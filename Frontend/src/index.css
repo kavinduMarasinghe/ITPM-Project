@@ -1,0 +1,83 @@
+/* ===================================================================
+   EventAura — Campus Stall Management
+   Tailwind CSS - Standardized Global Styles
+   =================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;   /* #F4F6F9 */
+    --foreground: 222 47% 11%;   /* #0F172A */
+    
+    --primary: 222 47% 11%;      /* #0F172A */
+    --primary-foreground: 210 40% 98%; /* #F8FAFC */
+    
+    --accent: 25 95% 53%;        /* #F97316 */
+    --accent-foreground: 0 0% 100%;    /* #FFFFFF */
+    
+    --secondary: 215 20% 93%;    /* #E9EEF5 */
+    --muted: 220 14% 96%;        /* #F1F5F9 */
+    --muted-foreground: 220 9% 46%;    /* #64748B */
+    
+    --destructive: 0 84.2% 60.2%;      /* #EF4444 */
+    --success: 142.1 70.6% 45.3%;      /* #22C55E */
+    --warning: 37.7 92.1% 50.2%;       /* #F59E0B */
+    --info: 217.2 91.2% 59.8%;         /* #3B82F6 */
+    
+    --border: 214.3 31.8% 91.4%;       /* #E2E8F0 */
+    --input: 214.3 31.8% 91.4%;        /* #E2E8F0 */
+    
+    --card: 0 0% 100%;                 /* #FFFFFF */
+  }
+
+  .dark {
+    --background: 229 84% 5%;          /* #020617 (approx) */
+    --foreground: 210 40% 96%;         /* #F1F5F9 */
+    
+    --primary: 25 95% 53%;             /* #F97316 */
+    --primary-foreground: 0 0% 100%;   /* #FFFFFF */
+    
+    --accent: 25 95% 53%;              /* #F97316 */
+    --accent-foreground: 0 0% 100%;    /* #FFFFFF */
+    
+    --secondary: 217 33% 17%;          /* #1E293B */
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --success: 142.1 70.6% 45.3%;
+    --warning: 37.7 92.1% 50.2%;
+    --info: 217.2 91.2% 59.8%;
+    
+    --border: 217 33% 17%;             /* #1E293B */
+    --input: 217 33% 17%;              /* #1E293B */
+    
+    --card: 222 47% 11%;               /* #0F172A */
+  }
+
+  body {
+    @apply font-sans bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  a {
+    @apply no-underline;
+  }
+
+  button {
+    @apply cursor-pointer outline-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50;
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  /* Added standard component layers when explicit usage is needed */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+}
