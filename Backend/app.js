@@ -36,7 +36,7 @@ app.use("/api/stall-bookings", bookingRoutes);
 // ================= MongoDB Connection =================
 
 mongoose
-  .connect("mongodb+srv://admin:7au0KnxTOQwJxCPG@cluster0.bstrqac.mongodb.net/stall_management")
+  .connect("mongodb+srv://Biyuni_Taraka:Biyuni456@event.puotuo9.mongodb.net/eventAuraDB?retryWrites=true&w=majority&appName=EVENT")
   .then(() => {
     console.log("✅ Connected to MongoDB");
 
