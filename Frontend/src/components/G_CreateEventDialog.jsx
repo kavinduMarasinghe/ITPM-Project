@@ -49,7 +49,7 @@ const EVENT_TYPES = [
 ];
 
 export function CreateEventDialog({ preSelectedSocietyId }) {
-  const { allSocieties, userSocieties } = useEvent();
+  const { allSocieties = [], userSocieties = [] } = useEvent();
   const { toast } = useToast();
 
   const [users, setUsers] = useState([]);
@@ -79,25 +79,40 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
     fetchUsers();
   }, []);
 
+  const getUserDisplayName = (user) => {
+    return user?.name || user?.fullName || user?.username || "Unknown";
+  };
+
   const society = allSocieties.find(
-    (s) => s.id === societyId || s._id === societyId
+    (s) => s?.id === societyId || s?._id === societyId
   );
 
   const societyMembers = useMemo(() => {
-    if (!society) return [];
+    if (!society || !Array.isArray(users)) return [];
 
     return users.filter((u) =>
-      society.members?.some((m) => (typeof m === "string" ? m : m._id) === u._id)
+      society.members?.some((m) => {
+        const memberId = typeof m === "string" ? m : m?._id || m?.memberId;
+        return memberId === u?._id;
+      })
     );
   }, [society, users]);
 
-  const availableMembers = societyMembers.filter(
-    (u) =>
-      !selectedTeam.some((t) => t.memberId === u._id) &&
-      u.name.toLowerCase().includes(teamSearch.toLowerCase())
-  );
+  const availableMembers = useMemo(() => {
+    return societyMembers.filter((u) => {
+      const userName = getUserDisplayName(u);
+      const search = teamSearch || "";
 
-  const selectedTemplate = eventTemplates.find((t) => t.id === selectedTemplateId);
+      return (
+        !selectedTeam.some((t) => t.memberId === u?._id) &&
+        userName.toLowerCase().includes(search.toLowerCase())
+      );
+    });
+  }, [societyMembers, selectedTeam, teamSearch]);
+
+  const selectedTemplate = eventTemplates.find(
+    (t) => t.id === selectedTemplateId
+  );
 
   const resetForm = () => {
     setName("");
@@ -132,6 +147,7 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
 
   const getInitials = (nameValue) => {
     if (!nameValue) return "NA";
+
     return nameValue
       .split(" ")
       .filter(Boolean)
@@ -171,7 +187,7 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
     if (selectedTeam.length === 0) {
       newErrors.team = "Please add at least one team member.";
     } else {
-      const societyMemberIds = new Set(societyMembers.map((m) => m._id));
+      const societyMemberIds = new Set(societyMembers.map((m) => m?._id));
       const hasInvalidMember = selectedTeam.some(
         (member) => !societyMemberIds.has(member.memberId)
       );
@@ -246,7 +262,7 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-2xl rounded-3xl p-0 overflow-hidden">
+      <DialogContent className="max-w-2xl rounded-3xl overflow-hidden p-0">
         <div className="border-b bg-gradient-to-r from-primary/10 via-background to-primary/5 px-6 py-5">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-xl font-heading">
@@ -257,7 +273,8 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
             </DialogTitle>
           </DialogHeader>
           <p className="mt-2 text-sm text-muted-foreground">
-            Set up an event, assign the team, and optionally start from a template.
+            Set up an event, assign the team, and optionally start from a
+            template.
           </p>
         </div>
 
@@ -437,31 +454,35 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
                 {teamSearch && (
                   <div className="max-h-44 overflow-y-auto rounded-2xl border border-border">
                     {availableMembers.length > 0 ? (
-                      availableMembers.map((u) => (
-                        <button
-                          key={u._id}
-                          type="button"
-                          onClick={() => addMember(u._id)}
-                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted"
-                        >
-                          <div
-                            className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white"
-                            style={{
-                              backgroundColor: u.avatar || "#6366f1",
-                            }}
+                      availableMembers.map((u) => {
+                        const displayName = getUserDisplayName(u);
+
+                        return (
+                          <button
+                            key={u._id}
+                            type="button"
+                            onClick={() => addMember(u._id)}
+                            className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted"
                           >
-                            {getInitials(u.name)}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">
-                              {u.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {u.email}
-                            </p>
-                          </div>
-                        </button>
-                      ))
+                            <div
+                              className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white"
+                              style={{
+                                backgroundColor: u.avatar || "#6366f1",
+                              }}
+                            >
+                              {getInitials(displayName)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-foreground">
+                                {displayName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {u.email || "No email"}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })
                     ) : (
                       <div className="px-4 py-3 text-sm text-muted-foreground">
                         No matching members found
@@ -473,6 +494,7 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
                 <div className="mt-3 space-y-2">
                   {selectedTeam.map((tm) => {
                     const user = users.find((u) => u._id === tm.memberId);
+                    const displayName = getUserDisplayName(user);
 
                     return (
                       <div
@@ -486,11 +508,11 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
                               backgroundColor: user?.avatar || "#6366f1",
                             }}
                           >
-                            {getInitials(user?.name)}
+                            {getInitials(displayName)}
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground">
-                              {user?.name || "Unknown member"}
+                              {displayName}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {user?.email || "No email"}
@@ -536,7 +558,7 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
           </div>
 
           <Button
-            className="h-12 w-full rounded-2xl gradient-primary text-white"
+            className="gradient-primary h-12 w-full rounded-2xl text-white"
             onClick={handleSubmit}
             disabled={submitting}
           >
@@ -551,7 +573,8 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
               Team Summary
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {selectedTeam.length} member{selectedTeam.length > 1 ? "s" : ""} selected for this event.
+              {selectedTeam.length} member
+              {selectedTeam.length > 1 ? "s" : ""} selected for this event.
             </p>
           </div>
         )}
