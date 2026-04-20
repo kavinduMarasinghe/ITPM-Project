@@ -175,7 +175,6 @@ export default function OrganizerDashboard() {
       status: request.status === "pending" ? "sent" : request.status,
       sent: request.sentAt ? new Date(request.sentAt).toLocaleDateString() : "Just now",
       event: request.eventName,
-      pkg: `${request.packageName} · LKR ${packagePrices[request.packageName] ? packagePrices[request.packageName].toLocaleString() : ""}`.trim(),
       statusNote:
         request.status === "accepted"
           ? `Accepted on ${request.respondedAt ? new Date(request.respondedAt).toLocaleDateString() : "recently"}`
@@ -2036,11 +2035,7 @@ export default function OrganizerDashboard() {
                                   </svg>
                                   {card.event}
                                 </div>
-                                <div className="flex items-center gap-1.5 text-xs">
-                                  <span className="badge-gold px-2 py-0.5 rounded-small font-bold text-xs" style={{ background: meta.pillBg, color: meta.pillText }}>
-                                    {card.pkg}
-                                  </span>
-                                </div>
+
                               </div>
                               <div className="mt-3 pt-3 flex items-center justify-between" style={{ borderTop: "1px solid #e5e7eb" }}>
                                 <div className="flex items-center gap-1.5 text-xs" style={{ color: meta.footerColor }}>
