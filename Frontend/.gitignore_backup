@@ -1,0 +1,96 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+Frontend/node_modules/
+Backend/node_modules/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+Frontend/dist/
+Frontend/build/
+Frontend/.vite/
+Frontend/.next/
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.local
+.env.*.local
+.env.production.local
+Frontend/.env
+Frontend/.env.local
+Backend/.env
+Backend/.env.local
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+*.logs
+Frontend/*.log
+Backend/*.log
+
+# =========================
+# Testing / Coverage
+# =========================
+coverage/
+.nyc_output/
+
+# =========================
+# Temporary files
+# =========================
+temp/
+tmp/
+*.tmp
+Frontend/temp/
+Backend/temp/
+Frontend/tmp/
+Backend/tmp/
+
+# =========================
+# Cache
+# =========================
+.cache/
+.eslintcache
+Frontend/.cache/
+Frontend/.eslintcache
+Backend/.eslintcache
+
+# =========================
+# Tools / Utilities
+# =========================
+tools/
+
+# =========================
+# Sensitive files
+# =========================
+credentials.json
+secrets.json
