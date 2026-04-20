@@ -432,6 +432,12 @@ export default function OrganizerDashboard() {
     localStorage.setItem("sponsorEmails", JSON.stringify(updated));
   };
 
+  const handleDeleteSponsorRequest = (requestId) => {
+    if (confirm("Are you sure you want to delete this sponsor request?")) {
+      setSponsorRequests((prev) => prev.filter((req) => req._id !== requestId));
+    }
+  };
+
   useEffect(() => {
     // Fetch sponsor requests from backend
     const fetchSponsorRequests = async () => {
@@ -2063,6 +2069,13 @@ export default function OrganizerDashboard() {
                                       {card.status === "accepted" ? "Process Application" : card.status === "opened" ? "Send Follow-up" : "Resend"}
                                     </button>
                                   )}
+                                  <button
+                                    className="text-xs font-semibold px-3 py-1.5 rounded-small transition-all"
+                                    style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
+                                    onClick={() => handleDeleteSponsorRequest(card.id)}
+                                  >
+                                    Delete
+                                  </button>
                                 </div>
                               </div>
                             </div>
