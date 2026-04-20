@@ -1226,27 +1226,6 @@ export default function OrganizerDashboard() {
                       <option>Sports Gala 2025</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="text-xs font-bold mb-2 block" style={{ color: "#6b7280" }}>
-                      💰 Suggested Package
-                    </label>
-                    <select
-                      className="w-full px-3 py-2.5 rounded-large text-sm transition-all"
-                      value={composeForm.package}
-                      onChange={(e) => setComposeForm((prev) => ({ ...prev, package: e.target.value }))}
-                      style={{
-                        background: "#ffffff",
-                        border: "1.5px solid #e5e7eb",
-                        color: "#1f2937"
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#8b5cf6"}
-                      onBlur={(e) => e.target.style.borderColor = "#e5e7eb"}
-                    >
-                      <option>Gold – LKR 200,000</option>
-                      <option>Silver – LKR 100,000</option>
-                      <option>Bronze – LKR 50,000</option>
-                    </select>
-                  </div>
                 </div>
                 <div className="mb-4">
                   <label className="text-xs font-bold mb-2 block" style={{ color: "#6b7280" }}>
