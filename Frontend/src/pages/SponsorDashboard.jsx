@@ -216,22 +216,6 @@ export default function SponsorDashboard() {
                 <p>{requestData.email}</p>
               </div>
             </div>
-
-            <div className="detail-card">
-              <div className="card-icon">🎁</div>
-              <div className="card-content">
-                <h4>Package Type</h4>
-                <p>{packageDetails.name}</p>
-              </div>
-            </div>
-
-            <div className="detail-card">
-              <div className="card-icon">💰</div>
-              <div className="card-content">
-                <h4>Investment</h4>
-                <p>{packageDetails.price}</p>
-              </div>
-            </div>
           </div>
         </section>
 
