@@ -167,7 +167,7 @@ export default function OrganizerDashboard() {
       }
     });
 
-    return Array.from(unique.values()).slice(0, 4).map((request) => ({
+    return Array.from(unique.values()).map((request) => ({
       id: request._id,
       company: request.companyName,
       email: request.email,
@@ -185,7 +185,7 @@ export default function OrganizerDashboard() {
     }));
   }, [sponsorRequests, packagePrices]);
 
-  const visibleSponsorRequests = displayedSponsorRequests.slice(0, 4);
+  const visibleSponsorRequests = displayedSponsorRequests;
 
   const visibleRequestSummary = useMemo(() => {
     const total = visibleSponsorRequests.length;
