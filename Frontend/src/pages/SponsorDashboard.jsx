@@ -17,6 +17,137 @@ export default function SponsorDashboard() {
   const [expMonth, setExpMonth] = useState("");
   const [expYear, setExpYear] = useState("");
   const [cvn, setCvn] = useState("");
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  // Format card number with spaces
+  const formatCardNumber = (value) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    const matches = v.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || "";
+    const parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+
+    if (parts.length) {
+      return parts.join(" ");
+    } else {
+      return value;
+    }
+  };
+
+  // Download invoice as PDF
+  const downloadInvoice = () => {
+    const invoiceNumber = `INV-${Date.now()}`;
+    const packageDetails = getPackageDetails(selectedPackage || requestData.packageName);
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${invoiceNumber}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 25px 30px; color: #1f2937; }
+          .invoice-header { border-bottom: 2px solid #e5e7eb; margin-bottom: 30px; padding-bottom: 15px; }
+          .invoice-header h2 { margin: 0 0 8px 0; font-size: 26px; font-weight: 700; }
+          .invoice-header p { margin: 0; color: #9ca3af; font-size: 12px; }
+          .invoice-details { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px; }
+          .invoice-details div { }
+          .invoice-details h4 { margin: 0 0 6px 0; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #6b7280; }
+          .invoice-details p { margin: 0 0 2px 0; color: #1f2937; font-size: 12px; }
+          .invoice-details p.subtitle { color: #9ca3af; font-size: 11px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+          table thead tr { border-bottom: 2px solid #e5e7eb; }
+          table th { text-align: left; padding: 8px 0; color: #6b7280; font-weight: 700; font-size: 10px; text-transform: uppercase; }
+          table th.right { text-align: right; padding-right: 5px; }
+          table td { padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 12px; }
+          table td:last-child { padding-right: 5px; }
+          table td.bold { font-weight: 700; }
+          table td.right { text-align: right; white-space: nowrap; }
+          .total-section { text-align: right; margin-bottom: 25px; padding-top: 12px; border-top: 2px solid #e5e7eb; }
+          .total-row { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 12px; font-size: 12px; }
+          .total-amount { font-size: 18px; font-weight: 700; color: #d97706; white-space: nowrap; }
+          .status-box { background: #dcfce7; border: 1px solid #86efac; border-radius: 6px; padding: 10px; margin-bottom: 20px; }
+          .status-box p { margin: 0; font-size: 11px; }
+          .status-box p.title { color: #166534; font-weight: 600; }
+          .status-box p.subtitle { color: #4b5563; margin-top: 2px; }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-header">
+          <h2>INVOICE</h2>
+          <p>Invoice #${invoiceNumber}</p>
+        </div>
+
+        <div class="invoice-details">
+          <div>
+            <h4>Bill From</h4>
+            <p class="bold">EVENTAURA</p>
+            <p class="subtitle">Tech Fest 2025</p>
+            <p class="subtitle">Universiti Teknologi Malaysia</p>
+          </div>
+          <div>
+            <h4>Bill To</h4>
+            <p class="bold">${requestData.companyName}</p>
+            <p class="subtitle">${requestData.email}</p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <p class="bold" style="margin-bottom: 2px;">${packageDetails.name}</p>
+                <p class="subtitle" style="margin: 0;">Sponsorship Package for ${requestData.eventName}</p>
+              </td>
+              <td class="right bold">${packageDetails.price}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="total-section">
+          <div class="total-row">
+            <span style="font-weight: 600;">Total:</span>
+            <span class="total-amount">${packageDetails.price}</span>
+          </div>
+        </div>
+
+        <div class="status-box">
+          <p class="title">✓ Payment Completed</p>
+          <p class="subtitle">Thank you for your sponsorship payment. Your invoice has been recorded.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Load html2pdf library and generate PDF
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = () => {
+      const element = document.createElement('div');
+      element.innerHTML = htmlContent;
+      
+      const opt = {
+        margin: 10,
+        filename: `${invoiceNumber}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+      };
+      
+      html2pdf().set(opt).from(element).save();
+    };
+    document.head.appendChild(script);
+  };
 
   useEffect(() => {
     console.log("SponsorDashboard component loaded with requestId:", requestId);
@@ -262,8 +393,7 @@ export default function SponsorDashboard() {
                 overflowY: "auto",
                 boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
               }}>
-                <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "10px", color: "#1f2937" }}>Payment Details 🔒</h2>
-                <p style={{ color: "#9ca3af", marginBottom: "25px", fontSize: "14px" }}>* Required field</p>
+                <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "25px", color: "#1f2937" }}>Payment Details 🔒</h2>
 
                 {/* Card Type Selection */}
                 <div style={{ marginBottom: "25px" }}>
@@ -276,6 +406,7 @@ export default function SponsorDashboard() {
                         value="visa"
                         checked={cardType === "visa"}
                         onChange={(e) => setCardType(e.target.value)}
+                        autoComplete="off"
                       />
                       <span style={{ fontWeight: "600", color: "#1f2937" }}>💳 VISA</span>
                     </label>
@@ -286,6 +417,7 @@ export default function SponsorDashboard() {
                         value="mastercard"
                         checked={cardType === "mastercard"}
                         onChange={(e) => setCardType(e.target.value)}
+                        autoComplete="off"
                       />
                       <span style={{ fontWeight: "600", color: "#1f2937" }}>💳 Mastercard</span>
                     </label>
@@ -298,15 +430,19 @@ export default function SponsorDashboard() {
                   <input 
                     type="text" 
                     placeholder="0000 0000 0000 0000"
+                    maxLength="19"
                     value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
+                    onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                    autoComplete="off"
+                    spellCheck="false"
                     style={{
                       width: "100%",
                       padding: "12px",
                       border: "1.5px solid #d1d5db",
                       borderRadius: "8px",
                       fontSize: "14px",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      letterSpacing: "2px"
                     }}
                   />
                 </div>
@@ -318,6 +454,7 @@ export default function SponsorDashboard() {
                     <select 
                       value={expMonth}
                       onChange={(e) => setExpMonth(e.target.value)}
+                      autoComplete="off"
                       style={{
                         width: "100%",
                         padding: "10px",
@@ -346,6 +483,7 @@ export default function SponsorDashboard() {
                     <select 
                       value={expYear}
                       onChange={(e) => setExpYear(e.target.value)}
+                      autoComplete="off"
                       style={{
                         width: "100%",
                         padding: "10px",
@@ -370,7 +508,8 @@ export default function SponsorDashboard() {
                       placeholder="123"
                       maxLength="4"
                       value={cvn}
-                      onChange={(e) => setCvn(e.target.value)}
+                      onChange={(e) => setCvn(e.target.value.replace(/[^0-9]/gi, ""))}
+                      autoComplete="off"
                       style={{
                         width: "100%",
                         padding: "10px",
@@ -416,7 +555,10 @@ export default function SponsorDashboard() {
                   <button
                     onClick={() => {
                       alert("Payment processed successfully!");
+                      setPaymentSuccess(true);
                       setShowPaymentGateway(false);
+                      setShowPayment(false);
+                      setShowInvoice(true);
                     }}
                     style={{
                       flex: "1",
@@ -553,6 +695,180 @@ export default function SponsorDashboard() {
     );
   }
 
+  // Invoice Dashboard View
+  if (showInvoice) {
+    return (
+      <div className="sponsor-dashboard-container">
+        {/* Sidebar */}
+        <aside className="sponsor-sidebar">
+          <div className="sidebar-logo">
+            <div className="logo-circle">EA</div>
+            <div>
+              <h3>EVENTAURA</h3>
+              <p>Sponsor</p>
+            </div>
+          </div>
+
+          <nav className="sidebar-nav">
+            <div className="nav-section">
+              <h4>SPONSORSHIP</h4>
+              <a 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowInvoice(false);
+                }}
+                className="nav-item"
+              >
+                <span>📊</span> Dashboard
+              </a>
+              <a 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowInvoice(false);
+                  setShowDetails(true);
+                }}
+                className="nav-item"
+              >
+                <span>📋</span> Details
+              </a>
+            </div>
+
+            <div className="nav-section">
+              <h4>PAYMENT</h4>
+              <a 
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowInvoice(false);
+                  setShowPayment(true);
+                }}
+                className="nav-item"
+              >
+                <span>💳</span> Payment
+              </a>
+              <a href="#" className="nav-item active">
+                <span>📄</span> Invoice
+              </a>
+            </div>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="sponsor-main">
+          {/* Top Header */}
+          <header className="sponsor-top-header">
+            <div className="header-left">
+              <h1>Invoice</h1>
+              <p>Payment receipt and invoice details</p>
+            </div>
+            <div className="header-right">
+              <button className="live-btn">🟢 Live</button>
+              <button className="notify-btn">🔔</button>
+            </div>
+          </header>
+
+          {/* Invoice Section */}
+          <section style={{ padding: "40px 20px" }}>
+            <div style={{
+              background: "#ffffff",
+              borderRadius: "16px",
+              padding: "40px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              maxWidth: "800px",
+              margin: "0 auto"
+            }}>
+              {/* Header */}
+              <div style={{ marginBottom: "40px", paddingBottom: "20px", borderBottom: "2px solid #e5e7eb" }}>
+                <h2 style={{ fontSize: "32px", fontWeight: "700", color: "#1f2937", margin: "0 0 10px 0" }}>INVOICE</h2>
+                <p style={{ color: "#9ca3af", margin: "0" }}>Invoice #INV-{Date.now()}</p>
+              </div>
+
+              {/* Company & Invoice Details */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", marginBottom: "40px" }}>
+                <div>
+                  <h4 style={{ color: "#6b7280", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", marginBottom: "10px" }}>Bill From</h4>
+                  <p style={{ margin: "0", fontWeight: "700", color: "#1f2937" }}>EVENTAURA</p>
+                  <p style={{ margin: "0 0 5px 0", color: "#9ca3af", fontSize: "14px" }}>Tech Fest 2025</p>
+                  <p style={{ margin: "0", color: "#9ca3af", fontSize: "14px" }}>Universiti Teknologi Malaysia</p>
+                </div>
+                <div>
+                  <h4 style={{ color: "#6b7280", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", marginBottom: "10px" }}>Bill To</h4>
+                  <p style={{ margin: "0", fontWeight: "700", color: "#1f2937" }}>{requestData.companyName}</p>
+                  <p style={{ margin: "0", color: "#9ca3af", fontSize: "14px" }}>{requestData.email}</p>
+                </div>
+              </div>
+
+              {/* Invoice Items */}
+              <div style={{ marginBottom: "40px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #e5e7eb" }}>
+                      <th style={{ textAlign: "left", padding: "12px 0", color: "#6b7280", fontWeight: "700", fontSize: "12px", textTransform: "uppercase" }}>Description</th>
+                      <th style={{ textAlign: "right", padding: "12px 0", color: "#6b7280", fontWeight: "700", fontSize: "12px", textTransform: "uppercase" }}>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "16px 0", color: "#1f2937" }}>
+                        <p style={{ margin: "0 0 5px 0", fontWeight: "600" }}>{getPackageDetails(selectedPackage || requestData.packageName).name}</p>
+                        <p style={{ margin: "0", color: "#9ca3af", fontSize: "13px" }}>Sponsorship Package for {requestData.eventName}</p>
+                      </td>
+                      <td style={{ padding: "16px 0", textAlign: "right", color: "#1f2937", fontWeight: "700" }}>
+                        {getPackageDetails(selectedPackage || requestData.packageName).price}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Total */}
+              <div style={{ textAlign: "right", marginBottom: "40px", paddingTop: "20px", borderTop: "2px solid #e5e7eb" }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "20px", marginBottom: "20px" }}>
+                  <span style={{ color: "#6b7280", fontWeight: "600" }}>Total:</span>
+                  <span style={{ fontSize: "24px", fontWeight: "700", color: "#d97706" }}>
+                    {getPackageDetails(selectedPackage || requestData.packageName).price}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment Status */}
+              <div style={{
+                background: "#dcfce7",
+                border: "1px solid #86efac",
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "30px"
+              }}>
+                <p style={{ margin: "0", color: "#166534", fontWeight: "600" }}>✓ Payment Completed</p>
+                <p style={{ margin: "5px 0 0 0", color: "#4b5563", fontSize: "13px" }}>Thank you for your sponsorship payment. Your invoice has been recorded.</p>
+              </div>
+
+              {/* Download Button */}
+              <button
+                onClick={downloadInvoice}
+                style={{
+                  width: "100%",
+                  padding: "12px 20px",
+                  background: "#3b82f6",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  fontSize: "14px"
+                }}
+              >
+                ⬇️ Download Invoice
+              </button>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   // Main Dashboard View
   return (
     <div className="sponsor-dashboard-container">
@@ -596,7 +912,18 @@ export default function SponsorDashboard() {
             >
               <span>💳</span> Payment
             </a>
-            <a href="#" className="nav-item">
+            <a 
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (paymentSuccess) {
+                  setShowInvoice(true);
+                } else {
+                  alert("Please complete payment first");
+                }
+              }}
+              className="nav-item"
+            >
               <span>📄</span> Invoice
             </a>
           </div>
