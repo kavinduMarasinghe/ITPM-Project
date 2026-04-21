@@ -2603,7 +2603,7 @@ export default function OrganizerDashboard() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr style={{ background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
-                          {["Sponsor", "Event", "Package", "Amount", "Applied", "Status", "Action"].map((h) => (
+                          {["Sponsor", "Event", "Package", "Amount", "Applied", "Status"].map((h) => (
                             <th
                               key={h}
                               className="text-left px-5 py-4 font-heading font-semibold text-xs uppercase tracking-wide"
@@ -2628,7 +2628,6 @@ export default function OrganizerDashboard() {
                           const status = ["Pending", "Pending", "Approved", "Pending", "Rejected"][idx];
                           const statusColor = status === "Approved" ? "rgba(74,222,128,0.15)" : status === "Pending" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)";
                           const statusText = status === "Approved" ? "#4ade80" : status === "Pending" ? "#fbbf24" : "#f87171";
-                          const statusTag = idx === 2 ? "View Details" : "";
                           return (
                             <tr key={name} className={`trow ${idx < 4 ? "pay-row" : ""}`}>
                               <td className="px-5 py-4">
@@ -2660,28 +2659,6 @@ export default function OrganizerDashboard() {
                                 <span className="text-xs font-bold px-2.5 py-1 rounded-small" style={{ background: statusColor, color: statusText }}>
                                   {status}
                                 </span>
-                              </td>
-                              <td className="px-5 py-4">
-                                {statusTag ? (
-                                  <button className="text-xs font-semibold" style={{ color: "#a78bfa" }}>
-                                    {statusTag}
-                                  </button>
-                                ) : (
-                                  <div className="flex gap-1.5">
-                                    <button
-                                      className="text-xs font-bold px-3 py-1.5 rounded-small transition-all"
-                                      style={{ background: "rgba(74,222,128,0.2)", color: "#4ade80" }}
-                                    >
-                                      Approve
-                                    </button>
-                                    <button
-                                      className="text-xs font-bold px-3 py-1.5 rounded-small transition-all"
-                                      style={{ background: "rgba(239,68,68,0.15)", color: "#f87171" }}
-                                    >
-                                      Reject
-                                    </button>
-                                  </div>
-                                )}
                               </td>
                             </tr>
                           );
