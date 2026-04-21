@@ -93,18 +93,6 @@ async function getPublishedEvents() {
   };
 }
 
-async function trackEventClick(context) {
-  return {
-    statusCode: 200,
-    message: "Event click recorded.",
-    data: {
-      interaction: await eventService.trackStudentEventClick(
-        context.params.id,
-        context.authUser
-      ),
-    },
-  };
-}
 
 async function getRecommendedEvents(context) {
   const requestedLimit = Number(context.query.limit || 4);
