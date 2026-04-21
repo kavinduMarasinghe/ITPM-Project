@@ -432,9 +432,31 @@ export default function OrganizerDashboard() {
     localStorage.setItem("sponsorEmails", JSON.stringify(updated));
   };
 
-  const handleDeleteSponsorRequest = (requestId) => {
+  const handleDeleteSponsorRequest = async (requestId) => {
     if (confirm("Are you sure you want to delete this sponsor request?")) {
-      setSponsorRequests((prev) => prev.filter((req) => req._id !== requestId));
+      try {
+        // First remove from frontend UI
+        setSponsorRequests((prev) => prev.filter((req) => req._id !== requestId));
+        
+        // Try to delete from backend (non-blocking)
+        try {
+          const response = await fetch(`http://127.0.0.1:5001/api/sponsor-requests/${requestId}`, {
+            method: "DELETE",
+            headers: {
+              "x-dev-role": "organizer",
+            },
+          });
+
+          if (!response.ok) {
+            console.warn("Backend deletion not supported, removed from frontend only");
+          }
+        } catch (error) {
+          console.warn("Backend deletion failed, removed from frontend only:", error);
+        }
+      } catch (error) {
+        console.error("Error deleting sponsor request:", error);
+        alert("Error deleting sponsor request");
+      }
     }
   };
 
