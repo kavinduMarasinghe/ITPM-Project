@@ -2060,30 +2060,11 @@ export default function OrganizerDashboard() {
                               </div>
                               <div className="mt-3 pt-3 flex items-center justify-between" style={{ borderTop: "1px solid #e5e7eb" }}>
                                 <div className="flex items-center gap-1.5 text-xs" style={{ color: meta.footerColor }}>
-                                  {card.statusNote}
                                 </div>
                                 <div className="flex gap-2 flex-wrap">
                                   <button className="text-xs font-semibold px-3 py-1.5 rounded-small transition-all" style={{ background: "#e5e7eb", color: "#6b7280" }}>
                                     View Email
                                   </button>
-                                  {card.status === "sent" && (
-                                    <button
-                                      className="text-xs font-semibold px-3 py-1.5 rounded-small transition-all"
-                                      style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}
-                                      onClick={() => navigate(`/sponsor/dashboard/${card.id}`)}
-                                    >
-                                      Accept
-                                    </button>
-                                  )}
-                                  {card.status !== "declined" && (
-                                    <button
-                                      className="text-xs font-semibold px-3 py-1.5 rounded-small transition-all"
-                                      style={{ background: card.status === "accepted" ? "rgba(74,222,128,0.15)" : "rgba(167,139,250,0.15)", color: card.status === "accepted" ? "#4ade80" : "#a78bfa" }}
-                                      onClick={() => openComposeModal()}
-                                    >
-                                      {card.status === "accepted" ? "Process Application" : card.status === "opened" ? "Send Follow-up" : "Resend"}
-                                    </button>
-                                  )}
                                   <button
                                     className="text-xs font-semibold px-3 py-1.5 rounded-small transition-all"
                                     style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
