@@ -10,8 +10,8 @@ import {
   FiShield,
   FiUsers,
   FiX,
-  FiZap,
 } from "react-icons/fi";
+import { Zap } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const MENU_ITEMS = [
@@ -67,11 +67,8 @@ function OrganizerSidebarLayout({
         <div className="border-b px-5 py-6" style={{ borderColor: "#E2E8F0" }}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: "#F97316", color: "#FFFFFF" }}
-              >
-                <FiZap size={20} />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 shadow-md shadow-orange-500/30">
+                <Zap className="w-6 h-6 text-white" fill="white" />
               </div>
               <div className={`min-w-0 ${hideTextOnDesktop}`}>
                 <h1 className="truncate text-2xl font-bold" style={{ color: "#0F172A" }}>
