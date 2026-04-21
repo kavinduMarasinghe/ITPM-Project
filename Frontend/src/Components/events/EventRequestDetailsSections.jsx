@@ -236,6 +236,15 @@ function EventRequestDetailsSections({ event }) {
         ]}
       />
 
+      <TextPanel title="Internal Guests" value={request.internalGuests} />
+      <TextPanel title="External Guests" value={request.externalGuests} />
+      <TextPanel title="Parking Details" value={request.additionalParking ? request.parkingDetails : ""} />
+      <TextPanel title="Fundraising Details" value={request.fundraisingDetails} />
+      <TextPanel title="Budget Details" value={request.budgetDetails || event?.budget} />
+      <TextPanel title="Assistance Expected From SLIIT" value={request.assistanceExpected} />
+      <TextPanel title="Virtual Platforms" value={request.virtualPlatforms} />
+      <TextPanel title="External Equipment or Companies" value={request.externalEquipment} />
+
       <ChecklistSection
         title="Approvals"
         items={[
