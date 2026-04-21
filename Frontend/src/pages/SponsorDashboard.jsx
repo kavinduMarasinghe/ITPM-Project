@@ -8,6 +8,7 @@ export default function SponsorDashboard() {
   const [requestData, setRequestData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   useEffect(() => {
     console.log("SponsorDashboard component loaded with requestId:", requestId);
@@ -50,6 +51,8 @@ export default function SponsorDashboard() {
         name: "Gold Package",
         price: "LKR 200,000",
         icon: "✨",
+        color: "#d97706",
+        bgColor: "#fef3c7",
         benefits: [
           "Main stage banner placement",
           "Logo on all event materials & social media",
@@ -62,6 +65,8 @@ export default function SponsorDashboard() {
         name: "Silver Package",
         price: "LKR 100,000",
         icon: "🌟",
+        color: "#6b7280",
+        bgColor: "#f3f4f6",
         benefits: [
           "Side banner placement on main concourse",
           "Logo on the official event poster",
@@ -73,6 +78,8 @@ export default function SponsorDashboard() {
         name: "Bronze Package",
         price: "LKR 50,000",
         icon: "⭐",
+        color: "#d97706",
+        bgColor: "#fed7aa",
         benefits: [
           "Logo on the event website",
           "Basic booth placement",
@@ -216,6 +223,73 @@ export default function SponsorDashboard() {
                 <p>{requestData.email}</p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Sponsorship Packages Selection */}
+        <section className="packages-section" style={{ marginTop: "40px" }}>
+          <h2 className="section-title">Sponsorship Packages</h2>
+          <p style={{ color: "#9ca3af", marginBottom: "30px" }}>Select the package that best fits your sponsorship goals</p>
+          
+          <div className="packages-grid">
+            {["Gold", "Silver", "Bronze"].map((packageType) => {
+              const pkg = getPackageDetails(packageType);
+              const isSelected = selectedPackage === packageType;
+              
+              return (
+                <div 
+                  key={packageType}
+                  className="package-card"
+                  onClick={() => setSelectedPackage(packageType)}
+                  style={{
+                    border: isSelected ? `2.5px solid ${pkg.color}` : "1.5px solid #e5e7eb",
+                    background: isSelected ? pkg.bgColor : "#ffffff",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    padding: "30px",
+                    borderRadius: "16px",
+                    boxShadow: isSelected ? `0 4px 20px rgba(${pkg.color}, 0.2)` : "0 1px 3px rgba(0,0,0,0.1)"
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "20px" }}>
+                    <div>
+                      <h3 style={{ fontSize: "24px", fontWeight: "700", color: "#1f2937", margin: "0 0 10px 0" }}>{packageType}</h3>
+                      <p style={{ fontSize: "28px", fontWeight: "800", color: pkg.color, margin: "0 0 5px 0" }}>{pkg.price}</p>
+                      <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0" }}>Per event sponsorship</p>
+                    </div>
+                    <div style={{ fontSize: "28px" }}>{pkg.icon}</div>
+                  </div>
+                  
+                  <div style={{ borderTop: `1.5px solid ${pkg.color}40`, paddingTop: "20px" }}>
+                    {pkg.benefits.map((benefit, idx) => (
+                      <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "12px" }}>
+                        <span style={{ fontSize: "16px", flexShrink: 0, marginTop: "2px" }}>✓</span>
+                        <p style={{ margin: "0", fontSize: "14px", color: "#1f2937", lineHeight: "1.5" }}>{benefit}</p>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button
+                    style={{
+                      width: "100%",
+                      marginTop: "20px",
+                      padding: "12px 20px",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      background: isSelected ? pkg.color : "#f3f4f6",
+                      color: isSelected ? "#ffffff" : pkg.color,
+                    }}
+                    onClick={() => setSelectedPackage(packageType)}
+                  >
+                    {isSelected ? "✓ Selected" : "Select Package"}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </section>
 
