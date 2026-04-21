@@ -107,6 +107,13 @@ export default function OrganizerDashboard() {
   });
   const [newSponsorEmail, setNewSponsorEmail] = useState("");
   const [isSendingRequest, setIsSendingRequest] = useState(false);
+  const [applications, setApplications] = useState([
+    { id: 1, name: "DataSoft Solutions", email: "datasoftit@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "10 Jul 2025", status: "Pending" },
+    { id: 2, name: "CloudVision Bhd", email: "cloudvision@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "9 Jul 2025", status: "Pending" },
+    { id: 3, name: "TechCorp Sdn Bhd", email: "techcorp@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "8 Jul 2025", status: "Approved" },
+    { id: 4, name: "GreenTech Ventures", email: "greentech@mail.com", event: "Tech Fest 2025", package: "Bronze", amount: 50000, applied: "7 Jul 2025", status: "Pending" },
+    { id: 5, name: "Nexus Media Group", email: "nexus@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "6 Jul 2025", status: "Rejected" }
+  ]);
   
   // Initialize packagePrices from localStorage or use defaults
   const [packagePrices, setPackagePrices] = useState(() => {
@@ -2615,21 +2622,14 @@ export default function OrganizerDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {["DataSoft Solutions", "CloudVision Bhd", "TechCorp Sdn Bhd", "GreenTech Ventures", "Nexus Media Group"].map((name, idx) => {
-                          const pkgBadge = ["badge-gold", "badge-silver", "badge-gold", "badge-bronze", "badge-silver"][idx];
-                          const pkgLabel = ["Gold", "Silver", "Gold", "Bronze", "Silver"][idx];
-                          const pkgAmounts = {
-                            Gold: packagePrices.Gold,
-                            Silver: packagePrices.Silver,
-                            Bronze: packagePrices.Bronze
-                          };
-                          const amount = pkgAmounts[pkgLabel];
-                          const dates = ["10 Jul 2025", "9 Jul 2025", "8 Jul 2025", "7 Jul 2025", "6 Jul 2025"];
-                          const status = ["Pending", "Pending", "Approved", "Pending", "Rejected"][idx];
-                          const statusColor = status === "Approved" ? "rgba(74,222,128,0.15)" : status === "Pending" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)";
-                          const statusText = status === "Approved" ? "#4ade80" : status === "Pending" ? "#fbbf24" : "#f87171";
+                        {applications.map((app, idx) => {
+                          const pkgLabels = { Gold: "badge-gold", Silver: "badge-silver", Bronze: "badge-bronze" };
+                          const pkgBadge = pkgLabels[app.package] || "badge-gold";
+                          const statusColor = app.status === "Approved" ? "rgba(74,222,128,0.15)" : app.status === "Pending" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)";
+                          const statusText = app.status === "Approved" ? "#4ade80" : app.status === "Pending" ? "#fbbf24" : "#f87171";
+                          
                           return (
-                            <tr key={name} className={`trow ${idx < 4 ? "pay-row" : ""}`}>
+                            <tr key={app.id} className={`trow ${idx < 4 ? "pay-row" : ""}`}>
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
                                   <img
@@ -2638,26 +2638,26 @@ export default function OrganizerDashboard() {
                                     className="w-8 h-8 rounded-large object-cover"
                                   />
                                   <div>
-                                    <p className="font-semibold text-gray-900">{name}</p>
+                                    <p className="font-semibold text-gray-900">{app.name}</p>
                                     <p className="text-xs" style={{ color: "#a1a5b8" }}>
-                                      {name.split(" ")[0].toLowerCase()}@mail.com
+                                      {app.email}
                                     </p>
                                   </div>
                                 </div>
                               </td>
                               <td className="px-5 py-4" style={{ color: "#6b7280" }}>
-                                Tech Fest 2025
+                                {app.event}
                               </td>
                               <td className="px-5 py-4">
-                                <span className={`${pkgBadge} text-xs px-2.5 py-1 rounded-small font-bold`}>{pkgLabel}</span>
+                                <span className={`${pkgBadge} text-xs px-2.5 py-1 rounded-small font-bold`}>{app.package}</span>
                               </td>
-                              <td className="px-5 py-4 font-bold text-gray-900">LKR {amount.toLocaleString()}</td>
+                              <td className="px-5 py-4 font-bold text-gray-900">LKR {app.amount.toLocaleString()}</td>
                               <td className="px-5 py-4 text-xs" style={{ color: "#9ca3af" }}>
-                                {dates[idx]}
+                                {app.applied}
                               </td>
                               <td className="px-5 py-4">
                                 <span className="text-xs font-bold px-2.5 py-1 rounded-small" style={{ background: statusColor, color: statusText }}>
-                                  {status}
+                                  {app.status}
                                 </span>
                               </td>
                               <td className="px-5 py-4">
@@ -2666,8 +2666,7 @@ export default function OrganizerDashboard() {
                                   style={{ background: "rgba(239,68,68,0.15)", color: "#f87171" }}
                                   onClick={() => {
                                     if (confirm("Are you sure you want to delete this application?")) {
-                                      // Remove from list
-                                      return true;
+                                      setApplications(applications.filter(a => a.id !== app.id));
                                     }
                                   }}
                                 >
