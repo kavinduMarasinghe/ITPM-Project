@@ -108,7 +108,7 @@ const Homepage = () => {
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/30 group-hover:scale-105 transition-transform">
               <Zap className="w-5 h-5 text-white" fill="white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">UniEvent</span>
+            <span className="text-xl font-bold text-gray-900">EventAura</span>
           </button>
 
           <div className="hidden md:flex items-center gap-8">
@@ -335,7 +335,7 @@ const Homepage = () => {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
               <Zap className="w-4 h-4 text-white" fill="white" />
             </div>
-            <span className="font-bold text-gray-900">UniEvent</span>
+            <span className="font-bold text-gray-900">EventAura</span>
           </button>
           <p className="text-gray-500 text-sm">
             © 2026 University Event Management System
