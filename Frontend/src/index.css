@@ -26,7 +26,19 @@
     transition: all 0.2s;
   }
   
-
+  .btn-primary:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  
+  .btn-accent {
+    background-color: #F97316;
+    color: #FFFFFF;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
   
   .btn-accent:hover {
     opacity: 0.9;
