@@ -109,18 +109,47 @@ export default function OrganizerDashboard() {
   const [isSendingRequest, setIsSendingRequest] = useState(false);
   const [applications, setApplications] = useState(() => {
     const saved = localStorage.getItem("deletedApplications");
-    const deleted = saved ? JSON.parse(saved) : [];
-    
-    const allApplications = [
-      { id: 1, name: "DataSoft Solutions", email: "datasoftit@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "10 Jul 2025", status: "Pending" },
-      { id: 2, name: "CloudVision Bhd", email: "cloudvision@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "9 Jul 2025", status: "Pending" },
-      { id: 3, name: "TechCorp Sdn Bhd", email: "techcorp@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "8 Jul 2025", status: "Approved" },
-      { id: 4, name: "GreenTech Ventures", email: "greentech@mail.com", event: "Tech Fest 2025", package: "Bronze", amount: 50000, applied: "7 Jul 2025", status: "Pending" },
-      { id: 5, name: "Nexus Media Group", email: "nexus@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "6 Jul 2025", status: "Rejected" }
-    ];
-    
-    return allApplications.filter(app => !deleted.includes(app.id));
+    return saved ? JSON.parse(saved) : [];
   });
+
+  // Fetch sponsor requests and convert to applications format
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5001/api/sponsor-requests", {
+          headers: {
+            "x-dev-role": "organizer",
+          },
+        });
+        
+        if (response.ok) {
+          const requests = await response.json();
+          const saved = localStorage.getItem("deletedApplications");
+          const deleted = saved ? JSON.parse(saved) : [];
+          
+          // Convert sponsor requests to applications format
+          const apps = requests
+            .filter(req => !deleted.includes(req._id))
+            .map((req, idx) => ({
+              id: req._id,
+              name: req.companyName,
+              email: req.email,
+              event: req.eventName,
+              package: req.packageName,
+              amount: { Gold: 200000, Silver: 100000, Bronze: 50000 }[req.packageName] || 0,
+              applied: req.sentAt ? new Date(req.sentAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString(),
+              status: req.status.charAt(0).toUpperCase() + req.status.slice(1)
+            }));
+          
+          setApplications(apps);
+        }
+      } catch (error) {
+        console.error("Failed to fetch applications:", error);
+      }
+    };
+
+    fetchApplications();
+  }, []);
   
   // Initialize packagePrices from localStorage or use defaults
   const [packagePrices, setPackagePrices] = useState(() => {
@@ -483,6 +512,14 @@ export default function OrganizerDashboard() {
         deleted.push(appId);
         localStorage.setItem("deletedApplications", JSON.stringify(deleted));
       }
+
+      // Delete from backend
+      fetch(`http://127.0.0.1:5001/api/sponsor-requests/${appId}`, {
+        method: "DELETE",
+        headers: {
+          "x-dev-role": "organizer",
+        },
+      }).catch(err => console.error("Failed to delete from backend:", err));
     }
   };
 
