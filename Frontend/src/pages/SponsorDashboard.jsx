@@ -133,6 +133,101 @@ export default function SponsorDashboard() {
 
   const packageDetails = getPackageDetails(requestData.packageName);
 
+  // Payment Dashboard View
+  if (showPayment) {
+    return (
+      <div className="sponsor-dashboard-container">
+        {/* Sidebar */}
+        <aside className="sponsor-sidebar">
+          <div className="sidebar-logo">
+            <div className="logo-circle">EA</div>
+            <div>
+              <h3>EVENTAURA</h3>
+              <p>Sponsor</p>
+            </div>
+          </div>
+
+          <nav className="sidebar-nav">
+            <div className="nav-section">
+              <h4>SPONSORSHIP</h4>
+              <a 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowPayment(false);
+                }}
+                className="nav-item"
+              >
+                <span>📊</span> Dashboard
+              </a>
+              <a href="#" className="nav-item">
+                <span>📋</span> Details
+              </a>
+            </div>
+
+            <div className="nav-section">
+              <h4>PAYMENT</h4>
+              <a href="#" className="nav-item active">
+                <span>💳</span> Payment
+              </a>
+              <a href="#" className="nav-item">
+                <span>📄</span> Invoice
+              </a>
+            </div>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="sponsor-main">
+          {/* Top Header */}
+          <header className="sponsor-top-header">
+            <div className="header-left">
+              <h1>Payment Information</h1>
+              <p>Manage your payment details</p>
+            </div>
+            <div className="header-right">
+              <button className="live-btn">🟢 Live</button>
+              <button className="notify-btn">🔔</button>
+            </div>
+          </header>
+
+          {/* Payment Section */}
+          <section className="payment-section">
+            <div className="payment-card">
+              <div className="payment-details">
+                <div className="payment-row">
+                  <span>Package</span>
+                  <strong>{packageDetails.name}</strong>
+                </div>
+                <div className="payment-row">
+                  <span>Amount</span>
+                  <strong className="amount">{packageDetails.price}</strong>
+                </div>
+                <div className="payment-row">
+                  <span>Status</span>
+                  <strong className="status-pending">Pending</strong>
+                </div>
+              </div>
+
+              <div className="payment-steps">
+                <h4>Next Steps:</h4>
+                <ol>
+                  <li>Review your sponsorship benefits</li>
+                  <li>Invoice will be sent to your email</li>
+                  <li>Complete payment through the invoice link</li>
+                  <li>Receive confirmation once processed</li>
+                </ol>
+              </div>
+
+              <button className="payment-btn">💳 Proceed to Payment</button>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  // Main Dashboard View
   return (
     <div className="sponsor-dashboard-container">
       {/* Sidebar */}
@@ -344,57 +439,6 @@ export default function SponsorDashboard() {
         </section>
 
         {/* Contact Support */}
-
-        {/* Payment Section - Show only when clicked from sidebar */}
-        {showPayment && (
-          <section className="payment-section" id="payment-section">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
-              <h2 className="section-title" style={{ margin: "0" }}>Payment Information</h2>
-              <button
-                onClick={() => setShowPayment(false)}
-                style={{
-                  background: "#e5e7eb",
-                  border: "none",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                  color: "#6b7280"
-                }}
-              >
-                ✕ Close
-              </button>
-            </div>
-            <div className="payment-card">
-              <div className="payment-details">
-                <div className="payment-row">
-                  <span>Package</span>
-                  <strong>{packageDetails.name}</strong>
-                </div>
-                <div className="payment-row">
-                  <span>Amount</span>
-                  <strong className="amount">{packageDetails.price}</strong>
-                </div>
-                <div className="payment-row">
-                  <span>Status</span>
-                  <strong className="status-pending">Pending</strong>
-                </div>
-              </div>
-
-              <div className="payment-steps">
-                <h4>Next Steps:</h4>
-                <ol>
-                  <li>Review your sponsorship benefits</li>
-                  <li>Invoice will be sent to your email</li>
-                  <li>Complete payment through the invoice link</li>
-                  <li>Receive confirmation once processed</li>
-                </ol>
-              </div>
-
-              <button className="payment-btn">💳 Proceed to Payment</button>
-            </div>
-          </section>
-        )}
         <section className="contact-section">
           <h2 className="section-title">Need Help?</h2>
           <div className="contact-card">
