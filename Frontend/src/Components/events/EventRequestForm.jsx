@@ -1672,15 +1672,7 @@ function EventRequestForm() {
                     error={errors.clearTime}
                     icon={FiClock}
                   />
-                  <InputField
-                    label="Venue"
-                    name="venue"
-                    value={formData.venue}
-                    onChange={handleChange}
-                    error={errors.venue}
-                    icon={FiMapPin}
-                    placeholder="Main Auditorium"
-                  />
+                  
                   <SelectField
                     label="Venue Type"
                     name="venueType"
