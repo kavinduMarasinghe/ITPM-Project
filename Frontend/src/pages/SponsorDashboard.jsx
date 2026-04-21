@@ -246,25 +246,25 @@ export default function SponsorDashboard() {
                     background: isSelected ? pkg.bgColor : "#ffffff",
                     cursor: "pointer",
                     transition: "all 0.3s ease",
-                    padding: "30px",
-                    borderRadius: "16px",
+                    padding: "20px",
+                    borderRadius: "12px",
                     boxShadow: isSelected ? `0 4px 20px rgba(${pkg.color}, 0.2)` : "0 1px 3px rgba(0,0,0,0.1)"
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "15px" }}>
                     <div>
-                      <h3 style={{ fontSize: "24px", fontWeight: "700", color: "#1f2937", margin: "0 0 10px 0" }}>{packageType}</h3>
-                      <p style={{ fontSize: "28px", fontWeight: "800", color: pkg.color, margin: "0 0 5px 0" }}>{pkg.price}</p>
-                      <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0" }}>Per event sponsorship</p>
+                      <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#1f2937", margin: "0 0 8px 0" }}>{packageType}</h3>
+                      <p style={{ fontSize: "24px", fontWeight: "800", color: pkg.color, margin: "0 0 3px 0" }}>{pkg.price}</p>
+                      <p style={{ fontSize: "12px", color: "#9ca3af", margin: "0" }}>Per event sponsorship</p>
                     </div>
-                    <div style={{ fontSize: "28px" }}>{pkg.icon}</div>
+                    <div style={{ fontSize: "24px" }}>{pkg.icon}</div>
                   </div>
                   
-                  <div style={{ borderTop: `1.5px solid ${pkg.color}40`, paddingTop: "20px" }}>
+                  <div style={{ borderTop: `1.5px solid ${pkg.color}40`, paddingTop: "15px" }}>
                     {pkg.benefits.map((benefit, idx) => (
-                      <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "12px" }}>
-                        <span style={{ fontSize: "16px", flexShrink: 0, marginTop: "2px" }}>✓</span>
-                        <p style={{ margin: "0", fontSize: "14px", color: "#1f2937", lineHeight: "1.5" }}>{benefit}</p>
+                      <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "14px", flexShrink: 0, marginTop: "1px" }}>✓</span>
+                        <p style={{ margin: "0", fontSize: "13px", color: "#1f2937", lineHeight: "1.4" }}>{benefit}</p>
                       </div>
                     ))}
                   </div>
@@ -272,11 +272,11 @@ export default function SponsorDashboard() {
                   <button
                     style={{
                       width: "100%",
-                      marginTop: "20px",
-                      padding: "12px 20px",
+                      marginTop: "15px",
+                      padding: "10px 16px",
                       border: "none",
                       borderRadius: "8px",
-                      fontSize: "14px",
+                      fontSize: "13px",
                       fontWeight: "600",
                       cursor: "pointer",
                       transition: "all 0.3s ease",
