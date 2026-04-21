@@ -400,7 +400,6 @@ export default function SponsorDashboard() {
         <section className="benefits-section">
           <div className="section-header-flex">
             <h2 className="section-title">Package Benefits</h2>
-            <span className="package-badge">{packageDetails.name}</span>
           </div>
           <div className="benefits-grid">
             {packageDetails.benefits.map((benefit, idx) => (
