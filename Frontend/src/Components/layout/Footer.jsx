@@ -1,30 +1,12 @@
 import React from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { getDashboardRouteForRole, getSession } from "../../services/session";
-import unieventIcon from "./unievent-icon.png";
-
-function getPortalLabel(role) {
-  switch (role) {
-    case "student":
-      return "Student Events";
-    case "organizer":
-      return "Organizer Dashboard";
-    case "admin":
-      return "Admin Dashboard";
-    case "hod":
-      return "HO Dashboard";
-    default:
-      return "Portal";
-  }
-}
+import { getSession } from "../../services/session";
 
 function Footer() {
   const session = getSession();
   const isSignedIn = Boolean(session?.token);
-  const portalRoute = getDashboardRouteForRole(session?.user?.role);
-  const portalLabel = getPortalLabel(session?.user?.role);
 
   return (
     <footer className="bg-white border-t border-gray-200">
@@ -59,11 +41,9 @@ function Footer() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-center md:text-left">
-              <img
-                src={unieventIcon}
-                alt="EventAura Logo"
-                className="h-8 w-8 md:h-10 md:w-10 object-contain"
-              />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/30">
+                <Zap className="w-5 h-5 text-white" fill="white" />
+              </div>
               <span className="text-2xl font-bold text-gray-900 tracking-tight">
                 Event<span className="text-orange-500">Aura</span>
               </span>
@@ -75,16 +55,7 @@ function Footer() {
               </p>
             </div>
 
-            {isSignedIn ? (
-              <div className="flex gap-6">
-                <Link
-                  to={portalRoute}
-                  className="text-gray-500 hover:text-orange-500 transition-colors text-sm"
-                >
-                  {portalLabel}
-                </Link>
-              </div>
-            ) : (
+            {!isSignedIn && (
               <div className="flex gap-6">
                 <Link
                   to="/student/register"
@@ -103,12 +74,6 @@ function Footer() {
                   className="text-gray-500 hover:text-orange-500 transition-colors text-sm"
                 >
                   Vendor Register
-                </Link>
-                <Link
-                  to="/login"
-                  className="text-gray-500 hover:text-orange-500 transition-colors text-sm"
-                >
-                  Login
                 </Link>
               </div>
             )}

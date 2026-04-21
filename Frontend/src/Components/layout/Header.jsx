@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Zap } from "lucide-react";
 import { FiLogOut } from "react-icons/fi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { api } from "../../services/api";
 import { clearSession, getSession } from "../../services/session";
-import unieventIcon from "./unievent-icon.png";
 
 function Header() {
   const location = useLocation();
@@ -60,12 +59,10 @@ function Header() {
     <header className="w-full bg-white/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <Link to="/" className="flex items-center space-x-2">
-            <img
-              src={unieventIcon}
-              alt="EventAura Logo"
-              className="h-8 w-8 md:h-10 md:w-10 object-contain"
-            />
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/30 group-hover:scale-105 transition-transform">
+              <Zap className="w-5 h-5 text-white" fill="white" />
+            </div>
             <span className="text-2xl font-bold text-foreground tracking-tight">
               Event<span className="text-accent">Aura</span>
             </span>

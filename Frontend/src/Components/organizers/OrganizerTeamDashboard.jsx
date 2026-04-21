@@ -236,25 +236,13 @@ function OrganizerTeamDashboard() {
         className="rounded-[32px] p-6 md:p-8 text-white mb-8"
         style={{ background: "linear-gradient(135deg, #F97316 0%, #0F172A 100%)" }}
       >
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-white/70 text-sm uppercase tracking-[0.25em] mb-3">Events Desk</p>
-            <h2 className="text-3xl font-bold mb-3">Welcome back, {organizerName}</h2>
-            <p className="text-white/85 max-w-3xl">
-              Submit event requests, wait for admin approval, and publish approved events when you
-              are ready for students to see them. Approved requests can also be cancelled before publishing.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => navigate("/eventrequest")}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-semibold text-white"
-            style={{ backgroundColor: "rgba(255, 255, 255, 0.16)", border: "1px solid rgba(255, 255, 255, 0.28)" }}
-          >
-            <FiFilePlus size={16} />
-            Create Event Request
-          </button>
+        <div>
+          <p className="text-white/70 text-sm uppercase tracking-[0.25em] mb-3">Events Desk</p>
+          <h2 className="text-3xl font-bold mb-3">Welcome back, {organizerName}</h2>
+          <p className="text-white/85 max-w-3xl">
+            Submit event requests, wait for admin approval, and publish approved events when you
+            are ready for students to see them. Approved requests can also be cancelled before publishing.
+          </p>
         </div>
       </div>
 
