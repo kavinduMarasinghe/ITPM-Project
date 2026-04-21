@@ -435,23 +435,19 @@ export default function OrganizerDashboard() {
   const handleDeleteSponsorRequest = async (requestId) => {
     if (confirm("Are you sure you want to delete this sponsor request?")) {
       try {
-        // First remove from frontend UI
-        setSponsorRequests((prev) => prev.filter((req) => req._id !== requestId));
-        
-        // Try to delete from backend (non-blocking)
-        try {
-          const response = await fetch(`http://127.0.0.1:5001/api/sponsor-requests/${requestId}`, {
-            method: "DELETE",
-            headers: {
-              "x-dev-role": "organizer",
-            },
-          });
+        // Delete from backend
+        const response = await fetch(`http://127.0.0.1:5001/api/sponsor-requests/${requestId}`, {
+          method: "DELETE",
+          headers: {
+            "x-dev-role": "organizer",
+          },
+        });
 
-          if (!response.ok) {
-            console.warn("Backend deletion not supported, removed from frontend only");
-          }
-        } catch (error) {
-          console.warn("Backend deletion failed, removed from frontend only:", error);
+        if (response.ok) {
+          // Remove from frontend state only if backend deletion was successful
+          setSponsorRequests((prev) => prev.filter((req) => req._id !== requestId));
+        } else {
+          alert("Failed to delete sponsor request");
         }
       } catch (error) {
         console.error("Error deleting sponsor request:", error);

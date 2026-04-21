@@ -6,6 +6,7 @@ import {
   rejectSponsorRequest,
   getSponsorRequests,
   getSponsorRequest,
+  deleteSponsorRequest,
 } from "../controllers/sponsorRequest.controller.js";
 
 const router = express.Router();
@@ -22,5 +23,8 @@ router.get("/sponsor-requests", requireRole("organizer", "admin"), getSponsorReq
 
 // Get single request (sponsors can view their own request)
 router.get("/sponsor-requests/:id", getSponsorRequest);
+
+// Delete sponsor request (organizer/admin only)
+router.delete("/sponsor-requests/:id", requireRole("organizer", "admin"), deleteSponsorRequest);
 
 export default router;

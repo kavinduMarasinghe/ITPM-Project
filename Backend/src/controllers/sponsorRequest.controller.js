@@ -286,3 +286,15 @@ export const getSponsorRequest = asyncHandler(async (req, res) => {
 
   res.json(request);
 });
+
+// Delete sponsor request
+export const deleteSponsorRequest = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const request = await SponsorRequest.findByIdAndDelete(id);
+  if (!request) {
+    return res.status(404).json({ message: "Request not found" });
+  }
+
+  res.json({ message: "Sponsor request deleted successfully", request });
+});
