@@ -11,6 +11,12 @@ export default function SponsorDashboard() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showPaymentGateway, setShowPaymentGateway] = useState(false);
+  const [cardType, setCardType] = useState("visa");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expMonth, setExpMonth] = useState("");
+  const [expYear, setExpYear] = useState("");
+  const [cvn, setCvn] = useState("");
 
   useEffect(() => {
     console.log("SponsorDashboard component loaded with requestId:", requestId);
@@ -206,11 +212,11 @@ export default function SponsorDashboard() {
               <div className="payment-details">
                 <div className="payment-row">
                   <span>Package</span>
-                  <strong>{packageDetails.name}</strong>
+                  <strong>{getPackageDetails(selectedPackage || requestData.packageName).name}</strong>
                 </div>
                 <div className="payment-row">
                   <span>Amount</span>
-                  <strong className="amount">{packageDetails.price}</strong>
+                  <strong className="amount">{getPackageDetails(selectedPackage || requestData.packageName).price}</strong>
                 </div>
                 <div className="payment-row">
                   <span>Status</span>
