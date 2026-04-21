@@ -10,6 +10,7 @@ export default function SponsorDashboard() {
   const [error, setError] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     console.log("SponsorDashboard component loaded with requestId:", requestId);
@@ -160,7 +161,15 @@ export default function SponsorDashboard() {
               >
                 <span>📊</span> Dashboard
               </a>
-              <a href="#" className="nav-item">
+              <a 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowPayment(false);
+                  setShowDetails(true);
+                }}
+                className="nav-item"
+              >
                 <span>📋</span> Details
               </a>
             </div>
@@ -227,6 +236,117 @@ export default function SponsorDashboard() {
     );
   }
 
+  // Details Dashboard View
+  if (showDetails) {
+    return (
+      <div className="sponsor-dashboard-container">
+        {/* Sidebar */}
+        <aside className="sponsor-sidebar">
+          <div className="sidebar-logo">
+            <div className="logo-circle">EA</div>
+            <div>
+              <h3>EVENTAURA</h3>
+              <p>Sponsor</p>
+            </div>
+          </div>
+
+          <nav className="sidebar-nav">
+            <div className="nav-section">
+              <h4>SPONSORSHIP</h4>
+              <a 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowDetails(false);
+                }}
+                className="nav-item"
+              >
+                <span>📊</span> Dashboard
+              </a>
+              <a href="#" className="nav-item active">
+                <span>📋</span> Details
+              </a>
+            </div>
+
+            <div className="nav-section">
+              <h4>PAYMENT</h4>
+              <a 
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowDetails(false);
+                  setShowPayment(true);
+                }}
+                className="nav-item"
+              >
+                <span>💳</span> Payment
+              </a>
+              <a href="#" className="nav-item">
+                <span>📄</span> Invoice
+              </a>
+            </div>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="sponsor-main">
+          {/* Top Header */}
+          <header className="sponsor-top-header">
+            <div className="header-left">
+              <h1>Sponsorship Details</h1>
+              <p>Package benefits and event information</p>
+            </div>
+            <div className="header-right">
+              <button className="live-btn">🟢 Live</button>
+              <button className="notify-btn">🔔</button>
+            </div>
+          </header>
+
+          {/* Package Benefits */}
+          <section className="benefits-section">
+            <div className="section-header-flex">
+              <h2 className="section-title">Package Benefits</h2>
+            </div>
+            <div className="benefits-grid">
+              {packageDetails.benefits.map((benefit, idx) => (
+                <div key={idx} className="benefit-card">
+                  <div className="benefit-icon">✓</div>
+                  <p>{benefit}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Event Information */}
+          <section className="event-section">
+            <h2 className="section-title">Event Information</h2>
+            <div className="event-cards-grid">
+              <div className="event-card">
+                <h4>📅 Event Name</h4>
+                <p>{requestData.eventName}</p>
+              </div>
+
+              <div className="event-card">
+                <h4>🕐 Date & Time</h4>
+                <p>15–16 August 2025</p>
+              </div>
+
+              <div className="event-card">
+                <h4>👥 Expected Attendance</h4>
+                <p>2,000+ participants</p>
+              </div>
+
+              <div className="event-card">
+                <h4>📍 Venue</h4>
+                <p>Universiti Teknologi Malaysia</p>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   // Main Dashboard View
   return (
     <div className="sponsor-dashboard-container">
@@ -246,7 +366,14 @@ export default function SponsorDashboard() {
             <a href="#" className="nav-item active">
               <span>📊</span> Dashboard
             </a>
-            <a href="#" className="nav-item">
+            <a 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                setShowDetails(true);
+              }}
+              className="nav-item"
+            >
               <span>📋</span> Details
             </a>
           </div>
@@ -393,47 +520,6 @@ export default function SponsorDashboard() {
                 </div>
               );
             })}
-          </div>
-        </section>
-
-        {/* Package Benefits */}
-        <section className="benefits-section">
-          <div className="section-header-flex">
-            <h2 className="section-title">Package Benefits</h2>
-          </div>
-          <div className="benefits-grid">
-            {packageDetails.benefits.map((benefit, idx) => (
-              <div key={idx} className="benefit-card">
-                <div className="benefit-icon">✓</div>
-                <p>{benefit}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Event Information */}
-        <section className="event-section">
-          <h2 className="section-title">Event Information</h2>
-          <div className="event-cards-grid">
-            <div className="event-card">
-              <h4>📅 Event Name</h4>
-              <p>{requestData.eventName}</p>
-            </div>
-
-            <div className="event-card">
-              <h4>🕐 Date & Time</h4>
-              <p>15–16 August 2025</p>
-            </div>
-
-            <div className="event-card">
-              <h4>👥 Expected Attendance</h4>
-              <p>2,000+ participants</p>
-            </div>
-
-            <div className="event-card">
-              <h4>📍 Venue</h4>
-              <p>Universiti Teknologi Malaysia</p>
-            </div>
           </div>
         </section>
 
