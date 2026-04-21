@@ -9,6 +9,7 @@ export default function SponsorDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     console.log("SponsorDashboard component loaded with requestId:", requestId);
@@ -157,7 +158,14 @@ export default function SponsorDashboard() {
 
           <div className="nav-section">
             <h4>PAYMENT</h4>
-            <a href="#" className="nav-item">
+            <a 
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowPayment(true);
+              }}
+              className="nav-item"
+            >
               <span>💳</span> Payment
             </a>
             <a href="#" className="nav-item">
@@ -335,40 +343,58 @@ export default function SponsorDashboard() {
           </div>
         </section>
 
-        {/* Payment Section */}
-        <section className="payment-section">
-          <h2 className="section-title">Payment Information</h2>
-          <div className="payment-card">
-            <div className="payment-details">
-              <div className="payment-row">
-                <span>Package</span>
-                <strong>{packageDetails.name}</strong>
-              </div>
-              <div className="payment-row">
-                <span>Amount</span>
-                <strong className="amount">{packageDetails.price}</strong>
-              </div>
-              <div className="payment-row">
-                <span>Status</span>
-                <strong className="status-pending">Pending</strong>
-              </div>
-            </div>
-
-            <div className="payment-steps">
-              <h4>Next Steps:</h4>
-              <ol>
-                <li>Review your sponsorship benefits</li>
-                <li>Invoice will be sent to your email</li>
-                <li>Complete payment through the invoice link</li>
-                <li>Receive confirmation once processed</li>
-              </ol>
-            </div>
-
-            <button className="payment-btn">💳 Proceed to Payment</button>
-          </div>
-        </section>
-
         {/* Contact Support */}
+
+        {/* Payment Section - Show only when clicked from sidebar */}
+        {showPayment && (
+          <section className="payment-section" id="payment-section">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+              <h2 className="section-title" style={{ margin: "0" }}>Payment Information</h2>
+              <button
+                onClick={() => setShowPayment(false)}
+                style={{
+                  background: "#e5e7eb",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  color: "#6b7280"
+                }}
+              >
+                ✕ Close
+              </button>
+            </div>
+            <div className="payment-card">
+              <div className="payment-details">
+                <div className="payment-row">
+                  <span>Package</span>
+                  <strong>{packageDetails.name}</strong>
+                </div>
+                <div className="payment-row">
+                  <span>Amount</span>
+                  <strong className="amount">{packageDetails.price}</strong>
+                </div>
+                <div className="payment-row">
+                  <span>Status</span>
+                  <strong className="status-pending">Pending</strong>
+                </div>
+              </div>
+
+              <div className="payment-steps">
+                <h4>Next Steps:</h4>
+                <ol>
+                  <li>Review your sponsorship benefits</li>
+                  <li>Invoice will be sent to your email</li>
+                  <li>Complete payment through the invoice link</li>
+                  <li>Receive confirmation once processed</li>
+                </ol>
+              </div>
+
+              <button className="payment-btn">💳 Proceed to Payment</button>
+            </div>
+          </section>
+        )}
         <section className="contact-section">
           <h2 className="section-title">Need Help?</h2>
           <div className="contact-card">
