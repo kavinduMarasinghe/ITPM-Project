@@ -2603,7 +2603,7 @@ export default function OrganizerDashboard() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr style={{ background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
-                          {["Sponsor", "Event", "Package", "Amount", "Applied", "Status"].map((h) => (
+                          {["Sponsor", "Event", "Package", "Amount", "Applied", "Status", "Action"].map((h) => (
                             <th
                               key={h}
                               className="text-left px-5 py-4 font-heading font-semibold text-xs uppercase tracking-wide"
@@ -2659,6 +2659,20 @@ export default function OrganizerDashboard() {
                                 <span className="text-xs font-bold px-2.5 py-1 rounded-small" style={{ background: statusColor, color: statusText }}>
                                   {status}
                                 </span>
+                              </td>
+                              <td className="px-5 py-4">
+                                <button
+                                  className="text-xs font-bold px-3 py-1.5 rounded-small transition-all"
+                                  style={{ background: "rgba(239,68,68,0.15)", color: "#f87171" }}
+                                  onClick={() => {
+                                    if (confirm("Are you sure you want to delete this application?")) {
+                                      // Remove from list
+                                      return true;
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </button>
                               </td>
                             </tr>
                           );
