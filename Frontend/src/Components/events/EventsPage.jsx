@@ -615,26 +615,7 @@ function EventsPage() {
                   }
                   className="p-2 rounded-xl hover:bg-slate-100 transition"
                 >
-                  <FiChevronLeft size={18} style={{ color: "#475569" }} />
-                </button>
-                <div className="text-center">
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em]" style={{ color: "#94A3B8" }}>
-                    Calendar
-                  </p>
-                  <h3 className="text-xl font-bold" style={{ color: "#0F172A" }}>
-                    {monthLabel}
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCurrentMonth(
-                      (previousMonth) =>
-                        new Date(previousMonth.getFullYear(), previousMonth.getMonth() + 1, 1)
-                    )
-                  }
-                  className="p-2 rounded-xl hover:bg-slate-100 transition"
-                >
+                
                   <FiChevronRight size={18} style={{ color: "#475569" }} />
                 </button>
               </div>
