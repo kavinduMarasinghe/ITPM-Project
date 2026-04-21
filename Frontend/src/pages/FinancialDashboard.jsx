@@ -2715,7 +2715,21 @@ export default function OrganizerDashboard() {
                                 {app.applied}
                               </td>
                               <td className="px-5 py-4">
-                                <span className="text-xs font-bold px-2.5 py-1 rounded-small" style={{ background: statusColor, color: statusText }}>
+                                <span 
+                                  className="text-xs font-bold px-2.5 py-1 rounded-small"
+                                  style={{
+                                    background: 
+                                      app.status === "Accepted" ? "rgba(74,222,128,0.15)" :
+                                      app.status === "Pending" ? "rgba(245,158,11,0.15)" :
+                                      app.status === "Rejected" ? "rgba(239,68,68,0.15)" :
+                                      "rgba(107,114,128,0.15)",
+                                    color:
+                                      app.status === "Accepted" ? "#4ade80" :
+                                      app.status === "Pending" ? "#fbbf24" :
+                                      app.status === "Rejected" ? "#f87171" :
+                                      "#6b7280"
+                                  }}
+                                >
                                   {app.status}
                                 </span>
                               </td>
