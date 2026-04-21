@@ -308,7 +308,7 @@ export default function SponsorDashboard() {
               <h2 className="section-title">Package Benefits</h2>
             </div>
             <div className="benefits-grid">
-              {packageDetails.benefits.map((benefit, idx) => (
+              {getPackageDetails(selectedPackage || requestData.packageName).benefits.map((benefit, idx) => (
                 <div key={idx} className="benefit-card">
                   <div className="benefit-icon">✓</div>
                   <p>{benefit}</p>
