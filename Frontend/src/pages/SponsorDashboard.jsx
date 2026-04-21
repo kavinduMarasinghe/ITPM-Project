@@ -234,9 +234,209 @@ export default function SponsorDashboard() {
                 </ol>
               </div>
 
-              <button className="payment-btn">💳 Proceed to Payment</button>
+              <button className="payment-btn" onClick={() => setShowPaymentGateway(true)}>💳 Proceed to Payment</button>
             </div>
           </section>
+
+          {/* Payment Gateway Modal */}
+          {showPaymentGateway && (
+            <div style={{
+              position: "fixed",
+              top: "0",
+              left: "0",
+              right: "0",
+              bottom: "0",
+              background: "rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: "3000"
+            }}>
+              <div style={{
+                background: "#ffffff",
+                borderRadius: "16px",
+                padding: "40px",
+                maxWidth: "500px",
+                width: "90%",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
+              }}>
+                <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "10px", color: "#1f2937" }}>Payment Details 🔒</h2>
+                <p style={{ color: "#9ca3af", marginBottom: "25px", fontSize: "14px" }}>* Required field</p>
+
+                {/* Card Type Selection */}
+                <div style={{ marginBottom: "25px" }}>
+                  <label style={{ display: "block", fontSize: "15px", fontWeight: "700", color: "#1f2937", marginBottom: "12px" }}>Card Type *</label>
+                  <div style={{ display: "flex", gap: "20px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+                      <input 
+                        type="radio" 
+                        name="cardType" 
+                        value="visa"
+                        checked={cardType === "visa"}
+                        onChange={(e) => setCardType(e.target.value)}
+                      />
+                      <span style={{ fontWeight: "600", color: "#1f2937" }}>💳 VISA</span>
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+                      <input 
+                        type="radio" 
+                        name="cardType" 
+                        value="mastercard"
+                        checked={cardType === "mastercard"}
+                        onChange={(e) => setCardType(e.target.value)}
+                      />
+                      <span style={{ fontWeight: "600", color: "#1f2937" }}>💳 Mastercard</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Card Number */}
+                <div style={{ marginBottom: "25px" }}>
+                  <label style={{ display: "block", fontSize: "14px", fontWeight: "600", color: "#1f2937", marginBottom: "8px" }}>Card Number *</label>
+                  <input 
+                    type="text" 
+                    placeholder="0000 0000 0000 0000"
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "1.5px solid #d1d5db",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                {/* Expiration and CVN */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "15px", marginBottom: "25px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: "600", color: "#1f2937", marginBottom: "8px" }}>Expiration Month *</label>
+                    <select 
+                      value={expMonth}
+                      onChange={(e) => setExpMonth(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1.5px solid #d1d5db",
+                        borderRadius: "8px",
+                        fontSize: "14px"
+                      }}
+                    >
+                      <option value="">Month</option>
+                      <option value="01">01</option>
+                      <option value="02">02</option>
+                      <option value="03">03</option>
+                      <option value="04">04</option>
+                      <option value="05">05</option>
+                      <option value="06">06</option>
+                      <option value="07">07</option>
+                      <option value="08">08</option>
+                      <option value="09">09</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: "600", color: "#1f2937", marginBottom: "8px" }}>Expiration Year *</label>
+                    <select 
+                      value={expYear}
+                      onChange={(e) => setExpYear(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1.5px solid #d1d5db",
+                        borderRadius: "8px",
+                        fontSize: "14px"
+                      }}
+                    >
+                      <option value="">Year</option>
+                      <option value="2025">2025</option>
+                      <option value="2026">2026</option>
+                      <option value="2027">2027</option>
+                      <option value="2028">2028</option>
+                      <option value="2029">2029</option>
+                      <option value="2030">2030</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: "600", color: "#1f2937", marginBottom: "8px" }}>CVN *</label>
+                    <input 
+                      type="text" 
+                      placeholder="123"
+                      maxLength="4"
+                      value={cvn}
+                      onChange={(e) => setCvn(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1.5px solid #d1d5db",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Your Order Section */}
+                <div style={{ borderTop: "1.5px solid #e5e7eb", paddingTop: "20px", marginBottom: "25px" }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1f2937", marginBottom: "15px" }}>Your Order</h3>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "15px", borderBottom: "1px solid #e5e7eb" }}>
+                    <span style={{ color: "#6b7280", fontWeight: "600" }}>Total amount</span>
+                    <span style={{ fontSize: "20px", fontWeight: "700", color: "#d97706" }}>
+                      {getPackageDetails(selectedPackage || requestData.packageName).price}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button
+                    onClick={() => setShowPaymentGateway(false)}
+                    style={{
+                      flex: "1",
+                      padding: "12px 20px",
+                      border: "1.5px solid #d1d5db",
+                      background: "#ffffff",
+                      color: "#6b7280",
+                      borderRadius: "8px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      transition: "all 0.3s ease"
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      alert("Payment processed successfully!");
+                      setShowPaymentGateway(false);
+                    }}
+                    style={{
+                      flex: "1",
+                      padding: "12px 20px",
+                      border: "none",
+                      background: "#0ea5e9",
+                      color: "#ffffff",
+                      borderRadius: "8px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      transition: "all 0.3s ease"
+                    }}
+                  >
+                    Pay
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     );
