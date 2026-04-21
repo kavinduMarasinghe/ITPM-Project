@@ -64,23 +64,7 @@ export const api = {
       body: organizerData,
     });
   },
-  getOrganizerApplications() {
-    return request("/organizers", {
-      auth: true,
-    });
-  },
-  getOrganizerStats() {
-    return request("/organizers/stats", {
-      auth: true,
-    });
-  },
-  updateOrganizerStatus(id, payload) {
-    return request(`/organizers/${id}/status`, {
-      method: "PUT",
-      auth: true,
-      body: payload,
-    });
-  },
+ 
   createEventRequest(eventData) {
     return request("/events", {
       method: "POST",
