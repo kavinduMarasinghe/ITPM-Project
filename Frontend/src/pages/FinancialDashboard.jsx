@@ -112,32 +112,32 @@ export default function OrganizerDashboard() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Fetch sponsor requests and display as applications
+  // Fetch sponsor applications from MongoDB
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5001/api/sponsor-requests", {
+        const response = await fetch("http://127.0.0.1:5001/api/sponsorship-applications", {
           headers: {
             "x-dev-role": "organizer",
           },
         });
         
         if (response.ok) {
-          const requests = await response.json();
+          const apps = await response.json();
           
-          // Convert sponsor requests to applications format
-          const apps = requests.map((req) => ({
-            id: req._id,
-            name: req.companyName,
-            email: req.email,
-            event: req.eventName,
-            package: req.packageName,
-            amount: { Gold: 200000, Silver: 100000, Bronze: 50000 }[req.packageName] || 0,
-            applied: req.sentAt ? new Date(req.sentAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString(),
-            status: "Pending"
+          // Format applications for display
+          const formattedApps = apps.map((app) => ({
+            id: app._id,
+            name: app.companyName,
+            email: app.email,
+            event: app.eventName,
+            package: app.packageName,
+            amount: { Gold: 200000, Silver: 100000, Bronze: 50000 }[app.packageName] || 0,
+            applied: app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString(),
+            status: app.status
           }));
           
-          setApplications(apps);
+          setApplications(formattedApps);
         }
       } catch (error) {
         console.error("Failed to fetch applications:", error);
@@ -501,8 +501,8 @@ export default function OrganizerDashboard() {
       // Update state
       setApplications(applications.filter(app => app.id !== appId));
 
-      // Delete from backend
-      fetch(`http://127.0.0.1:5001/api/sponsor-requests/${appId}`, {
+      // Delete from backend MongoDB
+      fetch(`http://127.0.0.1:5001/api/sponsorship-applications/${appId}`, {
         method: "DELETE",
         headers: {
           "x-dev-role": "organizer",

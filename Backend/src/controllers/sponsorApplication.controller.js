@@ -3,6 +3,28 @@ import SponsorshipPackage from "../models/SponsorshipPackage.js";
 import SponsorRequest from "../models/SponsorRequest.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// Create application from sponsor request data (organizer saves from dashboard)
+export const createApplicationFromRequest = asyncHandler(async (req, res) => {
+  const { companyName, email, eventName, packageName, sponsorRequestId } = req.body;
+
+  // Check if application already exists
+  const existingApp = await SponsorApplication.findOne({ email, eventName, packageName });
+  if (existingApp) {
+    return res.status(400).json({ message: "Application already exists" });
+  }
+
+  const app = await SponsorApplication.create({
+    companyName,
+    email,
+    eventName,
+    packageName,
+    status: "Pending",
+    sponsorRequestId,
+  });
+
+  res.status(201).json(app);
+});
+
 export const submitApplication = asyncHandler(async (req, res) => {
   const { eventId } = req.params;
   const { packageId, noteFromSponsor = "" } = req.body;
@@ -117,6 +139,40 @@ export const rejectApplication = asyncHandler(async (req, res) => {
   app.decisionNote = decisionNote;
   app.decisionAt = new Date();
   await app.save();
+
+  res.json(app);
+});
+
+// Delete an application from MongoDB
+export const deleteApplicationMongo = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const app = await SponsorApplication.findByIdAndDelete(id);
+  if (!app) {
+    return res.status(404).json({ message: "Application not found" });
+  }
+
+  res.json({ message: "Application deleted successfully", id: app._id });
+});
+
+// Update application status in MongoDB
+export const updateApplicationStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!["Accepted", "Pending", "Rejected"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  const app = await SponsorApplication.findByIdAndUpdate(
+    id,
+    { status },
+    { new: true }
+  );
+
+  if (!app) {
+    return res.status(404).json({ message: "Application not found" });
+  }
 
   res.json(app);
 });

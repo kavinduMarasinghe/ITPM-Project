@@ -2,9 +2,17 @@ import mongoose from "mongoose";
 
 const SponsorApplicationSchema = new mongoose.Schema(
   {
-    eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event", required: true, index: true },
-    sponsorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    packageId: { type: mongoose.Schema.Types.ObjectId, ref: "SponsorshipPackage", required: true },
+    // Simple fields for dashboard applications
+    companyName: { type: String },
+    email: { type: String },
+    eventName: { type: String },
+    packageName: { type: String },
+    sponsorRequestId: { type: String },
+
+    // Reference fields (optional, for future use)
+    eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event", index: true },
+    sponsorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
+    packageId: { type: mongoose.Schema.Types.ObjectId, ref: "SponsorshipPackage" },
 
     status: {
       type: String,
