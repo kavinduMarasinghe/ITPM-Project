@@ -82,6 +82,7 @@ export default function OrganizerDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentsFilter, setPaymentsFilter] = useState("all");
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [viewingEmailRequest, setViewingEmailRequest] = useState(null);
   const [composeStep, setComposeStep] = useState(2);
   const [selectedProspect, setSelectedProspect] = useState(prospectPool[0]);
   const [selectedTemplate, setSelectedTemplate] = useState("gold");
@@ -1041,6 +1042,105 @@ export default function OrganizerDashboard() {
               <p className="text-xs" style={{ color: "#9ca3af" }}>
                 Sponsorship invitation delivered to {composeForm.to}
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Email Modal */}
+      {viewingEmailRequest && (
+        <div className="modal-overlay open" onClick={() => setViewingEmailRequest(null)}>
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "700px", maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{
+              background: "#ffffff",
+              borderRadius: "12px",
+              padding: "30px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
+            }}>
+              {/* Email Header */}
+              <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "20px", paddingBottom: "20px", borderBottom: "1px solid #e5e7eb" }}>
+                <div style={{
+                  width: "40px",
+                  height: "40px",
+                  background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "20px",
+                  color: "white"
+                }}>
+                  ✉️
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ margin: "0 0 5px 0", fontSize: "16px", fontWeight: "700", color: "#1f2937" }}>
+                    {viewingEmailRequest.subject}
+                  </h3>
+                  <p style={{ margin: "0", fontSize: "13px", color: "#9ca3af" }}>
+                    To: {viewingEmailRequest.to} · {viewingEmailRequest.package}
+                  </p>
+                </div>
+              </div>
+
+              {/* Email Body */}
+              <div style={{ marginBottom: "30px" }}>
+                <div style={{
+                  padding: "20px",
+                  background: "#f9fafb",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  color: "#1f2937",
+                  lineHeight: "1.8",
+                  whiteSpace: "pre-wrap",
+                  wordWrap: "break-word",
+                  maxHeight: "400px",
+                  overflowY: "auto"
+                }}>
+                  {viewingEmailRequest.body}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+                paddingTop: "20px",
+                borderTop: "1px solid #e5e7eb"
+              }}>
+                <button
+                  onClick={() => setViewingEmailRequest(null)}
+                  style={{
+                    padding: "10px 24px",
+                    background: "#ffffff",
+                    color: "#1f2937",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "8px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    transition: "all 0.3s"
+                  }}
+                  onMouseOver={(e) => e.target.style.background = "#f3f4f6"}
+                  onMouseOut={(e) => e.target.style.background = "#ffffff"}
+                >
+                  ← Back
+                </button>
+                <button
+                  style={{
+                    padding: "10px 24px",
+                    background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
+                    color: "#ffffff",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    fontSize: "14px"
+                  }}
+                >
+                  ⚡ Send Request
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2080,9 +2180,6 @@ export default function OrganizerDashboard() {
                                 <div className="flex items-center gap-1.5 text-xs" style={{ color: meta.footerColor }}>
                                 </div>
                                 <div className="flex gap-2 flex-wrap">
-                                  <button className="text-xs font-semibold px-3 py-1.5 rounded-small transition-all" style={{ background: "#e5e7eb", color: "#6b7280" }}>
-                                    View Email
-                                  </button>
                                   <button
                                     className="text-xs font-semibold px-3 py-1.5 rounded-small transition-all"
                                     style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
