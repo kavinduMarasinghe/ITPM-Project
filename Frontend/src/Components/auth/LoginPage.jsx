@@ -21,6 +21,7 @@ function LoginPage({ defaultPortal = "staff" }) {
   );
   const [showStudentPassword, setShowStudentPassword] = useState(false);
   const [showStaffPassword, setShowStaffPassword] = useState(false);
+  const [showVendorPassword, setShowVendorPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [studentData, setStudentData] = useState({
@@ -28,6 +29,10 @@ function LoginPage({ defaultPortal = "staff" }) {
     password: "",
   });
   const [staffData, setStaffData] = useState({
+    email: "",
+    password: "",
+  });
+  const [vendorData, setVendorData] = useState({
     email: "",
     password: "",
   });
@@ -51,6 +56,15 @@ function LoginPage({ defaultPortal = "staff" }) {
   const handleStaffChange = (event) => {
     const { name, value } = event.target;
     setStaffData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+    setError("");
+  };
+
+  const handleVendorChange = (event) => {
+    const { name, value } = event.target;
+    setVendorData((current) => ({
       ...current,
       [name]: value,
     }));
@@ -106,6 +120,32 @@ function LoginPage({ defaultPortal = "staff" }) {
         role: "staff",
         email: staffData.email.trim(),
         password: staffData.password,
+      });
+
+      finishLogin(response.data);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVendorSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!vendorData.email.trim() || !vendorData.password) {
+      setError("Email and password are required.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await api.login({
+        role: "vendor",
+        email: vendorData.email.trim(),
+        password: vendorData.password,
       });
 
       finishLogin(response.data);
@@ -236,7 +276,136 @@ function LoginPage({ defaultPortal = "staff" }) {
             </div>
           )}
 
-          {activePortal === "student" ? (
+          {activePortal === "vendor" ? (
+            <>
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold mb-2" style={{ color: "#0F172A" }}>
+                  Vendor Login
+                </h3>
+                <p className="text-sm" style={{ color: "#64748B" }}>
+                  Sign in to manage your stalls, reservations, and event participation.
+                </p>
+              </div>
+
+              <form onSubmit={handleVendorSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: "#0F172A" }}>
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <FiMail
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      style={{ color: "#F97316" }}
+                      size={18}
+                    />
+                    <input
+                      type="email"
+                      name="email"
+                      value={vendorData.email}
+                      onChange={handleVendorChange}
+                      placeholder="your-business@example.com"
+                      className="w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all"
+                      style={{
+                        borderColor: error ? "#EF4444" : "#E2E8F0",
+                        backgroundColor: "#FFFFFF",
+                        color: "#0F172A",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: "#0F172A" }}>
+                    Password
+                  </label>
+                  <div className="relative">
+                    <FiLock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      style={{ color: "#F97316" }}
+                      size={18}
+                    />
+                    <input
+                      type={showVendorPassword ? "text" : "password"}
+                      name="password"
+                      value={vendorData.password}
+                      onChange={handleVendorChange}
+                      placeholder="Enter your password"
+                      className="w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all"
+                      style={{
+                        borderColor: error ? "#EF4444" : "#E2E8F0",
+                        backgroundColor: "#FFFFFF",
+                        color: "#0F172A",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowVendorPassword((current) => !current)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:opacity-70"
+                      style={{ color: "#64748B" }}
+                    >
+                      {showVendorPassword ? (
+                        <FiEyeOff size={18} />
+                      ) : (
+                        <FiEye size={18} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div
+                    className="rounded-xl p-3 animate-shake"
+                    style={{ backgroundColor: "#FEE2E2", border: "1px solid #EF4444" }}
+                  >
+                    <p className="text-sm text-center" style={{ color: "#EF4444" }}>
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  style={{ backgroundColor: "#F97316" }}
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      Continue to Vendor Portal
+                      <FiArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div
+                className="mt-6 pt-5 border-t"
+                style={{ borderColor: "#E2E8F0" }}
+              >
+                <div className="flex flex-wrap justify-center gap-6 text-sm">
+                  <Link
+                    to="/vendor/register"
+                    style={{ color: "#F97316" }}
+                    className="font-medium hover:opacity-80"
+                  >
+                    Vendor registration
+                  </Link>
+                  <Link
+                    to="/register/organization"
+                    style={{ color: "#64748B" }}
+                    className="font-medium hover:opacity-80"
+                  >
+                    Organization registration
+                  </Link>
+                </div>
+              </div>
+            </>
+          ) : activePortal === "student" ? (
             <>
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2" style={{ color: "#0F172A" }}>
@@ -349,7 +518,7 @@ function LoginPage({ defaultPortal = "staff" }) {
                 className="mt-6 pt-5 border-t"
                 style={{ borderColor: "#E2E8F0" }}
               >
-                <div className="flex flex-wrap justify-center gap-3 text-sm">
+                <div className="flex flex-wrap justify-center gap-6 text-sm">
                   <Link
                     to="/student/register"
                     style={{ color: "#F97316" }}
@@ -358,11 +527,18 @@ function LoginPage({ defaultPortal = "staff" }) {
                     Student registration
                   </Link>
                   <Link
-                    to="/"
+                    to="/register/organization"
                     style={{ color: "#64748B" }}
                     className="font-medium hover:opacity-80"
                   >
                     Organization registration
+                  </Link>
+                  <Link
+                    to="/vendor/register"
+                    style={{ color: "#64748B" }}
+                    className="font-medium hover:opacity-80"
+                  >
+                    Vendor registration
                   </Link>
                 </div>
               </div>
@@ -478,13 +654,20 @@ function LoginPage({ defaultPortal = "staff" }) {
                 className="mt-6 pt-5 border-t"
                 style={{ borderColor: "#E2E8F0" }}
               >
-                <div className="flex justify-center text-sm">
+                <div className="flex flex-wrap justify-center gap-6 text-sm">
                   <Link
-                    to="/"
+                    to="/register/organization"
                     style={{ color: "#F97316" }}
                     className="font-medium hover:opacity-80"
                   >
                     Organization registration
+                  </Link>
+                  <Link
+                    to="/vendor/register"
+                    style={{ color: "#F97316" }}
+                    className="font-medium hover:opacity-80"
+                  >
+                    Vendor registration
                   </Link>
                 </div>
               </div>

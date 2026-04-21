@@ -12,13 +12,14 @@ import {
   FiX,
   FiZap,
 } from "react-icons/fi";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const MENU_ITEMS = [
   { id: "events", label: "Events", icon: FiCalendar, live: true },
-  { id: "tasks", label: "Tasks", icon: FiClipboard, href: "#" },
-  { id: "stalls", label: "Stalls", icon: FiPackage, href: "#" },
-  { id: "sponsorships", label: "Sponsorships", icon: FiShield, href: "#" },
-  { id: "users", label: "Users", icon: FiUsers, href: "#" },
+  { id: "tasks", label: "Tasks", icon: FiClipboard, route: "/tasks" },
+  { id: "stalls", label: "Stalls", icon: FiPackage, route: "/stalls" },
+  { id: "sponsorships", label: "Sponsorships", icon: FiShield, route: "/sponsorships" },
+  { id: "users", label: "Users", icon: FiUsers, route: "/users" },
 ];
 
 function OrganizerSidebarLayout({
@@ -31,6 +32,8 @@ function OrganizerSidebarLayout({
   organizationName,
   onShowRules,
 }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -107,7 +110,9 @@ function OrganizerSidebarLayout({
           <div className="flex flex-col gap-2">
             {MENU_ITEMS.map((item) => {
               const Icon = item.icon;
-              const isActive = activeSection === item.id;
+              const isActive = item.live
+                ? activeSection === item.id
+                : location.pathname === item.route;
               const sharedClassName = `flex items-center gap-3 rounded-2xl px-4 py-3 font-semibold transition-all ${
                 isCollapsed ? "lg:justify-center lg:px-3" : ""
               }`;
@@ -134,11 +139,11 @@ function OrganizerSidebarLayout({
               }
 
               return (
-                <a
+                <button
                   key={item.id}
-                  href={item.href}
-                  onClick={(event) => {
-                    event.preventDefault();
+                  type="button"
+                  onClick={() => {
+                    navigate(item.route);
                     setMobileMenuOpen(false);
                   }}
                   className={sharedClassName}
@@ -147,7 +152,7 @@ function OrganizerSidebarLayout({
                 >
                   <Icon size={18} />
                   <span className={hideTextOnDesktop}>{item.label}</span>
-                </a>
+                </button>
               );
             })}
           </div>

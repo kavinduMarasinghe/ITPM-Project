@@ -93,10 +93,16 @@ function Footer() {
                   Student Register
                 </Link>
                 <Link
-                  to="/"
+                  to="/register/organization"
                   className="text-gray-500 hover:text-orange-500 transition-colors text-sm"
                 >
                   Organization Register
+                </Link>
+                <Link
+                  to="/vendor/register"
+                  className="text-gray-500 hover:text-orange-500 transition-colors text-sm"
+                >
+                  Vendor Register
                 </Link>
                 <Link
                   to="/login"

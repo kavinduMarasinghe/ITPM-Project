@@ -4,6 +4,7 @@ import LoginPage from "./Components/auth/LoginPage";
 import StudentRegistration from "./Components/auth/StudentRegistration";
 import EventRequestForm from "./Components/events/EventRequestForm";
 import EventsPage from "./Components/events/EventsPage";
+import Homepage from "./Components/home/Homepage";
 import Footer from "./Components/layout/Footer";
 import Header from "./Components/layout/Header";
 import AdminEventDashboard from "./Components/organizers/AdminEventDashboard";
@@ -37,8 +38,10 @@ function App() {
     <div className="App">
       <Routes>
         {/* PUBLIC ROUTES */}
+        <Route path="/" element={<Homepage />} />
+
         <Route
-          path="/"
+          path="/register/organization"
           element={
             <ShellLayout>
               <OrganizerRegistration />
