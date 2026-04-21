@@ -850,6 +850,21 @@ export default function OrganizerDashboard() {
         });
       }
 
+      // Refetch sponsor requests from backend to ensure data is persisted
+      try {
+        const fetchResponse = await fetch("http://127.0.0.1:5001/api/sponsor-requests", {
+          headers: {
+            "x-dev-role": "organizer",
+          },
+        });
+        if (fetchResponse.ok) {
+          const data = await fetchResponse.json();
+          setSponsorRequests(data);
+        }
+      } catch (err) {
+        console.error("Failed to refetch sponsor requests:", err);
+      }
+
       closeComposeModal();
       setShowSuccessToast(true);
       setTimeout(() => setShowSuccessToast(false), 4000);
