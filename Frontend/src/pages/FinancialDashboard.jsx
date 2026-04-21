@@ -107,13 +107,20 @@ export default function OrganizerDashboard() {
   });
   const [newSponsorEmail, setNewSponsorEmail] = useState("");
   const [isSendingRequest, setIsSendingRequest] = useState(false);
-  const [applications, setApplications] = useState([
-    { id: 1, name: "DataSoft Solutions", email: "datasoftit@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "10 Jul 2025", status: "Pending" },
-    { id: 2, name: "CloudVision Bhd", email: "cloudvision@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "9 Jul 2025", status: "Pending" },
-    { id: 3, name: "TechCorp Sdn Bhd", email: "techcorp@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "8 Jul 2025", status: "Approved" },
-    { id: 4, name: "GreenTech Ventures", email: "greentech@mail.com", event: "Tech Fest 2025", package: "Bronze", amount: 50000, applied: "7 Jul 2025", status: "Pending" },
-    { id: 5, name: "Nexus Media Group", email: "nexus@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "6 Jul 2025", status: "Rejected" }
-  ]);
+  const [applications, setApplications] = useState(() => {
+    const saved = localStorage.getItem("deletedApplications");
+    const deleted = saved ? JSON.parse(saved) : [];
+    
+    const allApplications = [
+      { id: 1, name: "DataSoft Solutions", email: "datasoftit@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "10 Jul 2025", status: "Pending" },
+      { id: 2, name: "CloudVision Bhd", email: "cloudvision@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "9 Jul 2025", status: "Pending" },
+      { id: 3, name: "TechCorp Sdn Bhd", email: "techcorp@mail.com", event: "Tech Fest 2025", package: "Gold", amount: 200000, applied: "8 Jul 2025", status: "Approved" },
+      { id: 4, name: "GreenTech Ventures", email: "greentech@mail.com", event: "Tech Fest 2025", package: "Bronze", amount: 50000, applied: "7 Jul 2025", status: "Pending" },
+      { id: 5, name: "Nexus Media Group", email: "nexus@mail.com", event: "Tech Fest 2025", package: "Silver", amount: 100000, applied: "6 Jul 2025", status: "Rejected" }
+    ];
+    
+    return allApplications.filter(app => !deleted.includes(app.id));
+  });
   
   // Initialize packagePrices from localStorage or use defaults
   const [packagePrices, setPackagePrices] = useState(() => {
@@ -460,6 +467,21 @@ export default function OrganizerDashboard() {
       } catch (error) {
         console.error("Error deleting sponsor request:", error);
         alert("Error deleting sponsor request");
+      }
+    }
+  };
+
+  const handleDeleteApplication = (appId) => {
+    if (confirm("Are you sure you want to delete this application?")) {
+      // Update state
+      setApplications(applications.filter(app => app.id !== appId));
+      
+      // Save deleted IDs to localStorage
+      const saved = localStorage.getItem("deletedApplications");
+      const deleted = saved ? JSON.parse(saved) : [];
+      if (!deleted.includes(appId)) {
+        deleted.push(appId);
+        localStorage.setItem("deletedApplications", JSON.stringify(deleted));
       }
     }
   };
@@ -2664,11 +2686,7 @@ export default function OrganizerDashboard() {
                                 <button
                                   className="text-xs font-bold px-3 py-1.5 rounded-small transition-all"
                                   style={{ background: "rgba(239,68,68,0.15)", color: "#f87171" }}
-                                  onClick={() => {
-                                    if (confirm("Are you sure you want to delete this application?")) {
-                                      setApplications(applications.filter(a => a.id !== app.id));
-                                    }
-                                  }}
+                                  onClick={() => handleDeleteApplication(app.id)}
                                 >
                                   Delete
                                 </button>
