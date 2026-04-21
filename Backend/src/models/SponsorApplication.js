@@ -8,8 +8,8 @@ const SponsorApplicationSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["SUBMITTED", "APPROVED", "REJECTED", "PAID", "CANCELLED"],
-      default: "SUBMITTED",
+      enum: ["Accepted", "Pending", "Rejected"],
+      default: "Pending",
       index: true,
     },
 

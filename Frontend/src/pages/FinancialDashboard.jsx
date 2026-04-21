@@ -112,7 +112,7 @@ export default function OrganizerDashboard() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Fetch sponsor requests and convert to applications format
+  // Fetch sponsor requests and display as applications
   useEffect(() => {
     const fetchApplications = async () => {
       try {
@@ -124,22 +124,18 @@ export default function OrganizerDashboard() {
         
         if (response.ok) {
           const requests = await response.json();
-          const saved = localStorage.getItem("deletedApplications");
-          const deleted = saved ? JSON.parse(saved) : [];
           
           // Convert sponsor requests to applications format
-          const apps = requests
-            .filter(req => !deleted.includes(req._id))
-            .map((req, idx) => ({
-              id: req._id,
-              name: req.companyName,
-              email: req.email,
-              event: req.eventName,
-              package: req.packageName,
-              amount: { Gold: 200000, Silver: 100000, Bronze: 50000 }[req.packageName] || 0,
-              applied: req.sentAt ? new Date(req.sentAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString(),
-              status: req.status.charAt(0).toUpperCase() + req.status.slice(1)
-            }));
+          const apps = requests.map((req) => ({
+            id: req._id,
+            name: req.companyName,
+            email: req.email,
+            event: req.eventName,
+            package: req.packageName,
+            amount: { Gold: 200000, Silver: 100000, Bronze: 50000 }[req.packageName] || 0,
+            applied: req.sentAt ? new Date(req.sentAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString(),
+            status: "Pending"
+          }));
           
           setApplications(apps);
         }
@@ -504,14 +500,6 @@ export default function OrganizerDashboard() {
     if (confirm("Are you sure you want to delete this application?")) {
       // Update state
       setApplications(applications.filter(app => app.id !== appId));
-      
-      // Save deleted IDs to localStorage
-      const saved = localStorage.getItem("deletedApplications");
-      const deleted = saved ? JSON.parse(saved) : [];
-      if (!deleted.includes(appId)) {
-        deleted.push(appId);
-        localStorage.setItem("deletedApplications", JSON.stringify(deleted));
-      }
 
       // Delete from backend
       fetch(`http://127.0.0.1:5001/api/sponsor-requests/${appId}`, {
