@@ -558,6 +558,24 @@ function StudentRegistration() {
               </div>
             )}
 
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+              style={{ backgroundColor: "#F97316" }}
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  Register as Student
+                  <FiCheckCircle size={18} />
+                </>
+              )}
+            </button>
 
             <div className="text-center pt-2">
               <p className="text-xs" style={{ color: "#64748B" }}>
