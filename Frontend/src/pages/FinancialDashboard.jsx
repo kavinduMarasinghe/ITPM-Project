@@ -836,11 +836,9 @@ export default function OrganizerDashboard() {
   }, [paymentsFilter]);
 
   const updateBodyForTemplate = (templateId, companyName) => {
-    const pkgLabel = templateId === "gold" ? "Gold – LKR 200,000" : templateId === "silver" ? "Silver – LKR 100,000" : templateId === "bronze" ? "Bronze – LKR 50,000" : composeForm.package;
     setSelectedTemplate(templateId);
     setComposeForm((prev) => ({
       ...prev,
-      package: pkgLabel,
       body: templateBodies[templateId](companyName || selectedProspect.name),
     }));
   };
@@ -1514,7 +1512,7 @@ export default function OrganizerDashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-gray-900">{composeForm.subject}</p>
                       <p className="text-xs" style={{ color: "#9ca3af" }}>
-                        To: {composeForm.email} · {composeForm.package}
+                        To: {composeForm.email}
                       </p>
                     </div>
                   </div>
