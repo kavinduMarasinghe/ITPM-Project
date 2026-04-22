@@ -1,4 +1,5 @@
 import SponsorRequest from "../models/SponsorRequest.js";
+import SponsorApplication from "../models/SponsorApplication.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import nodemailer from "nodemailer";
 
@@ -132,6 +133,24 @@ export const sendSponsorRequest = asyncHandler(async (req, res) => {
   const rejectLink = `${baseUrl}/api/sponsor-requests/${newRequest._id}/reject`;
 
   try {
+    // Create SponsorApplication with Pending status when request is sent
+    const existingApp = await SponsorApplication.findOne({
+      companyName: companyName.trim(),
+      email: normalizedEmail,
+      eventName: eventName.trim(),
+    });
+
+    if (!existingApp) {
+      await SponsorApplication.create({
+        companyName: companyName.trim(),
+        email: normalizedEmail,
+        eventName: eventName.trim(),
+        packageName: packageName.trim(),
+        sponsorRequestId: newRequest._id,
+        status: "Pending",
+      });
+    }
+
     await sendSponsorRequestEmail({
       to: email,
       subject,
@@ -169,6 +188,12 @@ export const acceptSponsorRequest = asyncHandler(async (req, res) => {
   request.respondedAt = new Date();
   await request.save();
 
+  // Update SponsorApplication status to Accepted
+  await SponsorApplication.updateOne(
+    { sponsorRequestId: request._id },
+    { status: "Accepted" }
+  );
+
   // Redirect to sponsor dashboard in the frontend
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
   res.redirect(`${frontendUrl}/sponsor/dashboard/${id}`);
@@ -186,6 +211,12 @@ export const rejectSponsorRequest = asyncHandler(async (req, res) => {
   request.status = "rejected";
   request.respondedAt = new Date();
   await request.save();
+
+  // Update SponsorApplication status to Rejected
+  await SponsorApplication.updateOne(
+    { sponsorRequestId: request._id },
+    { status: "Rejected" }
+  );
 
   res.send(`
     <!DOCTYPE html>
