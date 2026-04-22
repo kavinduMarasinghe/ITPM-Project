@@ -7,6 +7,7 @@ const SponsorApplicationSchema = new mongoose.Schema(
     email: { type: String },
     eventName: { type: String },
     packageName: { type: String },
+    amount: { type: Number, default: null },
     sponsorRequestId: { type: String },
 
     // Reference fields (optional, for future use)

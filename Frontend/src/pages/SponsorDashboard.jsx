@@ -230,6 +230,41 @@ export default function SponsorDashboard() {
     return packages[packageName] || packages.Gold;
   };
 
+  const handlePackageSelection = async (packageType) => {
+    setSelectedPackage(packageType);
+    
+    // Get the price for the selected package
+    const packagePrices = {
+      Gold: 200000,
+      Silver: 100000,
+      Bronze: 50000,
+    };
+    
+    const amount = packagePrices[packageType];
+    
+    // Update the backend with the selected package and amount
+    try {
+      const response = await fetch(`http://127.0.0.1:5001/api/sponsor-requests/${requestId}/update-package`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          packageName: packageType,
+          amount: amount,
+        }),
+      });
+      
+      if (response.ok) {
+        console.log("Package updated successfully");
+      } else {
+        console.error("Failed to update package");
+      }
+    } catch (error) {
+      console.error("Error updating package:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="sponsor-dashboard-container">
@@ -1003,7 +1038,7 @@ export default function SponsorDashboard() {
                 <div 
                   key={packageType}
                   className="package-card"
-                  onClick={() => setSelectedPackage(packageType)}
+                  onClick={() => handlePackageSelection(packageType)}
                   style={{
                     border: isSelected ? `2.5px solid ${pkg.color}` : "1.5px solid #e5e7eb",
                     background: isSelected ? pkg.bgColor : "#ffffff",
@@ -1046,7 +1081,7 @@ export default function SponsorDashboard() {
                       background: isSelected ? pkg.color : "#f3f4f6",
                       color: isSelected ? "#ffffff" : pkg.color,
                     }}
-                    onClick={() => setSelectedPackage(packageType)}
+                    onClick={() => handlePackageSelection(packageType)}
                   >
                     {isSelected ? "✓ Selected" : "Select Package"}
                   </button>

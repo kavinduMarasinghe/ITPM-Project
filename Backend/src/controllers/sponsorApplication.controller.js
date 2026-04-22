@@ -103,6 +103,27 @@ export const getAllApplications = asyncHandler(async (req, res) => {
   res.json(apps);
 });
 
+export const updateApplicationPackage = asyncHandler(async (req, res) => {
+  const { sponsorRequestId } = req.params;
+  const { packageName, amount } = req.body;
+
+  if (!packageName || !amount) {
+    return res.status(400).json({ message: "Missing packageName or amount" });
+  }
+
+  const app = await SponsorApplication.findOneAndUpdate(
+    { sponsorRequestId },
+    { packageName, amount },
+    { new: true }
+  );
+
+  if (!app) {
+    return res.status(404).json({ message: "Application not found" });
+  }
+
+  res.json(app);
+});
+
 export const approveApplication = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { decisionNote = "" } = req.body;

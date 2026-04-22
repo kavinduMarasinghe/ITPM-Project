@@ -12,6 +12,7 @@ import {
   createApplicationFromRequest,
   updateApplicationStatus,
   deleteApplicationMongo,
+  updateApplicationPackage,
 } from "../controllers/sponsorApplication.controller.js";
 
 const router = express.Router();
@@ -20,6 +21,7 @@ const router = express.Router();
 router.post("/sponsorship-applications/from-request", requireRole("organizer", "admin"), createApplicationFromRequest);
 router.get("/sponsorship-applications", requireRole("organizer", "admin"), getAllApplications);
 router.patch("/sponsorship-applications/:id/status", requireRole("organizer", "admin"), updateApplicationStatus);
+router.patch("/sponsor-requests/:sponsorRequestId/update-package", updateApplicationPackage);
 router.delete("/sponsorship-applications/:id", requireRole("organizer", "admin"), deleteApplicationMongo);
 
 // Complex endpoints for full application flow

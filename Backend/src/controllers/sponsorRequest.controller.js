@@ -145,7 +145,8 @@ export const sendSponsorRequest = asyncHandler(async (req, res) => {
         companyName: companyName.trim(),
         email: normalizedEmail,
         eventName: eventName.trim(),
-        packageName: packageName.trim(),
+        packageName: null,
+        amount: null,
         sponsorRequestId: newRequest._id,
         status: "Pending",
       });
