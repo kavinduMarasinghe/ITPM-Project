@@ -26,7 +26,18 @@ module.exports = [
     roles: [ROLES.ADMIN],
     handler: eventController.getAdminEventStats,
   },
-  
+  {
+    method: "PUT",
+    path: "/api/events/:id/review",
+    roles: [ROLES.ADMIN],
+    handler: eventController.reviewEvent,
+  },
+  {
+    method: "PUT",
+    path: "/api/events/:id/publish",
+    roles: [ROLES.ORGANIZER],
+    handler: eventController.publishEvent,
+  },
   {
     method: "PUT",
     path: "/api/events/:id/cancel",
