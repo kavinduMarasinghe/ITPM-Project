@@ -2715,20 +2715,6 @@ export default function OrganizerDashboard() {
                       Review and approve sponsorship requests
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <select className="dark-input text-sm rounded-small px-3 py-2">
-                      <option>All Status</option>
-                      <option>Pending</option>
-                      <option>Approved</option>
-                      <option>Rejected</option>
-                    </select>
-                    <select className="dark-input text-sm rounded-small px-3 py-2">
-                      <option>All Packages</option>
-                      <option>Gold</option>
-                      <option>Silver</option>
-                      <option>Bronze</option>
-                    </select>
-                  </div>
                 </div>
 
                 {/* Add Sponsor Email Section */}
