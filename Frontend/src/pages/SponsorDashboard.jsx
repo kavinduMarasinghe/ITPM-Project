@@ -588,12 +588,30 @@ export default function SponsorDashboard() {
                     Cancel
                   </button>
                   <button
-                    onClick={() => {
-                      alert("Payment processed successfully!");
-                      setPaymentSuccess(true);
-                      setShowPaymentGateway(false);
-                      setShowPayment(false);
-                      setShowInvoice(true);
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`http://127.0.0.1:5001/api/payments/sponsor-request/${requestId}/complete`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            "x-dev-role": "sponsor",
+                          },
+                        });
+
+                        const data = await response.json();
+                        if (!response.ok) {
+                          throw new Error(data?.message || "Failed to complete payment");
+                        }
+
+                        alert("Payment processed successfully!");
+                        setPaymentSuccess(true);
+                        setShowPaymentGateway(false);
+                        setShowPayment(false);
+                        setShowInvoice(true);
+                      } catch (error) {
+                        console.error("Payment completion error:", error);
+                        alert(`Payment failed: ${error.message}`);
+                      }
                     }}
                     style={{
                       flex: "1",

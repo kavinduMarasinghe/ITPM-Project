@@ -4,6 +4,7 @@ import { getPaymentById } from "../controllers/payment.controller.js";
 import {
   createPayment,
   completePayment,
+  completePaymentBySponsorRequest,
   failPayment,
   listPayments,
   listMyPayments,
@@ -16,6 +17,7 @@ const router = express.Router();
 
 router.post("/payments/create", requireRole("sponsor", "vendor", "admin", "organizer"), createPayment);
 router.post("/payments/:paymentId/complete", requireRole("sponsor", "vendor", "admin", "organizer"), completePayment);
+router.post("/payments/sponsor-request/:sponsorRequestId/complete", requireRole("sponsor", "vendor", "admin", "organizer"), completePaymentBySponsorRequest);
 router.post("/payments/:paymentId/fail", requireRole("sponsor", "vendor", "admin", "organizer"), failPayment);
 router.delete("/payments/:paymentId/cancel", requireRole("sponsor", "vendor", "admin", "organizer"), deletePayment);
 router.delete("/payments/:paymentId/delete", requireRole("admin"), hardDeletePayment);

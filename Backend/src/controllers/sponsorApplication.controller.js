@@ -125,12 +125,19 @@ export const updateApplicationPackage = asyncHandler(async (req, res) => {
     isActive: true,
   });
 
+  const resolvedPkg =
+    pkg ||
+    (await SponsorshipPackage.findOne({
+      name: packageName,
+      isActive: true,
+    }).sort({ updatedAt: -1 }));
+
   const app = await SponsorApplication.findOneAndUpdate(
     { sponsorRequestId },
     {
       packageName,
       amount,
-      packageId: pkg?._id,
+      packageId: resolvedPkg?._id,
     },
     { new: true, upsert: true }
   );
@@ -139,7 +146,7 @@ export const updateApplicationPackage = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Application not found" });
   }
 
-  const paymentAmount = pkg?.price ?? amount;
+  const paymentAmount = resolvedPkg?.price ?? amount;
   const paymentDescription = `${packageName} Sponsorship Package - LKR ${paymentAmount.toLocaleString()}`;
 
   const existingPayment = await Payment.findOne({
@@ -157,7 +164,7 @@ export const updateApplicationPackage = asyncHandler(async (req, res) => {
   const payment = await Payment.findOneAndUpdate(
     { refType: "SponsorApplication", refId: app._id },
     {
-      eventId: sponsorRequest.eventId,
+      eventId: sponsorRequest.eventId || resolvedPkg?.eventId,
       payerId,
       payerName,
       purpose: "SPONSORSHIP",

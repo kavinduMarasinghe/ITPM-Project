@@ -1,5 +1,6 @@
 import Payment from "../models/Payment.js";
 import SponsorApplication from "../models/SponsorApplication.js";
+import SponsorRequest from "../models/SponsorRequest.js";
 import SponsorshipPackage from "../models/SponsorshipPackage.js";
 import Counter from "../models/Counter.js";
 import User from "../models/User.js";
@@ -120,12 +121,62 @@ export const completePayment = asyncHandler(async (req, res) => {
       await reservation.save();
     }
   } else {
-    const app = await SponsorApplication.findById(payment.refId);
-    if (app) {
-      app.status = "PAID";
-      await app.save();
-    }
+    await SponsorApplication.findById(payment.refId);
   }
+
+  res.json(payment);
+});
+
+export const completePaymentBySponsorRequest = asyncHandler(async (req, res) => {
+  const { sponsorRequestId } = req.params;
+
+  const app = await SponsorApplication.findOne({ sponsorRequestId });
+  if (!app) {
+    return res.status(404).json({ message: "Sponsor application not found for this request" });
+  }
+
+  const payment = await Payment.findOne({
+    refType: "SponsorApplication",
+    refId: app._id,
+  }).sort({ createdAt: -1 });
+
+  if (!payment) {
+    return res.status(404).json({ message: "Payment not found for this sponsor request" });
+  }
+
+  if (payment.status === "COMPLETED") {
+    return res.json(payment);
+  }
+
+  if (payment.status !== "PENDING") {
+    return res.status(400).json({ message: `Cannot complete from status ${payment.status}` });
+  }
+
+  if (!payment.eventId) {
+    const sponsorRequest = await SponsorRequest.findById(sponsorRequestId);
+    let fallbackEventId = sponsorRequest?.eventId;
+
+    if (!fallbackEventId && app.packageName) {
+      const pkg = await SponsorshipPackage.findOne({
+        name: app.packageName,
+        isActive: true,
+      }).sort({ updatedAt: -1 });
+      fallbackEventId = pkg?.eventId;
+    }
+
+    if (!fallbackEventId) {
+      return res.status(400).json({ message: "Payment missing event mapping. Re-select package first." });
+    }
+
+    payment.eventId = fallbackEventId;
+  }
+
+  payment.status = "COMPLETED";
+  payment.paidAt = new Date();
+  if (!payment.invoiceNo) {
+    payment.invoiceNo = await nextInvoiceNo();
+  }
+  await payment.save();
 
   res.json(payment);
 });
