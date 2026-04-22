@@ -4,6 +4,7 @@ const PaymentSchema = new mongoose.Schema(
   {
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event", required: true, index: true },
     payerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    payerName: { type: String, required: true },
 
     purpose: { type: String, enum: ["STALL", "SPONSORSHIP"], required: true, index: true },
     refType: { type: String, enum: ["Reservation", "SponsorApplication"], required: true },
@@ -24,6 +25,10 @@ const PaymentSchema = new mongoose.Schema(
 
     invoiceNo: { type: String },
     paidAt: { type: Date },
+    paymentDetails: {
+      description: { type: String },
+      referenceNumber: { type: String },
+    },
   },
   { timestamps: true }
 );

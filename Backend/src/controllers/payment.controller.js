@@ -2,6 +2,7 @@ import Payment from "../models/Payment.js";
 import SponsorApplication from "../models/SponsorApplication.js";
 import SponsorshipPackage from "../models/SponsorshipPackage.js";
 import Counter from "../models/Counter.js";
+import User from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 // TODO: Change this import to match Member 3 reservation model path/name
@@ -40,15 +41,23 @@ export const createPayment = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Reservation expired" });
     }
 
+    const vendor = await User.findById(reservation.vendorId);
+    const payerName = vendor?.companyName || vendor?.name || "Unknown Vendor";
+
     const payment = await Payment.create({
       eventId: reservation.eventId,
       payerId: reservation.vendorId,
+      payerName: payerName,
       purpose: "STALL",
       refType: "Reservation",
       refId: reservation._id,
       amount: reservation.price,
       transactionRef: makeTxnRef(),
       status: "PENDING",
+      paymentDetails: {
+        description: `Stall Fee`,
+        referenceNumber: makeTxnRef(),
+      },
     });
 
     return res.status(201).json(payment);
@@ -65,15 +74,23 @@ export const createPayment = asyncHandler(async (req, res) => {
   const pkg = await SponsorshipPackage.findById(app.packageId);
   if (!pkg) return res.status(400).json({ message: "Package not found" });
 
+  const sponsor = await User.findById(app.sponsorId);
+  const payerName = sponsor?.companyName || sponsor?.name || "Unknown Sponsor";
+
   const payment = await Payment.create({
     eventId: app.eventId,
     payerId: app.sponsorId,
+    payerName: payerName,
     purpose: "SPONSORSHIP",
     refType: "SponsorApplication",
     refId: app._id,
     amount: pkg.price,
     transactionRef: makeTxnRef(),
     status: "PENDING",
+    paymentDetails: {
+      description: `${pkg.name} Sponsorship`,
+      referenceNumber: makeTxnRef(),
+    },
   });
 
   res.status(201).json(payment);
