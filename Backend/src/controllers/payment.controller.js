@@ -180,3 +180,49 @@ export const getPaymentById = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const deletePayment = asyncHandler(async (req, res) => {
+  const { paymentId } = req.params;
+  
+  console.log("=== DELETE PAYMENT ===");
+  console.log("Payment ID:", paymentId);
+  console.log("User:", req.user);
+  console.log("Request params:", req.params);
+  console.log("Request URL:", req.originalUrl);
+
+  const payment = await Payment.findById(paymentId);
+  
+  if (!payment) {
+    console.log("Payment NOT FOUND in database");
+    return res.status(404).json({ message: "Payment not found" });
+  }
+
+  console.log("Payment FOUND, current status:", payment.status);
+
+  // Soft delete by marking as CANCELLED instead of removing
+  payment.status = "CANCELLED";
+  await payment.save();
+
+  console.log("Payment CANCELLED successfully");
+  console.log("=== DELETE PAYMENT COMPLETE ===");
+  res.json({ 
+    message: "Payment cancelled successfully", 
+    payment 
+  });
+});
+
+export const hardDeletePayment = asyncHandler(async (req, res) => {
+  const { paymentId } = req.params;
+
+  const payment = await Payment.findById(paymentId);
+  if (!payment) return res.status(404).json({ message: "Payment not found" });
+
+  // Only admins can hard delete
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Only admins can permanently delete payments" });
+  }
+
+  await Payment.findByIdAndDelete(paymentId);
+
+  res.json({ message: "Payment permanently deleted" });
+});

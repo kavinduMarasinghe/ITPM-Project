@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Chart from "chart.js/auto";
 import { jsPDF } from "jspdf";
+import { deletePayment, listPayments } from "../api/payment.js";
 import "./FinancialDashboard.css";
 
 const statTargets = [
@@ -28,7 +29,8 @@ const approvals = [
   { id: 3, name: "GreenTech Ventures", amount: 1000, badge: "badge-bronze", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
 ];
 
-const payments = [
+// Payments will be fetched from backend API
+const defaultPayments = [
   { id: "#PAY-2025-001", payer: "TechCorp Sdn Bhd", type: "Sponsorship", amount: 5000, datetime: "12 Jul 2025, 10:32 AM", status: "completed", invoice: true },
   { id: "#PAY-2025-002", payer: "Vendor – Stall A-03", type: "Stall Fee", amount: 800, datetime: "11 Jul 2025, 2:15 PM", status: "completed", invoice: true },
   { id: "#PAY-2025-003", payer: "Nexus Media Group", type: "Sponsorship", amount: 2500, datetime: "10 Jul 2025, 9:00 AM", status: "pending", invoice: false },
@@ -111,6 +113,7 @@ export default function OrganizerDashboard() {
     const saved = localStorage.getItem("deletedApplications");
     return saved ? JSON.parse(saved) : [];
   });
+  const [payments, setPayments] = useState([]);
 
   // Fetch sponsor applications from MongoDB
   useEffect(() => {
@@ -146,6 +149,46 @@ export default function OrganizerDashboard() {
 
     fetchApplications();
   }, []);
+
+  // Fetch payments from MongoDB
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        console.log("🔄 Fetching payments from API...");
+        const paymentList = await listPayments();
+        console.log("✅ Payments fetched successfully:", paymentList);
+        
+        if (!paymentList || paymentList.length === 0) {
+          console.warn("⚠️ No payments returned from API, using default payments");
+          setPayments(defaultPayments);
+          return;
+        }
+        
+        // Format payments for display
+        const formattedPayments = paymentList.map((payment) => ({
+          _id: payment._id,
+          id: payment.transactionRef || payment._id,
+          payer: payment.payerName,
+          type: payment.purpose === "SPONSORSHIP" ? "Sponsorship" : "Stall Fee",
+          amount: payment.amount,
+          datetime: payment.paidAt ? new Date(payment.paidAt).toLocaleString() : payment.createdAt ? new Date(payment.createdAt).toLocaleString() : "N/A",
+          status: payment.status.toLowerCase(),
+          invoice: payment.invoiceNo ? true : false,
+        }));
+        
+        console.log("📋 Formatted payments for display:", formattedPayments);
+        setPayments(formattedPayments);
+      } catch (error) {
+        console.error("❌ Failed to fetch payments:", error);
+        console.log("📍 Falling back to default payments");
+        // Fallback to default payments if fetch fails
+        setPayments(defaultPayments);
+      }
+    };
+
+    fetchPayments();
+  }, []);
+  
   
   // Initialize packagePrices from localStorage or use defaults
   const [packagePrices, setPackagePrices] = useState(() => {
@@ -515,6 +558,24 @@ export default function OrganizerDashboard() {
     }
   };
 
+  const handleDeletePayment = async (paymentId) => {
+    if (confirm("Are you sure you want to delete this payment record?")) {
+      try {
+        console.log("Deleting payment with ID:", paymentId);
+        // Call backend API to delete payment
+        await deletePayment(paymentId);
+        
+        console.log("Payment deleted successfully, removing from state");
+        // Remove from frontend state after successful deletion
+        setPayments((prev) => prev.filter((p) => p._id !== paymentId && p.id !== paymentId));
+        alert("Payment deleted successfully");
+      } catch (error) {
+        console.error("Error deleting payment:", error);
+        alert("Failed to delete payment: " + error.message);
+      }
+    }
+  };
+
   useEffect(() => {
     // Fetch sponsor requests from backend
     const fetchSponsorRequests = async () => {
@@ -840,9 +901,10 @@ export default function OrganizerDashboard() {
   }, [eventFilter, packageFilter, searchTerm]);
 
   const filteredPayments = useMemo(() => {
+    console.log("Computing filteredPayments, payments:", payments, "filter:", paymentsFilter);
     if (paymentsFilter === "all") return payments;
     return payments.filter((p) => p.status === paymentsFilter);
-  }, [paymentsFilter]);
+  }, [paymentsFilter, payments]);
 
   const updateBodyForTemplate = (templateId, companyName) => {
     setSelectedTemplate(templateId);
@@ -2894,11 +2956,7 @@ export default function OrganizerDashboard() {
                             </td>
                             <td className="px-5 py-4">
                               <button
-                                onClick={() => {
-                                  if (confirm("Are you sure you want to delete this payment record?")) {
-                                    setPayments((prev) => prev.filter((p) => p.id !== row.id));
-                                  }
-                                }}
+                                onClick={() => handleDeletePayment(row._id || row.id)}
                                 className="text-xs font-bold flex items-center gap-1"
                                 style={{ color: "#f87171" }}
                               >
