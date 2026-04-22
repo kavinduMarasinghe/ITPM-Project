@@ -1,7 +1,10 @@
 import SponsorApplication from "../models/SponsorApplication.js";
 import SponsorshipPackage from "../models/SponsorshipPackage.js";
 import SponsorRequest from "../models/SponsorRequest.js";
+import Payment from "../models/Payment.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+
+const makeTxnRef = () => `TXN-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
 
 // Create application from sponsor request data (organizer saves from dashboard)
 export const createApplicationFromRequest = asyncHandler(async (req, res) => {
@@ -111,17 +114,70 @@ export const updateApplicationPackage = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Missing packageName or amount" });
   }
 
+  const sponsorRequest = await SponsorRequest.findById(sponsorRequestId);
+  if (!sponsorRequest) {
+    return res.status(404).json({ message: "Sponsor request not found" });
+  }
+
+  const pkg = await SponsorshipPackage.findOne({
+    eventId: sponsorRequest.eventId,
+    name: packageName,
+    isActive: true,
+  });
+
   const app = await SponsorApplication.findOneAndUpdate(
     { sponsorRequestId },
-    { packageName, amount },
-    { new: true }
+    {
+      packageName,
+      amount,
+      packageId: pkg?._id,
+    },
+    { new: true, upsert: true }
   );
 
   if (!app) {
     return res.status(404).json({ message: "Application not found" });
   }
 
-  res.json(app);
+  const paymentAmount = pkg?.price ?? amount;
+  const paymentDescription = `${packageName} Sponsorship Package - LKR ${paymentAmount.toLocaleString()}`;
+
+  const existingPayment = await Payment.findOne({
+    refType: "SponsorApplication",
+    refId: app._id,
+  });
+
+  if (existingPayment && existingPayment.status === "COMPLETED") {
+    return res.status(400).json({ message: "Payment already completed for this application" });
+  }
+
+  const payerId = sponsorRequest.createdBy || req.user?._id;
+  const payerName = sponsorRequest.companyName || app.companyName || "Sponsor";
+
+  const payment = await Payment.findOneAndUpdate(
+    { refType: "SponsorApplication", refId: app._id },
+    {
+      eventId: sponsorRequest.eventId,
+      payerId,
+      payerName,
+      purpose: "SPONSORSHIP",
+      refType: "SponsorApplication",
+      refId: app._id,
+      amount: paymentAmount,
+      currency: "LKR",
+      status: existingPayment?.status === "COMPLETED" ? "COMPLETED" : "PENDING",
+      transactionRef: existingPayment?.transactionRef || makeTxnRef(),
+      invoiceNo: existingPayment?.invoiceNo,
+      paidAt: existingPayment?.paidAt,
+      paymentDetails: {
+        description: paymentDescription,
+        referenceNumber: existingPayment?.paymentDetails?.referenceNumber || `REF-${Date.now()}`,
+      },
+    },
+    { new: true, upsert: true }
+  );
+
+  res.json({ app, payment });
 });
 
 export const approveApplication = asyncHandler(async (req, res) => {
