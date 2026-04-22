@@ -19,5 +19,16 @@ module.exports = [
     roles: [ROLES.ADMIN, ROLES.HOD],
     handler: organizerController.getOrganizers,
   },
-  
+  {
+    method: "GET",
+    path: "/api/organizers/:id",
+    roles: [ROLES.ADMIN, ROLES.HOD],
+    handler: organizerController.getOrganizerById,
+  },
+  {
+    method: "PUT",
+    path: "/api/organizers/:id/status",
+    roles: [ROLES.ADMIN, ROLES.HOD],
+    handler: organizerController.updateOrganizerStatus,
+  },
 ];
