@@ -184,11 +184,9 @@ export const getPaymentById = async (req, res) => {
 export const deletePayment = asyncHandler(async (req, res) => {
   const { paymentId } = req.params;
   
-  console.log("=== DELETE PAYMENT ===");
+  console.log("=== DELETE PAYMENT (HARD DELETE) ===");
   console.log("Payment ID:", paymentId);
   console.log("User:", req.user);
-  console.log("Request params:", req.params);
-  console.log("Request URL:", req.originalUrl);
 
   const payment = await Payment.findById(paymentId);
   
@@ -197,17 +195,16 @@ export const deletePayment = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Payment not found" });
   }
 
-  console.log("Payment FOUND, current status:", payment.status);
+  console.log("Payment FOUND, permanently deleting");
 
-  // Soft delete by marking as CANCELLED instead of removing
-  payment.status = "CANCELLED";
-  await payment.save();
+  // Hard delete - permanently remove from database
+  await Payment.findByIdAndDelete(paymentId);
 
-  console.log("Payment CANCELLED successfully");
+  console.log("Payment PERMANENTLY DELETED from database");
   console.log("=== DELETE PAYMENT COMPLETE ===");
   res.json({ 
-    message: "Payment cancelled successfully", 
-    payment 
+    message: "Payment permanently deleted successfully", 
+    paymentId
   });
 });
 

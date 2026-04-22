@@ -164,10 +164,8 @@ export default function OrganizerDashboard() {
           return;
         }
         
-        // Format payments for display (exclude CANCELLED payments)
-        const formattedPayments = paymentList
-          .filter(payment => payment.status !== "CANCELLED") // Hide deleted payments
-          .map((payment) => ({
+        // Format payments for display
+        const formattedPayments = paymentList.map((payment) => ({
           _id: payment._id,
           id: payment.transactionRef || payment._id,
           payer: payment.payerName,
