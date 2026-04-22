@@ -174,6 +174,12 @@ export default function OrganizerDashboard() {
           datetime: payment.paidAt ? new Date(payment.paidAt).toLocaleString() : payment.createdAt ? new Date(payment.createdAt).toLocaleString() : "N/A",
           status: payment.status.toLowerCase(),
           invoice: payment.invoiceNo ? true : false,
+          invoiceNo: payment.invoiceNo,
+          paidAt: payment.paidAt,
+          createdAt: payment.createdAt,
+          purpose: payment.purpose,
+          eventName: payment.eventId?.name || payment.eventId?.title || "Tech Fest 2025",
+          paymentDetails: payment.paymentDetails || {},
         }));
         
         console.log("📋 Formatted payments for display:", formattedPayments);
@@ -345,25 +351,25 @@ export default function OrganizerDashboard() {
   };
 
   // Handle downloading invoice
-  const handleDownloadInvoice = async (invoiceNumber, isPaid) => {
-    if (!isPaid) {
+  const handleDownloadInvoice = async (payment) => {
+    if (!payment || payment.status !== "completed") {
       alert("Invoice is not available until payment is completed");
       return;
     }
 
     try {
       const invoiceData = {
-        number: invoiceNumber,
-        date: new Date().toLocaleDateString(),
-        amount: "LKR 5,000",
-        company: "TechCorp Sdn Bhd",
-        type: "Gold Sponsorship"
+        number: payment.invoiceNo || payment.id || payment.transactionRef,
+        date: payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : new Date(payment.createdAt).toLocaleDateString(),
+        amount: `LKR ${Number(payment.amount || 0).toLocaleString()}`,
+        company: payment.payer,
+        type: payment.paymentDetails?.description || payment.type
       };
 
       // Try to fetch from backend first
       let paymentId = null;
       try {
-        const response = await fetch(`http://localhost:5001/api/invoices?invoiceNo=${invoiceNumber}`);
+        const response = await fetch(`http://localhost:5001/api/invoices?invoiceNo=${invoiceData.number}`);
         if (response.ok) {
           const data = await response.json();
           if (data && data._id) {
@@ -383,7 +389,7 @@ export default function OrganizerDashboard() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = `${invoiceNumber}.pdf`;
+            link.download = `${invoiceData.number}.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -425,7 +431,7 @@ export default function OrganizerDashboard() {
       doc.text(`Date: ${invoiceData.date}`, 120, yPosition);
       yPosition += 8;
       doc.text(`Status: PAID`, 20, yPosition);
-      doc.text(`Event: Tech Fest 2025`, 120, yPosition);
+      doc.text(`Event: ${payment.eventName || "Tech Fest 2025"}`, 120, yPosition);
       
       yPosition += 15;
 
@@ -461,8 +467,8 @@ export default function OrganizerDashboard() {
       doc.setFontSize(9);
       doc.text(invoiceData.type, 25, yPosition);
       doc.text("1", 120, yPosition);
-      doc.text("LKR 5,000", 140, yPosition);
-      doc.text("LKR 5,000", 170, yPosition);
+      doc.text(invoiceData.amount, 140, yPosition);
+      doc.text(invoiceData.amount, 170, yPosition);
       
       yPosition += 15;
 
@@ -476,7 +482,7 @@ export default function OrganizerDashboard() {
       doc.text("TOTAL:", 140, yPosition);
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
-      doc.text("LKR 5,000", 170, yPosition);
+      doc.text(invoiceData.amount, 170, yPosition);
       
       yPosition += 20;
 
@@ -487,7 +493,7 @@ export default function OrganizerDashboard() {
       doc.text("EVENTAURA - University Event Management System", pageWidth / 2, pageHeight - 15, { align: "center" });
 
       // Save the PDF
-      doc.save(`${invoiceNumber}.pdf`);
+      doc.save(`${invoiceData.number}.pdf`);
     } catch (error) {
       console.error("Error generating invoice:", error);
       alert("Failed to generate invoice: " + error.message);
@@ -905,6 +911,27 @@ export default function OrganizerDashboard() {
     if (paymentsFilter === "all") return payments;
     return payments.filter((p) => p.status === paymentsFilter);
   }, [paymentsFilter, payments]);
+
+  const invoiceCards = useMemo(() => {
+    return payments
+      .filter((payment) => payment.purpose === "SPONSORSHIP")
+      .map((payment) => {
+        const invoiceNo = payment.invoiceNo || payment.id;
+        const issuedDate = payment.paidAt || payment.createdAt;
+        const description = payment.paymentDetails?.description || payment.type;
+
+        return {
+          payment,
+          invoiceNo,
+          issuedLabel: payment.status === "completed"
+            ? `Issued: ${new Date(issuedDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`
+            : "Pending issuance",
+          statusLabel: payment.status === "completed" ? "PAID" : payment.status === "pending" ? "PENDING" : payment.status.toUpperCase(),
+          description: description.replace(/\s*-\s*LKR.*$/, ""),
+          isPaid: payment.status === "completed",
+        };
+      });
+  }, [payments]);
 
   const updateBodyForTemplate = (templateId, companyName) => {
     setSelectedTemplate(templateId);
@@ -2981,84 +3008,83 @@ export default function OrganizerDashboard() {
                 <div>
                   <h2 className="font-heading font-bold text-gray-900 text-xl">Invoices & Receipts</h2>
                   <p className="text-sm" style={{ color: "#9ca3af" }}>
-                    Auto-generated invoices for all completed payments
+                    Auto-generated invoices for all sponsorship payments
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {[1, 2, 3, 4].map((inv) => {
-                    const paid = inv !== 4;
-                    const amount = [5000, 800, 300, 2500][inv - 1];
-                    const who = ["TechCorp Sdn Bhd", "Vendor – Stall A-03", "Vendor – Stall C-01", "Nexus Media Group"][inv - 1];
-                    const type = ["Gold Sponsorship", "Stall Fee (Premium)", "Stall Fee (Basic)", "Silver Sponsorship"][inv - 1];
-                    const issue = ["12 Jul 2025", "11 Jul 2025", "8 Jul 2025", "Pending issuance"][inv - 1];
-                    return (
-                      <div key={inv} className="invoice-card rounded-large p-6">
+                  {invoiceCards.length > 0 ? (
+                    invoiceCards.map(({ payment, invoiceNo, issuedLabel, statusLabel, description, isPaid }) => (
+                      <div key={payment._id} className="invoice-card rounded-large p-6">
                         <div className="flex items-start justify-between mb-5">
                           <div>
-                            <p className="font-heading font-bold text-gray-900 text-base">INV-2025-00{inv}</p>
+                            <p className="font-heading font-bold text-gray-900 text-base">{invoiceNo}</p>
                             <p className="text-xs mt-0.5" style={{ color: "#a1a5b8" }}>
-                              {paid ? `Issued: ${issue}` : "Pending issuance"}
+                              {issuedLabel}
                             </p>
                           </div>
                           <span
                             className="text-xs font-bold px-2.5 py-1 rounded-small"
                             style={{
-                              background: paid ? "rgba(74,222,128,0.15)" : "rgba(245,158,11,0.15)",
-                              color: paid ? "#4ade80" : "#fbbf24",
-                              border: paid ? "1px solid rgba(74,222,128,0.25)" : "1px solid rgba(245,158,11,0.25)",
+                              background: isPaid ? "rgba(74,222,128,0.15)" : "rgba(245,158,11,0.15)",
+                              color: isPaid ? "#4ade80" : "#fbbf24",
+                              border: isPaid ? "1px solid rgba(74,222,128,0.25)" : "1px solid rgba(245,158,11,0.25)",
                             }}
                           >
-                            {paid ? "PAID" : "PENDING"}
+                            {statusLabel}
                           </span>
                         </div>
                         <div className="glow-divider mb-4" />
                         <div className="space-y-2.5 mb-5">
                           <div className="flex justify-between text-sm">
                             <span style={{ color: "#9ca3af" }}>Billed To</span>
-                            <span className="font-semibold text-gray-900">{who}</span>
+                            <span className="font-semibold text-gray-900">{payment.payer}</span>
                           </div>
                           <div className="flex justify-between text-sm">
                             <span style={{ color: "#9ca3af" }}>Type</span>
-                            <span style={{ color: "#1f2937" }}>{type}</span>
+                            <span style={{ color: "#1f2937" }}>{description}</span>
                           </div>
                           <div className="flex justify-between text-sm">
                             <span style={{ color: "#9ca3af" }}>Event</span>
-                            <span style={{ color: "#1f2937" }}>Tech Fest 2025</span>
+                            <span style={{ color: "#1f2937" }}>{payment.eventName}</span>
                           </div>
                           <div className="flex justify-between text-sm pt-2" style={{ borderTop: "1px solid #e5e7eb" }}>
                             <span className="font-heading font-bold text-gray-900">Total</span>
                             <span
                               className="font-heading font-black text-xl"
                               style={
-                                paid
+                                isPaid
                                   ? { background: "linear-gradient(90deg,#a78bfa,#ec4899,#f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }
                                   : { color: "#fbbf24" }
                               }
                             >
-                              LKR {amount.toLocaleString()}
+                              LKR {Number(payment.amount || 0).toLocaleString()}
                             </span>
                           </div>
                         </div>
                         <button
-                          onClick={() => handleDownloadInvoice(`INV-2025-00${inv}`, paid)}
+                          onClick={() => handleDownloadInvoice(payment)}
                           className="w-full flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-large transition-all"
                           style={{
-                            background: paid ? "linear-gradient(135deg,#10b981,#059669)" : "#f3f4f6",
-                            color: paid ? "#ffffff" : "#bfdbfe",
-                            border: paid ? "1px solid #059669" : "1px solid #f3f4f6",
-                            cursor: paid ? "pointer" : "not-allowed",
-                            boxShadow: paid ? "0 4px 12px rgba(16,185,129,0.3)" : "none"
+                            background: isPaid ? "linear-gradient(135deg,#10b981,#059669)" : "#f3f4f6",
+                            color: isPaid ? "#ffffff" : "#bfdbfe",
+                            border: isPaid ? "1px solid #059669" : "1px solid #f3f4f6",
+                            cursor: isPaid ? "pointer" : "not-allowed",
+                            boxShadow: isPaid ? "0 4px 12px rgba(16,185,129,0.3)" : "none"
                           }}
-                          disabled={!paid}
+                          disabled={!isPaid}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
-                          {paid ? "Download Invoice" : "Awaiting Payment"}
+                          {isPaid ? "Download Invoice" : "Awaiting Payment"}
                         </button>
                       </div>
-                    );
-                  })}
+                    ))
+                  ) : (
+                    <div className="rounded-large border border-dashed border-gray-200 p-8 text-center text-gray-500 md:col-span-2">
+                      No sponsorship invoices found yet.
+                    </div>
+                  )}
                 </div>
               </section>
             )}

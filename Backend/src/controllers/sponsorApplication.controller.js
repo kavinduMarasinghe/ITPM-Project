@@ -2,9 +2,22 @@ import SponsorApplication from "../models/SponsorApplication.js";
 import SponsorshipPackage from "../models/SponsorshipPackage.js";
 import SponsorRequest from "../models/SponsorRequest.js";
 import Payment from "../models/Payment.js";
+import Counter from "../models/Counter.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const makeTxnRef = () => `TXN-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+
+async function nextInvoiceNo() {
+  const year = new Date().getFullYear();
+  const key = `INV-${year}`;
+  const doc = await Counter.findOneAndUpdate(
+    { key },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  const padded = String(doc.seq).padStart(5, "0");
+  return `INV-${year}-${padded}`;
+}
 
 // Create application from sponsor request data (organizer saves from dashboard)
 export const createApplicationFromRequest = asyncHandler(async (req, res) => {
@@ -174,7 +187,7 @@ export const updateApplicationPackage = asyncHandler(async (req, res) => {
       currency: "LKR",
       status: existingPayment?.status === "COMPLETED" ? "COMPLETED" : "PENDING",
       transactionRef: existingPayment?.transactionRef || makeTxnRef(),
-      invoiceNo: existingPayment?.invoiceNo,
+      invoiceNo: existingPayment?.invoiceNo || (await nextInvoiceNo()),
       paidAt: existingPayment?.paidAt,
       paymentDetails: {
         description: paymentDescription,

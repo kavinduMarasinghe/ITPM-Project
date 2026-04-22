@@ -208,6 +208,7 @@ export const listPayments = asyncHandler(async (req, res) => {
 
   const payments = await Payment.find(q)
     .populate("payerId", "name email role")
+    .populate("eventId", "name title")
     .sort({ createdAt: -1 });
 
   res.json(payments);
