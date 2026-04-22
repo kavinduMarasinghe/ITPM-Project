@@ -188,6 +188,7 @@ export default function OrganizerDashboard() {
   }, [sponsorRequests]);
 
   const displayedSponsorRequests = useMemo(() => {
+    console.log("displayedSponsorRequests memo triggered, sponsorRequests.length:", sponsorRequests.length);
     if (sponsorRequests.length === 0) return [];
 
     const unique = new Map();
@@ -207,7 +208,7 @@ export default function OrganizerDashboard() {
       }
     });
 
-    return Array.from(unique.values()).map((request) => ({
+    const result = Array.from(unique.values()).map((request) => ({
       id: request._id,
       company: request.companyName,
       email: request.email,
@@ -223,6 +224,9 @@ export default function OrganizerDashboard() {
             : "Pending response",
       response: request.status,
     }));
+    
+    console.log("displayedSponsorRequests result:", result);
+    return result;
   }, [sponsorRequests, packagePrices]);
 
   const visibleSponsorRequests = displayedSponsorRequests;
@@ -522,7 +526,12 @@ export default function OrganizerDashboard() {
         });
         if (response.ok) {
           const data = await response.json();
+          console.log("Fetched sponsor requests:", data);
           setSponsorRequests(data);
+        } else {
+          console.error("Failed to fetch sponsor requests. Status:", response.status);
+          const errorData = await response.json();
+          console.error("Error details:", errorData);
         }
       } catch (error) {
         console.error("Failed to fetch sponsor requests:", error);
@@ -873,8 +882,17 @@ export default function OrganizerDashboard() {
   const handleSendRequest = async () => {
     if (isSendingRequest) return;
 
-    if (!composeForm.to || !composeForm.email || !composeForm.event || !composeForm.package || !composeForm.subject || !composeForm.body) {
-      alert("Please fill all fields before sending.");
+    if (!composeForm.to || !composeForm.email || !composeForm.event || !composeForm.subject || !composeForm.body) {
+      const missing = [];
+      if (!composeForm.to) missing.push("Company Name (to)");
+      if (!composeForm.email) missing.push("Email");
+      if (!composeForm.event) missing.push("Event");
+      if (!composeForm.subject) missing.push("Subject");
+      if (!composeForm.body) missing.push("Body");
+      
+      console.error("Missing fields:", missing);
+      console.error("Current composeForm:", composeForm);
+      alert("Please fill all fields before sending. Missing: " + missing.join(", "));
       return;
     }
 
@@ -885,10 +903,12 @@ export default function OrganizerDashboard() {
         companyName: composeForm.to,
         email: composeForm.email,
         eventName: composeForm.event,
-        packageName: composeForm.package.split(" ")[0],
+        packageName: composeForm.package ? composeForm.package.split(" ")[0] : "Gold",
         subject: composeForm.subject,
         message: composeForm.body,
       };
+
+      console.log("Sending sponsor request with data:", requestData);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
@@ -905,6 +925,9 @@ export default function OrganizerDashboard() {
       clearTimeout(timeoutId);
 
       const result = await response.json();
+      console.log("Response status:", response.status);
+      console.log("Response data:", result);
+      
       if (!response.ok) {
         throw new Error(result.message || "Failed to send request");
       }
@@ -936,10 +959,28 @@ export default function OrganizerDashboard() {
         console.error("Failed to refetch sponsor requests:", err);
       }
 
+      // Also refetch applications to ensure they show up
+      try {
+        const appResponse = await fetch("http://127.0.0.1:5001/api/sponsorship-applications", {
+          headers: {
+            "x-dev-role": "organizer",
+          },
+        });
+        if (appResponse.ok) {
+          const appData = await appResponse.json();
+          console.log("Refetched applications:", appData);
+          setApplications(appData);
+        }
+      } catch (err) {
+        console.error("Failed to refetch applications:", err);
+      }
+
       closeComposeModal();
       setShowSuccessToast(true);
       setTimeout(() => setShowSuccessToast(false), 4000);
     } catch (error) {
+      console.error("Full error object:", error);
+      console.error("Error stack:", error.stack);
       if (error.name === "AbortError") {
         alert("Request timed out. Backend may not be running on port 5001.");
       } else {
@@ -2190,9 +2231,12 @@ export default function OrganizerDashboard() {
                       </div>
                     </div>
 
-                    {visibleSponsorRequests.length > 0 ? visibleSponsorRequests.map((card) => {
-                      const meta = statusMeta(card.status);
-                      return (
+                    {visibleSponsorRequests.length > 0 ? (
+                      <>
+                        {console.log("Rendering visibleSponsorRequests with length:", visibleSponsorRequests.length)}
+                        {visibleSponsorRequests.map((card) => {
+                          const meta = statusMeta(card.status);
+                          return (
                         <div key={card.id} className="req-card rounded-large p-5">
                           <div className="flex items-start gap-4">
                             <img
@@ -2245,7 +2289,9 @@ export default function OrganizerDashboard() {
                           </div>
                         </div>
                       );
-                    }) : (
+                        })}
+                      </>
+                    ) : (
                       <div className="req-card rounded-large p-6 text-center" style={{ border: "1px dashed #d1d5db" }}>
                         <p className="font-heading font-semibold text-gray-900">No sponsor requests yet</p>
                         <p className="text-sm mt-1" style={{ color: "#9ca3af" }}>

@@ -84,7 +84,10 @@ const sendSponsorRequestEmail = async ({ to, subject, message, eventName, compan
 export const sendSponsorRequest = asyncHandler(async (req, res) => {
   const { companyName, email, eventName, eventId, packageName, subject, message } = req.body;
 
+  console.log("sendSponsorRequest called with:", { companyName, email, eventName, packageName });
+
   if (!companyName || !email || !eventName || !packageName || !subject || !message) {
+    console.log("Missing required fields validation failed");
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -125,6 +128,9 @@ export const sendSponsorRequest = asyncHandler(async (req, res) => {
 
   if (!existingRequest) {
     await newRequest.save();
+    console.log("New sponsor request saved with ID:", newRequest._id);
+  } else {
+    console.log("Sponsor request already exists");
   }
 
   // Generate accept/reject links
@@ -280,11 +286,14 @@ export const rejectSponsorRequest = asyncHandler(async (req, res) => {
 export const getSponsorRequests = asyncHandler(async (req, res) => {
   const { eventId, status } = req.query;
 
+  console.log("getSponsorRequests called with:", { eventId, status, userRole: req.user?.role });
+
   const query = {};
   if (eventId) query.eventId = eventId;
   if (status) query.status = status;
 
   const requests = await SponsorRequest.find(query).sort({ sentAt: -1 });
+  console.log("Found requests:", requests.length);
 
   const uniqueRequests = [];
   const seen = new Set();
@@ -304,6 +313,7 @@ export const getSponsorRequests = asyncHandler(async (req, res) => {
     uniqueRequests.push(request);
   }
 
+  console.log("Returning unique requests:", uniqueRequests.length);
   res.json(uniqueRequests);
 });
 
