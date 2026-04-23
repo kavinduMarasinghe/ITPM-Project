@@ -45,7 +45,7 @@ const InputWrapper = ({ label, name, type = "text", placeholder, maxLength, read
         />
       )}
       
-      {error && isTouched && <span className="text-xs font-bold text-red-500 mt-1.5 ml-1">{error}</span>}
+      {error && isTouched && <span className="text-sm font-bold text-red-500 mt-1.5 ml-1">{error}</span>}
     </div>
   );
 };
@@ -86,15 +86,25 @@ const BookingRequestForm = () => {
     let error = null;
     const trimValue = (value || '').toString().trim();
 
+    if (name === "vendorName") {
+      if (!trimValue) error = "Vendor name is required.";
+      else if (!/^[A-Za-z\s]{3,50}$/.test(trimValue)) error = "Name must be 3-50 characters, containing only letters and spaces.";
+    }
+
     if (name === "contactNumber") {
       if (!trimValue) error = "Contact number is required.";
-      else if (!/^\d{10}$/.test(trimValue)) error = "Phone number must be exactly 10 digits (e.g. 0712345678).";
+      else if (!/^0[0-9]{9}$/.test(trimValue)) error = "Phone number must be exactly 10 digits starting with 0.";
     }
 
     if (name === "businessName") {
       if (!trimValue) error = "Business name is required.";
       else if (!/^[A-Za-z\s0-9]+$/.test(trimValue)) error = "Business name can only contain letters, numbers, and spaces.";
       else if (trimValue.length < 5 || trimValue.length > 35) error = "Business name must be between 5 and 35 characters.";
+    }
+
+    if (name === "itemsToSell") {
+      if (!trimValue) error = "Product manifest is required.";
+      else if (trimValue.length < 10 || trimValue.length > 80) error = "Description must be between 10 and 80 characters.";
     }
 
     return error;
@@ -172,9 +182,9 @@ const BookingRequestForm = () => {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <span className="h-1.5 w-12 bg-accent rounded-full"></span>
-              <p className="text-[0.7rem] font-black uppercase tracking-[0.4em] text-accent">Merchant Acquisition</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.4em] text-accent">Merchant Acquisition</p>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-primary leading-none">
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-tighter text-primary leading-none">
               Apply for <span className="text-accent">Space.</span>
             </h1>
             <p className="mt-4 text-lg text-slate-500 font-medium max-w-xl">
@@ -201,14 +211,14 @@ const BookingRequestForm = () => {
               <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
               
               <div className="relative z-10">
-                <p className="text-[0.65rem] font-black uppercase tracking-widest text-accent mb-6">Target Node Summary</p>
+                <p className="text-sm font-semibold uppercase tracking-widest text-accent mb-6">Target Node Summary</p>
                 
                 <div className="flex justify-between items-end mb-10">
                   <div>
-                    <h2 className="text-7xl font-black tracking-tighter text-white drop-shadow-2xl">{stall.stallNumber}</h2>
+                    <h2 className="text-7xl font-semibold tracking-tighter text-white drop-shadow-2xl">{stall.stallNumber}</h2>
                     <p className="text-xl font-bold text-primary-foreground/80 mt-2">{stall.stallName}</p>
                   </div>
-                  <div className="px-4 py-2 bg-accent rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-accent/30">
+                  <div className="px-4 py-2 bg-accent rounded-2xl text-sm font-semibold uppercase tracking-widest shadow-lg shadow-accent/30">
                     {stall.stallType}
                   </div>
                 </div>
@@ -224,7 +234,7 @@ const BookingRequestForm = () => {
                   </div>
                   <div className="flex justify-between items-center pt-4">
                     <span className="text-primary-foreground/60 font-medium text-sm">Deployment Rate</span>
-                    <span className="text-2xl font-black text-white tracking-tight">LKR {stall.price.toLocaleString()}</span>
+                    <span className="text-2xl font-semibold text-white tracking-tight">LKR {stall.price.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -236,9 +246,9 @@ const BookingRequestForm = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                </div>
-               <h4 className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-6 relative z-10">Application Policy</h4>
+               <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-6 relative z-10">Application Policy</h4>
                <p className="text-sm text-slate-600 font-medium leading-relaxed relative z-10">
-                 Submission establishes a <span className="text-slate-950 font-black">Temporal Hold (72h)</span> on the node. Final clearance requires administrative review and financial verification.
+                 Submission establishes a <span className="text-slate-950 font-semibold">Temporal Hold (72h)</span> on the node. Final clearance requires administrative review and financial verification.
                </p>
             </div>
           </div>
@@ -259,8 +269,8 @@ const BookingRequestForm = () => {
                              </svg>
                           </div>
                           <div>
-                             <h3 className="text-xl font-black text-slate-900 tracking-tight">Merchant Identity</h3>
-                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Verification Details</p>
+                             <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Merchant Identity</h3>
+                             <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Verification Details</p>
                           </div>
                        </div>
 
@@ -301,8 +311,8 @@ const BookingRequestForm = () => {
                              </svg>
                           </div>
                           <div>
-                             <h3 className="text-xl font-black text-primary tracking-tight">Market Strategy</h3>
-                             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Inventory & Manifest</p>
+                             <h3 className="text-xl font-semibold text-primary tracking-tight">Market Strategy</h3>
+                             <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">Inventory & Manifest</p>
                           </div>
                        </div>
 
@@ -328,13 +338,13 @@ const BookingRequestForm = () => {
                        <button 
                          type="button" 
                          onClick={() => navigate('/vendor/dashboard')}
-                         className="px-10 py-5 rounded-3xl font-black text-[0.7rem] uppercase tracking-widest text-slate-400 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-all active:scale-95"
+                         className="px-10 py-5 rounded-3xl font-semibold text-sm uppercase tracking-widest text-slate-400 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-all active:scale-95"
                        >
                          Abort Change
                        </button>
                        <button 
                          type="submit" 
-                         className="px-14 py-5 rounded-3xl font-black text-[0.7rem] uppercase tracking-widest text-white bg-slate-950 hover:bg-indigo-600 shadow-[0_20px_40px_rgba(79,70,229,0.3)] transition-all active:scale-95 flex items-center gap-3"
+                         className="px-14 py-5 rounded-3xl font-semibold text-sm uppercase tracking-widest text-white bg-slate-950 hover:bg-indigo-600 shadow-[0_20px_40px_rgba(79,70,229,0.3)] transition-all active:scale-95 flex items-center gap-3"
                        >
                          Transmit Application
                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

@@ -39,10 +39,10 @@ const EventList = () => {
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/20 text-xs font-bold uppercase tracking-widest mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/20 text-sm font-bold uppercase tracking-widest mb-3">
             Events Gallery
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight">Campus Event Lineup</h1>
+          <h1 className="text-3xl md:text-4xl font-semibold text-primary tracking-tight">Campus Event Lineup</h1>
           <p className="text-muted-foreground mt-1 font-medium text-sm">
             Browse all university events managed through EventAura and prepare your next stall presence.
           </p>
@@ -63,13 +63,13 @@ const EventList = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
               <div className="absolute top-4 left-4">
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/90 text-primary text-xs font-black uppercase tracking-widest shadow-sm">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/90 text-primary text-sm font-semibold uppercase tracking-widest shadow-sm">
                   {evt.date}
                 </span>
               </div>
               <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-xl font-black text-white leading-tight drop-shadow-sm">{evt.name}</h3>
-                <p className="text-xs text-slate-100/80 mt-1 font-medium flex items-center gap-1">
+                <h3 className="text-xl font-semibold text-white leading-tight drop-shadow-sm">{evt.name}</h3>
+                <p className="text-sm text-slate-100/80 mt-1 font-medium flex items-center gap-1">
                   📍 {evt.location}
                 </p>
               </div>
@@ -81,7 +81,7 @@ const EventList = () => {
               </p>
 
               <div className="mt-auto pt-4 border-t border-border flex items-center justify-between gap-3">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                <div className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
                   Organizer{' '}
                   <span className="text-primary font-bold">
                     {evt.organizer}
@@ -89,7 +89,7 @@ const EventList = () => {
                 </div>
                 <Link
                   to={`/events/${evt.id}`}
-                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold tracking-wide shadow-md shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold tracking-wide shadow-md shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
                 >
                   View Details
                 </Link>
