@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,13 +18,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.username.trim() || !form.password.trim()) {
+      setError('Username and password are required.');
+      return;
+    }
+    
     setLoading(true);
     try {
       const user = await login(form.username, form.password);
+      const from = location.state?.from?.pathname || '';
       if (user.role === 'admin') {
-        navigate('/admin/stalls');
+        navigate(from.startsWith('/admin') ? from : '/admin/stalls', { replace: true });
       } else {
-        navigate('/vendor/dashboard');
+        navigate(from.startsWith('/vendor') ? from : '/vendor/dashboard', { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Invalid credentials. Please try again.');
@@ -44,9 +51,9 @@ const Login = () => {
         <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/60 border border-slate-100">
           {/* Header badge */}
           <div className="mb-2">
-            <span className="text-xs font-extrabold uppercase tracking-[0.2em] text-orange-500">Access Portal</span>
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">Access Portal</span>
           </div>
-          <h2 className="text-3xl font-black text-slate-800 mb-6 tracking-tight">Sign In</h2>
+          <h2 className="text-3xl font-semibold text-slate-800 mb-6 tracking-tight">Sign In</h2>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm font-semibold mb-5 flex items-start gap-3">
@@ -54,12 +61,6 @@ const Login = () => {
               {error}
             </div>
           )}
-
-          {/* Vendor Login label */}
-          <div className="mb-5">
-            <h3 className="text-lg font-bold text-slate-800">Vendor Login</h3>
-            <p className="text-slate-400 text-sm font-medium mt-0.5">Use your vendor username or email to manage stall bookings and vendor requests.</p>
-          </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
@@ -116,7 +117,7 @@ const Login = () => {
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                   Authenticating...
                 </span>
-              ) : 'Continue to Vendor Portal →'}
+              ) : 'Sign In'}
             </button>
           </form>
 

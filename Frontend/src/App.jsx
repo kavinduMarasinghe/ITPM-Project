@@ -20,11 +20,15 @@ import VendorDashboard from './pages/vendor/VendorDashboard'
 import VendorStalls from './pages/vendor/VendorStalls'
 import MyBookings from './pages/vendor/MyBookings'
 import BookingRequestForm from './pages/vendor/BookingRequestForm'
-import PaymentForm from './pages/vendor/PaymentForm'
 import EventList from './pages/vendor/EventList'
 import EventDetails from './pages/vendor/EventDetails'
 import BookingPayment from './pages/vendor/BookingPayment'
+import PaymentCheckout from './pages/vendor/PaymentCheckout'
 import ProfileSettings from './pages/shared/ProfileSettings'
+
+import VendorBarcode from "./pages/vendor/VendorBarcode";
+import ScanAttendance from "./pages/shared/ScanAttendance";
+import AttendanceLogs from "./pages/admin/AttendanceLogs";
 import './App.css'
 
 function App() {
@@ -57,8 +61,11 @@ function App() {
             <Route path='add-stall' element={<AddStall />} />
             <Route path='edit-stall/:id' element={<EditStall />} />
             <Route path='bookings' element={<BookingRequests />} />
+            <Route path='attendance/scan' element={<ScanAttendance />} />
+            <Route path='attendance/scan/:token' element={<ScanAttendance />} />
+            <Route path='attendance/logs' element={<AttendanceLogs />} />
           </Route>
-          
+
           <Route path='/vendor' element={
             <ProtectedRoute allowedRoles={['vendor']}>
               <VendorLayout />
@@ -72,10 +79,11 @@ function App() {
             <Route path='bookings' element={<MyBookings />} />
             <Route path='my-bookings' element={<MyBookings />} />
             <Route path='request' element={<BookingRequestForm />} />
-            <Route path='payment' element={<PaymentForm />} />
             <Route path='events' element={<EventList />} />
             <Route path='event/:id' element={<EventDetails />} />
             <Route path='booking-payment' element={<BookingPayment />} />
+            <Route path='checkout/:bookingId' element={<PaymentCheckout />} />
+            <Route path='qr/:bookingId' element={<VendorBarcode />} />
           </Route>
         </Routes>
       </Router>

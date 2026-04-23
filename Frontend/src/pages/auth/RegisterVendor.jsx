@@ -35,22 +35,28 @@ const RegisterVendor = () => {
         return;
       }
 
-      const nameRegex = /^[A-Za-z\s]+$/;
-      if (!nameRegex.test(form.name)) {
-        setError('Name cannot contain numbers or special characters.');
+      const nameRegex = /^[A-Za-z\s]{3,50}$/;
+      if (!nameRegex.test(form.name.trim())) {
+        setError('Name must be 3-50 characters, containing only letters and spaces.');
         return;
       }
 
-      const emailRegex = /^[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
       if (!emailRegex.test(form.email)) {
-        setError('Email can only contain letters, numbers, @ and . symbols.');
+        setError('Please provide a valid email address.');
+        return;
+      }
+
+      const usernameRegex = /^[a-zA-Z0-9_]{4,20}$/;
+      if (!usernameRegex.test(form.username)) {
+        setError('Username must be 4-20 characters, containing only letters, numbers, or underscores.');
         return;
       }
 
       if (form.contactNumber) {
-        const phoneRegex = /^[0-9]+$/;
+        const phoneRegex = /^0[0-9]{9}$/;
         if (!phoneRegex.test(form.contactNumber)) {
-          setError('Contact number can only contain numbers (0-9).');
+          setError('Contact number must be exactly 10 digits starting with 0.');
           return;
         }
       }
@@ -65,8 +71,9 @@ const RegisterVendor = () => {
       setError('Passwords do not match.');
       return;
     }
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    if (!passwordRegex.test(form.password)) {
+      setError('Password must be at least 8 characters long and contain at least one letter, one number, and one special character (@$!%*#?&).');
       return;
     }
     setLoading(true);
@@ -92,9 +99,9 @@ const RegisterVendor = () => {
         <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/60 border border-slate-100">
           {/* Header badge */}
           <div className="mb-2">
-            <span className="text-xs font-extrabold uppercase tracking-[0.2em] text-orange-500">Vendor Portal</span>
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">Vendor Portal</span>
           </div>
-          <h2 className="text-3xl font-black text-slate-800 mb-6 tracking-tight">Sign Up</h2>
+          <h2 className="text-3xl font-semibold text-slate-800 mb-6 tracking-tight">Sign Up</h2>
 
           {/* Step Indicator */}
           <div className="flex items-center gap-3 mb-6">

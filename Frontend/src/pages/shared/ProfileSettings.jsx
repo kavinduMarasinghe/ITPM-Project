@@ -26,10 +26,10 @@ const ProfileSettings = () => {
   return (
     <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
       <div className="mb-10 text-center md:text-left">
-        <div className="inline-block px-3 py-1 bg-primary/10 border border-primary/20 text-primary font-bold text-[0.65rem] uppercase tracking-widest rounded-full mb-3 shadow-sm">
+        <div className="inline-block px-3 py-1 bg-primary/10 border border-primary/20 text-primary font-bold text-sm uppercase tracking-widest rounded-full mb-3 shadow-sm">
           Account Identification
         </div>
-        <h1 className="text-4xl font-black text-primary tracking-tight">Platform Settings</h1>
+        <h1 className="text-4xl font-semibold text-primary tracking-tight">Platform Settings</h1>
         <p className="text-muted-foreground mt-2 font-medium">Manage your EventAura persona and security configurations.</p>
       </div>
 
@@ -37,11 +37,11 @@ const ProfileSettings = () => {
         
         {/* Profile Card Side Panel */}
         <div className="w-full md:w-1/3 bg-slate-50 border-r border-slate-100 p-8 flex flex-col items-center">
-           <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-tr from-accent to-orange-400 text-white flex items-center justify-center font-black text-5xl mb-6 mt-4">
+           <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-tr from-accent to-orange-400 text-white flex items-center justify-center font-semibold text-5xl mb-6 mt-4">
               {initials}
            </div>
-           <h2 className="text-2xl font-black text-slate-800">{displayName}</h2>
-           <div className="px-3 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg mt-2 uppercase tracking-widest">
+           <h2 className="text-2xl font-semibold text-slate-800">{displayName}</h2>
+           <div className="px-3 py-1 bg-slate-200 text-slate-700 text-sm font-bold rounded-lg mt-2 uppercase tracking-widest">
              {user?.role === 'admin' ? 'Administrator' : 'Vendor Account'}
            </div>
 
@@ -51,7 +51,7 @@ const ProfileSettings = () => {
 
            <div className="mt-8 w-full border-t border-slate-200 pt-8">
              <div className="flex justify-between items-center mb-4 text-sm">
-               <span className="font-bold text-slate-400 uppercase tracking-wider text-xs">Security Status</span>
+               <span className="font-bold text-slate-400 uppercase tracking-wider text-sm">Security Status</span>
                <span className="font-bold text-green-500 flex items-center gap-1">
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -75,7 +75,7 @@ const ProfileSettings = () => {
                 <div className="flex flex-col">
                   <label className="text-sm font-bold text-slate-700 mb-1.5">Full Name</label>
                   <input type="text" defaultValue={user?.name || ''} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none transition-all focus:border-primary focus:ring-primary shadow-sm font-medium text-slate-700 bg-slate-50 cursor-not-allowed" readOnly />
-                  <span className="text-xs text-slate-400 mt-1 font-medium">To change your primary registered identity, contact IT.</span>
+                  <span className="text-sm text-slate-400 mt-1 font-medium">To change your primary registered identity, contact IT.</span>
                 </div>
                 
                 <div className="flex flex-col">
