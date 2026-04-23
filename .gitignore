@@ -2,6 +2,7 @@
 node_modules/
 Backend/node_modules/
 Frontend/node_modules/
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -14,6 +15,23 @@ Frontend/.env
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*
+!.env.example
+Backend/.env.*
+Frontend/.env.*
+!Backend/.env.example
+!Frontend/.env.example
+
+# Secrets / keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+credentials.json
+service-account*.json
+id_rsa
+id_rsa.pub
 
 # Logs
 logs
@@ -107,6 +125,12 @@ appsettings.json
 # Build results
 [Dd]ebug/
 [Rr]elease/
+dist/
+build/
+Frontend/dist/
+Backend/dist/
+.vite/
+Frontend/.vite/
 x64/
 x86/
 [Ww][Ii][Nn]32/
