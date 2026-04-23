@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
+require("dotenv").config({ override: true });
 
 const stallRoutes = require("./routes/stallRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
@@ -34,7 +34,7 @@ app.use("/api/stall-bookings", bookingRoutes);
 app.use("/api/attendance", attendanceRoutes);
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("✅ Connected to MongoDB");
 
