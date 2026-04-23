@@ -237,43 +237,43 @@ const StallLayoutMap = ({ role = "admin" }) => {
   };
 
   return (
-    <div className="w-full px-6 py-6 pb-20">
+    <div className="w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 pb-12 sm:pb-20">
       <div className="mx-auto max-w-[1440px]">
-        <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        <div className="mb-6 sm:mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
-            <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-lg text-[0.65rem] font-black uppercase tracking-widest mb-3 border border-accent/20">
+            <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-widest mb-2 sm:mb-3 border border-accent/20">
               Interactive Blueprint
             </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-primary leading-none">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tighter text-primary leading-none">
               Event <span className="text-accent">Flow</span> Map
             </h1>
-            <p className="mt-4 text-lg text-muted-foreground font-medium max-w-2xl">
+            <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg text-muted-foreground font-medium max-w-2xl">
               Visualize the global stall ecosystem. Select any node to calculate route geometry and operational constraints.
             </p>
           </div>
           
-          <div className="flex gap-3 flex-wrap">
-             <div className="bg-white border-2 border-slate-100 px-5 py-3 rounded-full shadow-sm flex items-center gap-2">
+          <div className="flex gap-2 sm:gap-3 flex-wrap">
+             <div className="bg-white border-2 border-slate-100 px-3 sm:px-5 py-2 sm:py-3 rounded-full shadow-sm flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
-                <span className="text-sm font-bold text-slate-700">Available ({zoneCounts.available})</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-700">Available ({zoneCounts.available})</span>
              </div>
-             <div className="bg-white border-2 border-slate-100 px-5 py-3 rounded-full shadow-sm flex items-center gap-2">
+             <div className="bg-white border-2 border-slate-100 px-3 sm:px-5 py-2 sm:py-3 rounded-full shadow-sm flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"></span>
-                <span className="text-sm font-bold text-slate-700">Pending ({zoneCounts.reserved})</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-700">Pending ({zoneCounts.reserved})</span>
              </div>
-             <div className="bg-white border-2 border-slate-100 px-5 py-3 rounded-full shadow-sm flex items-center gap-2">
+             <div className="bg-white border-2 border-slate-100 px-3 sm:px-5 py-2 sm:py-3 rounded-full shadow-sm flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-slate-500 shadow-[0_0_8px_rgba(100,116,139,0.4)]"></span>
-                <span className="text-sm font-bold text-slate-700">Booked ({zoneCounts.booked})</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-700">Booked ({zoneCounts.booked})</span>
              </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 relative">
           <div className="xl:col-span-8 group">
-            <div className="relative overflow-hidden rounded-[40px] border-4 border-white bg-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] ring-1 ring-slate-100 transition-all hover:shadow-[0_48px_80px_-20px_rgba(0,0,0,0.15)]">
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-[32px] border-2 sm:border-4 border-white bg-white shadow-[0_24px_40px_-18px_rgba(0,0,0,0.15)] ring-1 ring-slate-100 transition-all hover:shadow-[0_48px_80px_-20px_rgba(0,0,0,0.15)]">
               
               {/* Simple Legend */}
-              <div className="absolute right-8 top-8 z-10 rounded-xl bg-white border border-slate-200 shadow-lg p-4">
+              <div className="absolute right-3 top-3 sm:right-8 sm:top-8 z-10 rounded-xl bg-white border border-slate-200 shadow-lg p-2.5 sm:p-4">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Map Legend</p>
                 <div className="space-y-3">
                   {[
@@ -293,7 +293,7 @@ const StallLayoutMap = ({ role = "admin" }) => {
                 width="100%"
                 height="100%"
                 viewBox="0 0 800 600"
-                className="w-full min-h-[680px]"
+                className="w-full min-h-[420px] sm:min-h-[560px] md:min-h-[680px]"
               >
                 <defs>
 
@@ -322,9 +322,9 @@ const StallLayoutMap = ({ role = "admin" }) => {
                 <rect x="510" y="270" width="220" height="210" rx="28" fill="white" stroke="#e2e8f0" strokeWidth="2" />
                 <rect x="320" y="280" width="160" height="190" rx="28" fill="#f1f5f9" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="10 5" />
 
-                <text x="180" y="295" textAnchor="middle" fill="#64748b" className="text-[11px] font-black tracking-widest uppercase">West Wing</text>
-                <text x="620" y="295" textAnchor="middle" fill="#64748b" className="text-[11px] font-black tracking-widest uppercase">East Wing</text>
-                <text x="400" y="305" textAnchor="middle" fill="#64748b" className="text-[11px] font-black tracking-widest uppercase">Central Hub</text>
+                <text x="180" y="295" textAnchor="middle" fill="#64748b" className="text-[11px] font-semibold tracking-widest uppercase">West Wing</text>
+                <text x="620" y="295" textAnchor="middle" fill="#64748b" className="text-[11px] font-semibold tracking-widest uppercase">East Wing</text>
+                <text x="400" y="305" textAnchor="middle" fill="#64748b" className="text-[11px] font-semibold tracking-widest uppercase">Central Hub</text>
 
                 {/* PATHS */}
                 <path d="M 400 600 L 400 480 M 400 480 L 120 480 L 120 400 M 400 480 L 680 480 L 680 400 M 400 480 L 400 230" fill="none" stroke="#e2e8f0" strokeWidth="12" strokeLinecap="round" />
@@ -333,7 +333,7 @@ const StallLayoutMap = ({ role = "admin" }) => {
                 <g transform="translate(400, 560)">
                    <rect x="-60" y="-30" width="120" height="60" rx="15" fill="#1e293b" />
                    <rect x="-50" y="-20" width="100" height="40" rx="10" fill="none" stroke="#334155" strokeWidth="2" strokeDasharray="4 4" />
-                   <text y="5" textAnchor="middle" fill="white" className="text-[12px] font-black tracking-widest">GATE A</text>
+                   <text y="5" textAnchor="middle" fill="white" className="text-[12px] font-semibold tracking-widest">GATE A</text>
                    <circle cy="15" r="3" fill="#fbbf24" className="animate-pulse" />
                 </g>
 
@@ -377,7 +377,7 @@ const StallLayoutMap = ({ role = "admin" }) => {
                 {loading && (
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center flex-col">
                    <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                   <p className="font-black text-slate-900 uppercase tracking-widest text-sm">Synchronizing Ledger...</p>
+                   <p className="font-semibold text-slate-900 uppercase tracking-widest text-sm">Synchronizing Ledger...</p>
                 </div>
               )}
 
@@ -436,78 +436,77 @@ const StallLayoutMap = ({ role = "admin" }) => {
 
           {/* Side Control Panel */}
           <div className="xl:col-span-4 h-full">
-            <div className="sticky top-8 space-y-6">
-              <div className="rounded-[40px] bg-slate-950 text-white shadow-2xl overflow-hidden border border-slate-800">
-                <div className="p-10 border-b border-white/5 bg-gradient-to-br from-slate-900 to-slate-950">
-                  <div className="flex items-center gap-3 mb-8">
-                     <span className="h-2 w-12 bg-sky-500 rounded-full"></span>
-                     <p className="text-[0.65rem] uppercase tracking-[0.3em] text-sky-400 font-black">Module: Telemetry</p>
+            <div className="xl:sticky xl:top-8 space-y-4 sm:space-y-6">
+              <div className="rounded-[28px] bg-slate-900 text-white shadow-xl overflow-hidden border border-slate-800">
+                <div className="p-6 border-b border-white/10 bg-slate-900">
+                  <div className="flex items-center gap-3 mb-5">
+                     <span className="h-1.5 w-10 bg-sky-500 rounded-full"></span>
+                     <p className="text-xs uppercase tracking-[0.24em] text-sky-300 font-semibold">Module: Telemetry</p>
                   </div>
 
                   {!selectedStall ? (
-                    <div className="py-10 text-center">
-                      <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-[32px] bg-white/5 border border-white/10 text-4xl shadow-inner group-hover:scale-110 transition-transform">
+                    <div className="py-8 text-center">
+                      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-3xl shadow-inner group-hover:scale-110 transition-transform">
                         🔭
                       </div>
-                      <h3 className="text-3xl font-black mb-4 tracking-tighter">Waiting for Input</h3>
+                      <h3 className="text-2xl font-semibold mb-3 tracking-tight">Waiting for Input</h3>
                       <p className="text-slate-400 text-sm leading-relaxed max-w-[240px] mx-auto font-medium">
                         Select a coordinate on the interactive grid to initiate data retrieval and route synthesis.
                       </p>
                     </div>
                   ) : (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <div className="flex items-start justify-between mb-10">
+                      <div className="flex items-start justify-between gap-2 mb-6">
                         <div className="flex-1">
-                          <h2 className="text-7xl font-black tracking-tighter leading-none mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                          <h2 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight leading-none mb-3 text-white">
                             {selectedStall.stallNumber}
                           </h2>
-                          <p className="text-2xl font-bold text-sky-400 leading-tight">
+                          <p className="text-lg sm:text-xl font-semibold text-sky-300 leading-tight break-words">
                             {selectedStall.stallName}
                           </p>
-                          <div className="flex items-center gap-2 mt-3 p-2 bg-white/5 rounded-xl inline-flex">
-                             <span className="text-lg">📍</span>
-                             <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedStall.locationZone}</span>
+                          <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-white/5 rounded-xl inline-flex border border-white/10">
+                             <span className="text-slate-300 text-sm font-semibold uppercase tracking-wider">{selectedStall.locationZone}</span>
                           </div>
                         </div>
 
-                        <span className={`px-4 py-2 rounded-xl text-[0.65rem] font-black uppercase tracking-widest shadow-lg ${getStatusBadge(selectedStall.status)}`}>
+                        <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider ${getStatusBadge(selectedStall.status)}`}>
                           {selectedStall.status}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-10">
-                        <div className="rounded-3xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-colors">
-                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-black mb-2">Spatial Class</p>
-                          <p className="text-lg font-bold text-white">{selectedStall.size}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-7">
+                        <div className="rounded-2xl bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition-colors">
+                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-semibold mb-2">Spatial Class</p>
+                          <p className="text-base font-semibold text-white">{selectedStall.size}</p>
                         </div>
 
-                        <div className="rounded-3xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-colors">
-                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-black mb-2">Financial Tier</p>
-                          <p className="text-lg font-bold text-sky-400">
+                        <div className="rounded-2xl bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition-colors">
+                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-semibold mb-2">Financial Tier</p>
+                          <p className="text-base font-semibold text-sky-300">
                              {Number(selectedStall.price || 0).toLocaleString()}
                           </p>
                         </div>
 
-                        <div className="rounded-3xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-colors">
-                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-black mb-2">Distance</p>
-                          <p className="text-lg font-bold text-white">
+                        <div className="rounded-2xl bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition-colors">
+                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-semibold mb-2">Distance</p>
+                          <p className="text-base font-semibold text-white">
                             {estimatedRoute ? `${estimatedRoute.meters}m` : "-"}
                           </p>
                         </div>
 
-                        <div className="rounded-3xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-colors">
-                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-black mb-2">Est. Travel</p>
-                          <p className="text-lg font-bold text-white">
+                        <div className="rounded-2xl bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition-colors">
+                          <p className="text-[0.6rem] uppercase tracking-widest text-slate-500 font-semibold mb-2">Est. Travel</p>
+                          <p className="text-base font-semibold text-white">
                             {estimatedRoute ? `${estimatedRoute.seconds}s` : "-"}
                           </p>
                         </div>
                       </div>
 
-                      <div className="mb-10 group/desc">
-                        <p className="text-[0.65rem] uppercase tracking-[0.2em] text-slate-500 font-black mb-4 flex items-center gap-2">
+                      <div className="mb-7 group/desc">
+                        <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold mb-3 flex items-center gap-2">
                            Manifest Details
                         </p>
-                        <div className="rounded-3xl bg-slate-900 border border-slate-800 p-6 group-hover/desc:border-sky-500/30 transition-all">
+                        <div className="rounded-2xl bg-slate-800/70 border border-slate-700 p-4 group-hover/desc:border-sky-500/20 transition-all">
                           <p className="text-sm text-slate-300 leading-relaxed font-medium">
                             {selectedStall.description?.trim()
                               ? selectedStall.description
@@ -518,7 +517,7 @@ const StallLayoutMap = ({ role = "admin" }) => {
 
                       <button
                         onClick={handleAction}
-                        className={`w-full rounded-2xl py-5 text-sm font-black uppercase tracking-[0.2em] transition-all transform hover:-translate-y-1 active:scale-95 ${
+                        className={`w-full rounded-xl py-4 text-sm font-semibold uppercase tracking-[0.1em] transition-all transform hover:-translate-y-0.5 active:scale-95 ${
                           role === "admin" 
                           ? "bg-primary text-primary-foreground hover:bg-accent shadow-[0_20px_40px_-10px_rgba(15,23,42,0.1)]"
                           : selectedStall.status === "Available"
@@ -541,24 +540,24 @@ const StallLayoutMap = ({ role = "admin" }) => {
                   )}
                 </div>
 
-                <div className="p-8 bg-black/40">
-                   <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></span>
+                <div className="p-5 bg-black/30">
+                   <div className="flex items-center gap-3 text-xs font-semibold text-slate-500">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                       SYSTEMS NOMINAL - VER 2.0.4
                    </div>
                 </div>
               </div>
 
               {/* Quick Info Card */}
-              <div className="rounded-3xl bg-white border border-slate-100 p-8 shadow-sm">
-                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Tactical Intelligence</h4>
+              <div className="rounded-2xl bg-white border border-slate-100 p-6 shadow-sm">
+                 <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-4">Tactical Intelligence</h4>
                  <ul className="space-y-4">
                     {[
                       { icon: '🗺️', text: 'Select icons to view route geometry from Gate A.' },
                       { icon: '🔒', text: 'Red markers indicate node occupancy / reservation.' },
                       { icon: '✨', text: 'Gradients highlight your active focal selection.' }
                     ].map((item, i) => (
-                      <li key={i} className="flex gap-4 text-xs font-bold text-slate-600 leading-relaxed">
+                      <li key={i} className="flex gap-4 text-sm font-bold text-slate-600 leading-relaxed">
                         <span>{item.icon}</span>
                         {item.text}
                       </li>

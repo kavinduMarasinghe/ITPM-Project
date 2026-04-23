@@ -45,7 +45,7 @@ const StallDetails = () => {
           <div className="border-b border-border pb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <div className="flex items-center gap-4 mb-3 flex-wrap">
-                <h1 className="text-4xl md:text-5xl font-black text-primary leading-tight tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-semibold text-primary leading-tight tracking-tight">
                   {stall.stallName}
                 </h1>
                 {stall.status === 'Available' && <span className="bg-success/20 text-success border border-success/30 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider">Available</span>}
@@ -75,29 +75,29 @@ const StallDetails = () => {
             <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-sm border border-border relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[100px] -z-10 transition-transform duration-700 group-hover:scale-110"></div>
               
-              <h3 className="text-xl text-primary font-extrabold mb-8 flex items-center gap-3">
+              <h3 className="text-xl text-primary font-bold mb-8 flex items-center gap-3">
                 <span className="block w-1.5 h-6 bg-accent rounded-full"></span>
                 Stall Information
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
                 <div className="space-y-1">
-                  <div className="text-muted-foreground text-xs font-bold uppercase tracking-widest">Type</div>
+                  <div className="text-muted-foreground text-sm font-bold uppercase tracking-widest">Type</div>
                   <div className="font-bold text-2xl text-slate-900">{stall.stallType}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-muted-foreground text-xs font-bold uppercase tracking-widest">Location Zone</div>
+                  <div className="text-muted-foreground text-sm font-bold uppercase tracking-widest">Location Zone</div>
                   <div className="font-bold text-2xl text-slate-900">{stall.locationZone}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-muted-foreground text-xs font-bold uppercase tracking-widest">Size Specifications</div>
+                  <div className="text-muted-foreground text-sm font-bold uppercase tracking-widest">Size Specifications</div>
                   <div className="font-bold text-2xl text-slate-900">{stall.size}</div>
                 </div>
                 
                 <div className="bg-gradient-to-br from-primary to-slate-800 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden">
                   <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-white/70 mb-2 relative z-10">Booking Price</div>
-                  <div className="font-black text-3xl md:text-4xl relative z-10">LKR {stall.price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
+                  <div className="text-sm font-bold uppercase tracking-widest text-white/70 mb-2 relative z-10">Booking Price</div>
+                  <div className="font-semibold text-3xl md:text-4xl relative z-10">LKR {stall.price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
                 </div>
               </div>
               
@@ -115,7 +115,7 @@ const StallDetails = () => {
             
             {/* QR Code Card */}
             <div className="bg-gradient-to-b from-white to-slate-50 p-8 rounded-[2rem] border border-border shadow-sm flex flex-col items-center justify-center text-center">
-              <h3 className="text-lg text-primary font-extrabold mb-6">Stall Share Code</h3>
+              <h3 className="text-lg text-primary font-bold mb-6">Stall Share Code</h3>
               
               <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 mb-6 transition-transform hover:scale-105 duration-300">
                 <QRCodeSVG 
@@ -145,7 +145,7 @@ const StallDetails = () => {
             
             {/* Status Context Card */}
             <div className={`p-6 rounded-[2rem] border ${stall.status === 'Available' ? 'bg-success/10 border-success/30' : 'bg-slate-100 border-slate-200'}`}>
-              <h4 className={`text-lg font-extrabold mb-3 flex items-center gap-2 ${stall.status === 'Available' ? 'text-green-800' : 'text-slate-800'}`}>
+              <h4 className={`text-lg font-bold mb-3 flex items-center gap-2 ${stall.status === 'Available' ? 'text-green-800' : 'text-slate-800'}`}>
                  State: {stall.status}
               </h4>
               <p className={`text-sm font-medium leading-relaxed ${stall.status === 'Available' ? 'text-green-900' : 'text-slate-600'}`}>
