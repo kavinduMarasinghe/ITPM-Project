@@ -35,6 +35,7 @@ const stallBookingSchema = new mongoose.Schema(
     },
 
     advancePaid: { type: Boolean, default: false },
+    advanceAmountPaid: { type: Number, default: 0 },
     paymentDeadline: { type: Date },
 
     // QR / Attendance

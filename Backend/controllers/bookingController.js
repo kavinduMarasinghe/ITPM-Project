@@ -1,5 +1,9 @@
+const crypto = require("crypto");
 const StallBooking = require("../models/stallBookingModel");
 const Stall = require("../models/stallModel");
+
+const ADVANCE_MIN = 5000;
+const ADVANCE_MAX = 10000;
 
 // Vendor creates a booking request (FCFS Atomic Action)
 const createBooking = async (req, res) => {
@@ -62,17 +66,27 @@ const getMyBookings = async (req, res) => {
   }
 };
 
-// Admin: approve booking (Locks the stall)
+// Admin: approve booking (Locks the stall) — legacy step if booking stayed "Confirmed" after older flows
 const approveBooking = async (req, res) => {
   try {
     const booking = await StallBooking.findById(req.params.id);
     if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
 
+    if (booking.status === "Approved" && booking.advancePaid) {
+      return res.status(200).json({ success: true, message: "Booking is already locked.", data: booking });
+    }
+
+    if (booking.status !== "Confirmed") {
+      return res.status(400).json({
+        success: false,
+        message: "Admin lock applies only to advance-paid bookings still awaiting final lock (legacy status).",
+      });
+    }
+
     booking.status = "Approved";
     await booking.save();
 
-    // Update stall status to Booked (LOCKED)
-    await Stall.findByIdAndUpdate(booking.stallId, { status: "Booked" });
+    await Stall.findByIdAndUpdate(booking.stallId, { status: "Booked", reservedUntil: null });
 
     res.status(200).json({ success: true, message: "Booking locked and approved successfully.", data: booking });
   } catch (error) {
@@ -129,21 +143,42 @@ const updateBooking = async (req, res) => {
   }
 };
 
-// Vendor: confirm payment (Stops countdown)
+// Vendor: confirm advance payment — locks stall, issues unique QR token (max LKR 10,000)
 const confirmBooking = async (req, res) => {
   try {
     const booking = await StallBooking.findById(req.params.id);
     if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
 
     if (booking.status !== "PreApproved") {
-      return res.status(400).json({ success: false, message: "Request must be Accepted by Admin before payment is allowed." });
+      return res.status(400).json({ success: false, message: "Request must be accepted by admin before payment is allowed." });
     }
 
-    booking.status = "Confirmed"; // Confirmed means Paid
-    booking.advancePaid = true;
-    await booking.save();
+    const raw = req.body?.advanceAmount ?? req.body?.amount;
+    const advanceAmount = Number(raw);
+    if (!Number.isFinite(advanceAmount) || advanceAmount < ADVANCE_MIN || advanceAmount > ADVANCE_MAX) {
+      return res.status(400).json({
+        success: false,
+        message: `Advance must be between LKR ${ADVANCE_MIN.toLocaleString()} and LKR ${ADVANCE_MAX.toLocaleString()} to lock the stall.`,
+      });
+    }
 
-    res.status(200).json({ success: true, message: "Payment successful. Waiting for Admin lock.", data: booking });
+    booking.advancePaid = true;
+    booking.advanceAmountPaid = advanceAmount;
+    booking.status = "Approved";
+    if (!booking.barcodeToken) {
+      booking.barcodeToken = crypto.randomBytes(16).toString("hex");
+      booking.barcodeGeneratedAt = new Date();
+    }
+
+    await booking.save();
+    await Stall.findByIdAndUpdate(booking.stallId, { status: "Booked", reservedUntil: null });
+
+    const fresh = await StallBooking.findById(booking._id);
+    res.status(200).json({
+      success: true,
+      message: "Advance verified. Stall locked. Your unique check-in QR is ready.",
+      data: fresh,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error confirming payment", error: error.message });
   }
@@ -156,10 +191,12 @@ const acceptBooking = async (req, res) => {
     if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
 
     booking.status = "PreApproved";
-    booking.paymentDeadline = new Date(Date.now() + 5 * 24 * 60 * 60000); // 5 days from now
+    const days = Number(process.env.PAYMENT_DEADLINE_DAYS ?? 5);
+    const safeDays = Number.isFinite(days) && days > 0 ? days : 5;
+    booking.paymentDeadline = new Date(Date.now() + safeDays * 24 * 60 * 60000);
     await booking.save();
 
-    res.status(200).json({ success: true, message: "Booking accepted. Vendor now has 5 days to pay advance.", data: booking });
+    res.status(200).json({ success: true, message: `Booking accepted. Vendor now has ${safeDays} days to pay advance.`, data: booking });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error accepting booking", error: error.message });
   }
