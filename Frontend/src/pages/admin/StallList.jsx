@@ -42,13 +42,13 @@ const StallList = () => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Available': 
-        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-success/10 text-success border border-success/20">🟢 Available</span>;
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-success/10 text-success border border-success/20">🟢 Available</span>;
       case 'Booked': 
-        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">🔒 Booked</span>;
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-slate-100 text-slate-500 border border-slate-200">🔒 Booked</span>;
       case 'Reserved': 
-        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-warning/10 text-warning border border-warning/20">⏳ Pending</span>;
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-warning/10 text-warning border border-warning/20">⏳ Pending</span>;
       default: 
-        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">{status}</span>;
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-slate-100 text-slate-600 border border-slate-200">{status}</span>;
     }
   };
 
@@ -59,6 +59,7 @@ const StallList = () => {
            s.eventName.toLowerCase().startsWith(term) ||
            s.stallNumber.toLowerCase().startsWith(term);
   });
+
 
   return (
     <div className="min-h-screen bg-[#f8fafc] py-12 px-4 sm:px-6 lg:px-8">
@@ -72,9 +73,9 @@ const StallList = () => {
                   <span className="h-5 w-5 rounded-full bg-accent border-2 border-white shadow-sm animate-pulse"></span>
                   <span className="h-5 w-5 rounded-full bg-accent/30 border-2 border-white shadow-sm"></span>
                </div>
-               <p className="text-[0.7rem] font-black uppercase tracking-[0.4em] text-accent">Operations Control</p>
+               <p className="text-sm font-semibold uppercase tracking-[0.4em] text-accent">Operations Control</p>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-primary leading-none">
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-tighter text-primary leading-none">
               Stall <span className="text-accent">Registry.</span>
             </h1>
             <p className="mt-4 text-lg text-muted-foreground font-medium max-w-xl">
@@ -84,7 +85,7 @@ const StallList = () => {
           
           <Link 
             to="/admin/stalls/add" 
-            className="group flex items-center gap-4 px-10 py-5 bg-primary rounded-3xl text-primary-foreground font-black text-xs uppercase tracking-widest transition-all hover:bg-accent hover:shadow-[0_20px_40px_rgba(249,115,22,0.3)] hover:-translate-y-1 active:scale-95"
+            className="group flex items-center gap-4 px-10 py-5 bg-primary rounded-3xl text-primary-foreground font-semibold text-sm uppercase tracking-widest transition-all hover:bg-accent hover:shadow-[0_20px_40px_rgba(249,115,22,0.3)] hover:-translate-y-1 active:scale-95"
           >
             <span className="text-xl leading-none transition-transform group-hover:rotate-90">+</span>
             Register New Node
@@ -110,10 +111,10 @@ const StallList = () => {
            
            <div className="lg:col-span-4 bg-white border border-slate-100 rounded-[30px] px-8 py-4 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
               <div>
-                 <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400 mb-1">Live Feed</p>
+                 <p className="text-sm font-semibold uppercase tracking-widest text-slate-400 mb-1">Live Feed</p>
                  <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-                    <span className="text-sm font-black text-slate-900 uppercase tracking-tighter">Directory Connected</span>
+                    <span className="text-sm font-semibold text-slate-900 uppercase tracking-tighter">Directory Connected</span>
                  </div>
               </div>
               <button 
@@ -132,7 +133,7 @@ const StallList = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-50 text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-400">
+                <tr className="bg-slate-50/50 border-b border-slate-50 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
                   <th className="px-10 py-6">Operational Node</th>
                   <th className="px-10 py-6">Deployment Meta</th>
                   <th className="px-10 py-6">Valuation</th>
@@ -145,27 +146,27 @@ const StallList = () => {
                   <tr key={stall._id} className="group hover:bg-slate-50/50 transition-all">
                     <td className="px-10 py-8">
                       <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center font-black text-xl shadow-lg group-hover:bg-accent transition-colors">
+                        <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center font-semibold text-xl shadow-lg group-hover:bg-accent transition-colors">
                           {stall.stallNumber}
                         </div>
                         <div>
-                          <p className="text-lg font-black text-primary tracking-tight leading-tight">{stall.stallName}</p>
+                          <p className="text-lg font-semibold text-primary tracking-tight leading-tight">{stall.stallName}</p>
                           <div className="flex items-center gap-2 mt-1">
-                             <span className="text-[0.65rem] font-black uppercase text-accent bg-accent/10 px-2 py-0.5 rounded-md">{stall.stallType}</span>
+                             <span className="text-sm font-semibold uppercase text-accent bg-accent/10 px-2 py-0.5 rounded-md">{stall.stallType}</span>
                              <span className="text-slate-300">&bull;</span>
-                             <span className="text-[0.65rem] font-black uppercase text-muted-foreground">{stall.locationZone}</span>
+                             <span className="text-sm font-semibold uppercase text-muted-foreground">{stall.locationZone}</span>
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-10 py-8">
                        <p className="font-bold text-slate-600 text-sm tracking-tight">{stall.eventName}</p>
-                       <p className="text-[0.65rem] font-black uppercase text-slate-300 mt-1">Tier: {stall.locationCategory}</p>
+                       <p className="text-sm font-semibold uppercase text-slate-300 mt-1">Tier: {stall.locationCategory}</p>
                     </td>
                     <td className="px-10 py-8">
-                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Fixed Rate</p>
-                       <p className="text-lg font-black text-slate-900 tracking-tighter">
-                          <span className="text-xs text-slate-300 mr-1.5 font-medium uppercase tracking-normal">lkr</span> 
+                       <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-1">Fixed Rate</p>
+                       <p className="text-lg font-semibold text-slate-900 tracking-tighter">
+                          <span className="text-sm text-slate-300 mr-1.5 font-medium uppercase tracking-normal">lkr</span> 
                           {formatPrice(stall.price)}
                        </p>
                     </td>
@@ -204,7 +205,7 @@ const StallList = () => {
                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                              </svg>
                           </div>
-                          <p className="text-xl font-black text-slate-900 tracking-tight">Zero Nodes Intercepted</p>
+                          <p className="text-xl font-semibold text-slate-900 tracking-tight">Zero Nodes Intercepted</p>
                           <p className="text-sm font-medium text-slate-400 mt-2">Adjust search parameters or initialize a new node.</p>
                        </div>
                     </td>
@@ -214,7 +215,7 @@ const StallList = () => {
             </table>
           </div>
           
-          <div className="p-8 border-t border-slate-50 bg-slate-50/30 flex justify-between items-center text-[0.65rem] font-black uppercase tracking-widest text-slate-400">
+          <div className="p-8 border-t border-slate-50 bg-slate-50/30 flex justify-between items-center text-sm font-semibold uppercase tracking-widest text-slate-400">
             <span>Manifest Coverage: 100%</span>
             <span>Intercepted Count: {filteredStalls.length} Nodes</span>
           </div>

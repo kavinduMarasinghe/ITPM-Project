@@ -124,10 +124,10 @@ const InputGroup = ({
       </div>
 
       {helperText && !error && (
-        <span className="text-xs font-medium text-[#64748B] mt-1.5 ml-1">{helperText}</span>
+        <span className="text-sm font-medium text-[#64748B] mt-1.5 ml-1">{helperText}</span>
       )}
       {error && touched && (
-        <span className="text-xs font-bold text-red-500 mt-1.5 ml-1">{error}</span>
+        <span className="text-sm font-bold text-red-500 mt-1.5 ml-1">{error}</span>
       )}
     </div>
   );
@@ -297,9 +297,9 @@ const AddStall = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="h-1.5 w-12 rounded-full" style={{ background: '#F97316' }}></span>
-              <p className="text-[0.65rem] font-black uppercase tracking-[0.3em]" style={{ color: '#F97316' }}>Administrative Portal</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em]" style={{ color: '#F97316' }}>Administrative Portal</p>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none" style={{ color: '#0F172A' }}>
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-tighter leading-none" style={{ color: '#0F172A' }}>
               Deploy <span style={{ color: '#F97316' }}>Node.</span>
             </h1>
             <p className="mt-4 text-lg font-medium max-w-xl" style={{ color: '#64748B' }}>
@@ -334,8 +334,8 @@ const AddStall = () => {
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-xl font-black tracking-tight" style={{ color: '#0F172A' }}>Core Identification</h2>
-                        <p className="text-xs font-bold uppercase tracking-widest mt-1" style={{ color: '#64748B' }}>Stall Identity &amp; Mapping</p>
+                        <h2 className="text-xl font-semibold tracking-tight" style={{ color: '#0F172A' }}>Core Identification</h2>
+                        <p className="text-sm font-bold uppercase tracking-widest mt-1" style={{ color: '#64748B' }}>Stall Identity &amp; Mapping</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -353,8 +353,8 @@ const AddStall = () => {
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-xl font-black tracking-tight" style={{ color: '#0F172A' }}>Classification &amp; Metrics</h2>
-                        <p className="text-xs font-bold uppercase tracking-widest mt-1" style={{ color: '#64748B' }}>Tier &amp; Placement Logic</p>
+                        <h2 className="text-xl font-semibold tracking-tight" style={{ color: '#0F172A' }}>Classification &amp; Metrics</h2>
+                        <p className="text-sm font-bold uppercase tracking-widest mt-1" style={{ color: '#64748B' }}>Tier &amp; Placement Logic</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -410,8 +410,8 @@ const AddStall = () => {
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-xl font-black tracking-tight" style={{ color: '#0F172A' }}>Operations &amp; Ledger</h2>
-                        <p className="text-xs font-bold uppercase tracking-widest mt-1" style={{ color: '#64748B' }}>Financial Defaults &amp; Notes</p>
+                        <h2 className="text-xl font-semibold tracking-tight" style={{ color: '#0F172A' }}>Operations &amp; Ledger</h2>
+                        <p className="text-sm font-bold uppercase tracking-widest mt-1" style={{ color: '#64748B' }}>Financial Defaults &amp; Notes</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -441,7 +441,7 @@ const AddStall = () => {
                     <button
                       type="button"
                       onClick={() => navigate('/admin/stalls/list')}
-                      className="px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95"
+                      className="px-8 py-4 rounded-2xl font-semibold text-sm uppercase tracking-widest transition-all active:scale-95"
                       style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', color: '#64748B' }}
                     >
                       Cancel
@@ -449,7 +449,7 @@ const AddStall = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-12 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg"
+                      className="px-12 py-4 rounded-2xl font-semibold text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg"
                       style={{
                         background: isSubmitting ? '#94a3b8' : '#0F172A',
                         color: '#F8FAFC',
@@ -470,12 +470,12 @@ const AddStall = () => {
           <div className="lg:col-span-4 space-y-8">
             <div className="rounded-[40px] p-10 overflow-hidden relative" style={{ background: '#0F172A', color: '#F8FAFC' }}>
               <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" style={{ background: 'rgba(249,115,22,0.15)' }}></div>
-              <h3 className="text-2xl font-black tracking-tight mb-4 leading-tight">Automated Mapping Protocol</h3>
+              <h3 className="text-2xl font-semibold tracking-tight mb-4 leading-tight">Automated Mapping Protocol</h3>
               <p className="text-sm font-medium leading-relaxed mb-8" style={{ color: 'rgba(248,250,252,0.65)' }}>
                 New nodes sync automatically with the interactive SVG layout. Ensure the <code className="px-2 py-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>Map Code</code> is exact.
               </p>
               <div className="p-5 rounded-3xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
-                <p className="text-[0.65rem] font-black uppercase tracking-widest mb-2" style={{ color: 'rgba(248,250,252,0.5)' }}>System Status</p>
+                <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(248,250,252,0.5)' }}>System Status</p>
                 <div className="flex items-center gap-3">
                   <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: '#22C55E', boxShadow: '0 0 10px #22C55E' }}></span>
                   <p className="text-sm font-bold">Cloud Link Active</p>
@@ -484,7 +484,7 @@ const AddStall = () => {
             </div>
 
             <div className="rounded-[40px] p-10 border" style={{ background: '#FFFFFF', borderColor: '#E9EEF5' }}>
-              <h4 className="text-xs font-black uppercase tracking-widest mb-6" style={{ color: '#64748B' }}>Validation Rules</h4>
+              <h4 className="text-sm font-semibold uppercase tracking-widest mb-6" style={{ color: '#64748B' }}>Validation Rules</h4>
               <ul className="space-y-5">
                 {[
                   { label: 'Map Code',    text: 'Must be unique and exist in SVG layers.' },
@@ -492,9 +492,9 @@ const AddStall = () => {
                   { label: 'Event Name',  text: 'Use letters and numbers, 3–50 chars.' },
                 ].map((item, i) => (
                   <li key={i} className="flex gap-4">
-                    <span className="shrink-0 w-6 h-6 rounded-lg text-[10px] font-black flex items-center justify-center" style={{ background: 'rgba(249,115,22,0.1)', color: '#F97316' }}>{i + 1}</span>
+                    <span className="shrink-0 w-6 h-6 rounded-lg text-[10px] font-semibold flex items-center justify-center" style={{ background: 'rgba(249,115,22,0.1)', color: '#F97316' }}>{i + 1}</span>
                     <div>
-                      <p className="text-xs font-black uppercase tracking-tighter mb-1" style={{ color: '#0F172A' }}>{item.label}</p>
+                      <p className="text-sm font-semibold uppercase tracking-tighter mb-1" style={{ color: '#0F172A' }}>{item.label}</p>
                       <p className="text-sm font-medium leading-tight" style={{ color: '#64748B' }}>{item.text}</p>
                     </div>
                   </li>
