@@ -1,21 +1,21 @@
 const crypto = require("crypto");
 const StallBooking = require("../models/stallBookingModel");
+const { sendAttendanceScanEmail } = require("../utils/emailService");
 
-// Helper: check whether today is the event day
+// Same calendar day as event (local). Set ATTENDANCE_RELAX_EVENT_DAY=1 to allow any day (demo).
 const isEventDay = (eventDate) => {
-  if (!eventDate) return false;
-
-  const today = new Date();
-  const event = new Date(eventDate);
-
+  if (process.env.ATTENDANCE_RELAX_EVENT_DAY === "1") return true;
+  if (!eventDate) return true;
+  const d = new Date(eventDate);
+  const now = new Date();
   return (
-    today.getFullYear() === event.getFullYear() &&
-    today.getMonth() === event.getMonth() &&
-    today.getDate() === event.getDate()
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
   );
 };
 
-// 1. Generate QR token only for confirmed booking on event day
+// 1. Generate or return QR token for vendor pass (token is created at advance payment)
 exports.generateBarcodeForBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -26,21 +26,29 @@ exports.generateBarcodeForBooking = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
+    const role = req.user?.role;
+    if (role === "vendor") {
+      const displayName = req.user.name || req.user.username;
+      const matches =
+        booking.vendorName === displayName ||
+        booking.vendorName === req.user.username ||
+        (req.user.name && booking.vendorName === req.user.name);
+      if (!matches) {
+        return res.status(403).json({ message: "You can only view QR passes for your own bookings." });
+      }
+    } else if (role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
     if (!booking.advancePaid) {
       return res.status(400).json({
-        message: "Advance payment must be completed before generating QR code",
+        message: "Advance payment must be completed before your QR pass is available.",
       });
     }
 
     if (!["Confirmed", "Approved"].includes(booking.status)) {
       return res.status(400).json({
-        message: "QR can only be generated for approved bookings",
-      });
-    }
-
-    if (!isEventDay(booking.eventDate)) {
-      return res.status(400).json({
-        message: "QR code can only be generated on the event day",
+        message: "QR is only available for confirmed stall bookings.",
       });
     }
 
@@ -51,14 +59,17 @@ exports.generateBarcodeForBooking = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "QR token generated successfully",
+      message: "QR token ready",
       bookingId: booking._id,
       barcodeToken: booking.barcodeToken,
       vendorName: booking.vendorName,
+      vendorEmail: booking.vendorEmail,
       stallName: booking.stallName,
       stallNumber: booking.stallNumber,
       eventName: booking.eventName,
       eventDate: booking.eventDate,
+      advancePaid: booking.advancePaid,
+      eventDay: isEventDay(booking.eventDate),
     });
   } catch (error) {
     console.error("Generate QR error:", error);
@@ -83,31 +94,53 @@ exports.scanAttendance = async (req, res) => {
 
     if (!isEventDay(booking.eventDate)) {
       return res.status(400).json({
-        message: "Attendance can only be confirmed on the event day",
+        message: "Attendance can only be confirmed on the scheduled event day.",
       });
     }
 
     if (booking.attendanceConfirmed) {
       return res.status(400).json({
         message: "Attendance already confirmed for this vendor",
-        booking,
+        booking: {
+          id: booking._id,
+          vendorName: booking.vendorName,
+          stallNumber: booking.stallNumber,
+          stallName: booking.stallName,
+          eventName: booking.eventName,
+          attendanceConfirmedAt: booking.attendanceConfirmedAt,
+        },
       });
     }
 
     booking.attendanceConfirmed = true;
     booking.attendanceConfirmedAt = new Date();
 
+    const scannedAt = new Date();
+    const scanBy = scannedBy || "Admin";
     booking.scanLogs.push({
-      scannedAt: new Date(),
-      scannedBy: scannedBy || "Admin",
+      scannedAt,
+      scannedBy: scanBy,
       ipAddress: req.ip,
       emailSent: false,
     });
+
+    const emailResult = await sendAttendanceScanEmail({
+      booking,
+      scannedBy: scanBy,
+      scannedAt,
+    });
+    if (emailResult.sent && booking.scanLogs.length > 0) {
+      booking.scanLogs[booking.scanLogs.length - 1].emailSent = true;
+    }
 
     await booking.save();
 
     return res.status(200).json({
       message: "Attendance marked successfully",
+      adminEmailSent: Boolean(emailResult.sent),
+      adminEmailNote: emailResult.sent
+        ? "Notification sent to admin Gmail."
+        : emailResult.reason || emailResult.error || "Admin email not configured (set GMAIL_APP_PASSWORD in Backend/.env).",
       booking: {
         id: booking._id,
         vendorName: booking.vendorName,
@@ -129,16 +162,16 @@ exports.scanAttendance = async (req, res) => {
 exports.getAttendanceLogs = async (req, res) => {
   try {
     const logs = await StallBooking.find({
-      barcodeToken: { $ne: null },
+      $or: [{ barcodeToken: { $ne: null } }, { advancePaid: true }],
     })
       .select(
-        "vendorName vendorEmail stallName stallNumber eventName eventDate attendanceConfirmed attendanceConfirmedAt scanLogs status advancePaid"
+        "vendorName vendorEmail stallName stallNumber eventName eventDate attendanceConfirmed attendanceConfirmedAt scanLogs status advancePaid advanceAmountPaid barcodeToken"
       )
       .sort({ attendanceConfirmedAt: -1, createdAt: -1 });
 
-    return res.status(200).json(logs);
+    return res.status(200).json({ success: true, data: logs });
   } catch (error) {
     console.error("Get attendance logs error:", error);
-    return res.status(500).json({ message: "Server error while fetching attendance logs" });
+    return res.status(500).json({ success: false, message: "Server error while fetching attendance logs" });
   }
 };
