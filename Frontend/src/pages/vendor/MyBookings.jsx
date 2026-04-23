@@ -19,12 +19,25 @@ const MyBookings = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const getRemainingTime = (createdAt) => {
-    const expiryTimestamp = new Date(createdAt).getTime() + 15 * 60000;
-    const diff = expiryTimestamp - now;
+  const FALLBACK_DEADLINE_DAYS = 5;
+
+  const resolveDeadline = (req) => {
+    if (req?.paymentDeadline) return req.paymentDeadline;
+    if (!req?.createdAt) return null;
+    const fallback = new Date(req.createdAt).getTime() + FALLBACK_DEADLINE_DAYS * 24 * 60 * 60 * 1000;
+    return new Date(fallback).toISOString();
+  };
+
+  const getRemainingTime = (deadline) => {
+    if (!deadline) return null;
+    const diff = new Date(deadline).getTime() - now;
     if (diff <= 0) return null;
-    const mins = Math.floor(diff / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+    const hrs = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const mins = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+    const secs = Math.floor((diff % (60 * 1000)) / 1000);
+    if (days > 0) return `${days}d ${hrs}h ${mins}m`;
+    if (hrs > 0) return `${hrs}h ${mins}m ${secs}s`;
     return `${mins}m ${secs}s`;
   };
 
@@ -67,7 +80,7 @@ const MyBookings = () => {
   };
 
   const handleConfirm = (req) => {
-    navigate('/vendor/booking-payment', { state: { booking: req } });
+    navigate(`/vendor/checkout/${req._id}`, { state: { booking: req } });
   };
 
   const startEdit = (req) => {
@@ -81,19 +94,19 @@ const MyBookings = () => {
   };
 
   const handleViewPass = (req) => {
-    toast.success(
-      `🎟️ Booking Pass\nStall: ${req.stallNumber} - ${req.stallName}\nEvent: ${req.eventName}\nStatus: Approved ✅`,
-      { duration: 5000 }
-    );
+    navigate(`/vendor/qr/${req._id}`);
   };
+
+  const canViewQrPass = (req) =>
+    req.advancePaid && ["Approved", "Confirmed"].includes(req.status);
 
   return (
     <div className="max-w-7xl mx-auto py-8">
       <div className="mb-8">
-        <div className="inline-block px-3 py-1 bg-accent/10 border border-accent/20 text-accent font-bold text-[0.65rem] uppercase tracking-widest rounded-full mb-3 shadow-sm">
+        <div className="inline-block px-3 py-1 bg-accent/10 border border-accent/20 text-accent font-bold text-sm uppercase tracking-widest rounded-full mb-3 shadow-sm">
           Booking Records
         </div>
-        <h1 className="text-4xl font-black text-primary tracking-tight">My Requests</h1>
+        <h1 className="text-4xl font-semibold text-primary tracking-tight">My Requests</h1>
         <p className="text-muted-foreground mt-2 font-medium">Track your historical booking statuses and pending reservation passes.</p>
       </div>
 
@@ -102,7 +115,7 @@ const MyBookings = () => {
         
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
-            <tr className="text-slate-400 text-xs uppercase tracking-widest border-b-2 border-slate-100">
+            <tr className="text-slate-400 text-sm uppercase tracking-widest border-b-2 border-slate-100">
               <th className="py-4 pr-4">Event Details</th>
               <th className="py-4 px-4">Stall Info</th>
               <th className="py-4 px-4">Request Date</th>
@@ -116,57 +129,57 @@ const MyBookings = () => {
                 <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                   <td className="py-5 pr-4 align-top">
                     <div className="font-bold text-slate-800">{req.eventName}</div>
-                    <div className="text-xs font-medium text-slate-500 mt-1">Org: <span className="text-slate-700">{req.businessName}</span></div>
+                    <div className="text-sm font-medium text-slate-500 mt-1">Org: <span className="text-slate-700">{req.businessName}</span></div>
                   </td>
                   <td className="py-5 px-4 align-top">
                     <div className="font-bold text-primary tracking-tight">Stall {req.stallNumber}</div>
-                    <div className="text-xs font-medium text-slate-500 mt-1">{req.stallName}</div>
+                    <div className="text-sm font-medium text-slate-500 mt-1">{req.stallName}</div>
                   </td>
                   <td className="text-sm font-medium text-slate-600 py-5 px-4 align-top">
                     {new Date(req.createdAt).toLocaleDateString()}
                   </td>
                   <td className="py-5 px-4 align-top">
                     {req.status === 'Pending' && (
-                      <span className="inline-flex px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold leading-tight">Awaiting Admin Approval</span>
+                      <span className="inline-flex px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 border border-amber-200 text-sm font-bold leading-tight">Awaiting Admin Approval</span>
                     )}
                     {req.status === 'PreApproved' && (
                       <div className="flex flex-col gap-1.5 items-start">
-                        <span className="inline-flex px-2.5 py-1 rounded-md bg-orange-500 text-white border border-orange-600 text-xs font-bold leading-tight shadow-sm shadow-orange-500/20">Awaiting Payment</span>
-                        {getRemainingTime(req.updatedAt) ? (
-                          <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-100 leading-tight">
-                            ⏱️ Expires in {getRemainingTime(req.updatedAt)}
+                        <span className="inline-flex px-2.5 py-1 rounded-md bg-orange-500 text-white border border-orange-600 text-sm font-bold leading-tight shadow-sm shadow-orange-500/20">Awaiting Payment</span>
+                        {getRemainingTime(resolveDeadline(req)) ? (
+                          <span className="text-sm font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-100 leading-tight">
+                            ⏱️ Remaining to pay advance: {getRemainingTime(resolveDeadline(req))}
                           </span>
                         ) : (
-                          <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100 leading-tight">
+                          <span className="text-sm font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100 leading-tight">
                             Expired
                           </span>
                         )}
                       </div>
                     )}
-                    {req.status === 'Confirmed' && <span className="inline-flex px-2.5 py-1 rounded-md bg-blue-500 text-white border border-blue-600 text-xs font-bold leading-tight shadow-sm shadow-blue-500/20">Pending Verification</span>}
-                    {req.status === 'Approved' && <span className="inline-flex px-2.5 py-1 rounded-md bg-green-100 text-green-700 border border-green-200 text-xs font-black uppercase tracking-wider leading-tight shadow-sm">Locked & Approved</span>}
-                    {req.status === 'Rejected' && <span className="inline-flex px-2.5 py-1 rounded-md bg-red-100 text-red-700 border border-red-200 text-xs font-bold leading-tight">Cancelled/Expired</span>}
+                    {req.status === 'Confirmed' && <span className="inline-flex px-2.5 py-1 rounded-md bg-blue-500 text-white border border-blue-600 text-sm font-bold leading-tight shadow-sm shadow-blue-500/20">Pending Verification</span>}
+                    {req.status === 'Approved' && <span className="inline-flex px-2.5 py-1 rounded-md bg-green-100 text-green-700 border border-green-200 text-sm font-semibold uppercase tracking-wider leading-tight shadow-sm">Locked & Approved</span>}
+                    {req.status === 'Rejected' && <span className="inline-flex px-2.5 py-1 rounded-md bg-red-100 text-red-700 border border-red-200 text-sm font-bold leading-tight">Cancelled/Expired</span>}
                   </td>
                   <td className="py-5 pl-4 align-top text-right whitespace-nowrap">
-                    {req.status === 'Approved' ? (
-                      <button onClick={() => handleViewPass(req)} className="px-4 py-2 border-2 border-emerald-500 text-emerald-600 font-bold rounded-lg hover:bg-emerald-50 transition-colors text-xs flex items-center gap-1.5 ml-auto">
-                        <span className="text-sm">🎟️</span> View Pass
+                    {canViewQrPass(req) ? (
+                      <button onClick={() => handleViewPass(req)} className="px-4 py-2 border-2 border-emerald-500 text-emerald-600 font-bold rounded-lg hover:bg-emerald-50 transition-colors text-sm flex items-center gap-1.5 ml-auto">
+                        <span className="text-sm">🎟️</span> View QR pass
                       </button>
                     ) : req.status === 'PreApproved' ? (
                       <div className="flex gap-2 items-center justify-end">
-                        {getRemainingTime(req.updatedAt) && (
-                           <button onClick={() => handleConfirm(req)} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg shadow-sm shadow-emerald-500/20 transition-all hover:-translate-y-0.5 text-xs flex items-center gap-1.5">
+                        {getRemainingTime(resolveDeadline(req)) && (
+                           <button onClick={() => handleConfirm(req)} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg shadow-sm shadow-emerald-500/20 transition-all hover:-translate-y-0.5 text-sm flex items-center gap-1.5">
                              <span className="text-sm">💳</span> Pay Now
                            </button>
                         )}
-                        <button className="px-3 py-2 border border-red-200 text-red-500 font-bold rounded-lg hover:bg-red-50 transition-colors text-xs" onClick={() => handleDelete(req._id, false)}>Cancel</button>
+                        <button className="px-3 py-2 border border-red-200 text-red-500 font-bold rounded-lg hover:bg-red-50 transition-colors text-sm" onClick={() => handleDelete(req._id, false)}>Cancel</button>
                       </div>
                     ) : req.status === 'Pending' ? (
-                      <button className="px-4 py-2 border border-red-200 text-red-500 font-bold rounded-lg hover:bg-red-50 transition-colors text-xs ml-auto block" onClick={() => handleDelete(req._id, false)}>Cancel Request</button>
+                      <button className="px-4 py-2 border border-red-200 text-red-500 font-bold rounded-lg hover:bg-red-50 transition-colors text-sm ml-auto block" onClick={() => handleDelete(req._id, false)}>Cancel Request</button>
                     ) : req.status === 'Rejected' ? (
-                      <button className="px-4 py-2 border border-slate-200 text-slate-500 font-bold rounded-lg hover:bg-slate-50 transition-colors text-xs ml-auto block" onClick={() => handleDelete(req._id, true)}>Delete Record</button>
+                      <button className="px-4 py-2 border border-slate-200 text-slate-500 font-bold rounded-lg hover:bg-slate-50 transition-colors text-sm ml-auto block" onClick={() => handleDelete(req._id, true)}>Delete Record</button>
                     ) : (
-                      <span className="text-xs font-medium text-slate-400">Processing...</span>
+                      <span className="text-sm font-medium text-slate-400">Processing...</span>
                     )}
                   </td>
                 </tr>
@@ -179,15 +192,15 @@ const MyBookings = () => {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 text-sm">
                         <div className="flex flex-col">
-                          <label className="font-bold text-slate-700 mb-1.5 text-xs">Contact Number</label>
+                          <label className="font-bold text-slate-700 mb-1.5 text-sm">Contact Number</label>
                           <input className="px-4 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm" value={editForm.contactNumber} onChange={e => setEditForm({...editForm, contactNumber: e.target.value})} />
                         </div>
                         <div className="flex flex-col">
-                          <label className="font-bold text-slate-700 mb-1.5 text-xs">Business Name</label>
+                          <label className="font-bold text-slate-700 mb-1.5 text-sm">Business Name</label>
                           <input className="px-4 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm" value={editForm.businessName} onChange={e => setEditForm({...editForm, businessName: e.target.value})} />
                         </div>
                         <div className="flex flex-col lg:col-span-3">
-                          <label className="font-bold text-slate-700 mb-1.5 text-xs">Items to Sell</label>
+                          <label className="font-bold text-slate-700 mb-1.5 text-sm">Items to Sell</label>
                           <input className="px-4 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm" value={editForm.itemsToSell} onChange={e => setEditForm({...editForm, itemsToSell: e.target.value})} />
                         </div>
                       </div>

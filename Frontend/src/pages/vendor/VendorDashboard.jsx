@@ -144,10 +144,10 @@ const VendorDashboard = () => {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
         <div>
-          <div className="inline-block px-3 py-1 bg-accent/10 border border-accent/20 text-accent font-bold text-[0.65rem] uppercase tracking-widest rounded-full mb-3 shadow-sm">
+          <div className="inline-block px-3 py-1 bg-accent/10 border border-accent/20 text-accent font-bold text-sm uppercase tracking-widest rounded-full mb-3 shadow-sm">
             Control Center
           </div>
-          <h1 className="text-4xl font-black text-primary tracking-tight">Vendor Dashboard</h1>
+          <h1 className="text-4xl font-semibold text-primary tracking-tight">Vendor Dashboard</h1>
           <p className="text-muted-foreground mt-2 font-medium">Overview of your external event bookings, approval status, and financial commitments.</p>
         </div>
       </div>
@@ -155,10 +155,10 @@ const VendorDashboard = () => {
       {/* STATS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/40 flex flex-col justify-between hover:-translate-y-1 transition-transform relative overflow-hidden border-l-8 border-blue-600">
-          <div className="text-xs font-bold uppercase tracking-widest mb-6 text-slate-400">Total Events</div>
+          <div className="text-sm font-bold uppercase tracking-widest mb-6 text-slate-400">Total Events</div>
           <div>
-            <div className="text-5xl font-black tracking-tighter text-primary">12</div>
-            <div className="text-xs font-bold uppercase tracking-widest mt-2 text-blue-600">+2 this month</div>
+            <div className="text-5xl font-semibold tracking-tighter text-primary">12</div>
+            <div className="text-sm font-bold uppercase tracking-widest mt-2 text-blue-600">+2 this month</div>
           </div>
           <div className="absolute top-0 right-0 p-6 opacity-5">
              <span className="text-7xl leading-none block">📅</span>
@@ -166,10 +166,10 @@ const VendorDashboard = () => {
         </div>
 
         <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/40 flex flex-col justify-between hover:-translate-y-1 transition-transform relative overflow-hidden border-l-8 border-orange-500">
-          <div className="text-xs font-bold uppercase tracking-widest mb-6 text-slate-400">Pending Requests</div>
+          <div className="text-sm font-bold uppercase tracking-widest mb-6 text-slate-400">Pending Requests</div>
           <div>
-            <div className="text-5xl font-black tracking-tighter text-primary">{stats.pending}</div>
-            <div className="text-xs font-bold uppercase tracking-widest mt-2 text-orange-600">Awaiting approval</div>
+            <div className="text-5xl font-semibold tracking-tighter text-primary">{stats.pending}</div>
+            <div className="text-sm font-bold uppercase tracking-widest mt-2 text-orange-600">Awaiting approval</div>
           </div>
           <div className="absolute top-0 right-0 p-6 opacity-5">
              <span className="text-7xl leading-none block">⏳</span>
@@ -177,10 +177,10 @@ const VendorDashboard = () => {
         </div>
 
         <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/40 flex flex-col justify-between hover:-translate-y-1 transition-transform relative overflow-hidden border-l-8 border-emerald-500">
-          <div className="text-xs font-bold uppercase tracking-widest mb-6 text-slate-400">Approved Stalls</div>
+          <div className="text-sm font-bold uppercase tracking-widest mb-6 text-slate-400">Approved Stalls</div>
           <div>
-            <div className="text-5xl font-black tracking-tighter text-primary">{stats.approved}</div>
-            <div className="text-xs font-bold uppercase tracking-widest mt-2 text-emerald-600">Active bookings</div>
+            <div className="text-5xl font-semibold tracking-tighter text-primary">{stats.approved}</div>
+            <div className="text-sm font-bold uppercase tracking-widest mt-2 text-emerald-600">Active bookings</div>
           </div>
           <div className="absolute top-0 right-0 p-6 opacity-5">
              <span className="text-7xl leading-none block">⭐</span>
@@ -188,10 +188,10 @@ const VendorDashboard = () => {
         </div>
 
         <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/40 flex flex-col justify-between hover:-translate-y-1 transition-transform relative overflow-hidden border-l-8 border-rose-600">
-          <div className="text-xs font-bold uppercase tracking-widest mb-6 text-slate-400">Rejected</div>
+          <div className="text-sm font-bold uppercase tracking-widest mb-6 text-slate-400">Rejected</div>
           <div>
-            <div className="text-5xl font-black tracking-tighter text-primary">{stats.rejected}</div>
-            <div className="text-xs font-bold uppercase tracking-widest mt-2 text-rose-600">Check feedback</div>
+            <div className="text-5xl font-semibold tracking-tighter text-primary">{stats.rejected}</div>
+            <div className="text-sm font-bold uppercase tracking-widest mt-2 text-rose-600">Check feedback</div>
           </div>
           <div className="absolute top-0 right-0 p-6 opacity-5">
              <span className="text-7xl leading-none block">❌</span>
@@ -202,7 +202,7 @@ const VendorDashboard = () => {
       {/* MY PENDING PAYMENTS & ALLOCATIONS */}
       {activeBookings.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-2xl font-black text-primary mb-6">Action Required: Allocations & Payments</h2>
+          <h2 className="text-2xl font-semibold text-primary mb-6">Action Required: Allocations & Payments</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {activeBookings.map(booking => (
               <div key={booking._id} className="bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-xl shadow-slate-200/50 flex flex-col relative overflow-hidden">
@@ -214,10 +214,10 @@ const VendorDashboard = () => {
 
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-black text-primary">{booking.stallNumber}</h3>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{booking.stallName}</p>
+                    <h3 className="text-xl font-semibold text-primary">{booking.stallNumber}</h3>
+                    <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{booking.stallName}</p>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest ${
                     booking.status === 'PreApproved' ? 'bg-orange-100 text-orange-700' :
                     booking.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
                   }`}>
@@ -246,18 +246,20 @@ const VendorDashboard = () => {
                       </button>
                     </div>
                   )}
-                  {booking.status === 'Confirmed' && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                      <span className="text-2xl mb-2 block">⏳</span>
-                      <p className="text-sm font-bold text-blue-800">Awaiting Admin Lock</p>
-                      <p className="text-xs font-medium text-blue-600 mt-1">Your payment was received.</p>
-                    </div>
-                  )}
-                  {booking.status === 'Approved' && (
+                  {booking.advancePaid && (booking.status === 'Approved' || booking.status === 'Confirmed') && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
                       <span className="text-2xl mb-2 block">🔒</span>
-                      <p className="text-sm font-bold text-emerald-800">Stall Allocated & Locked</p>
-                      <p className="text-xs font-medium text-emerald-600 mt-1">You are ready for the event.</p>
+                      <p className="text-sm font-bold text-emerald-800">
+                        {booking.status === 'Confirmed' ? 'Advance received — final lock pending' : 'Stall locked'}
+                      </p>
+                      <p className="text-sm font-medium text-emerald-600 mt-1 mb-3">Your check-in QR is available below.</p>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/vendor/qr/${booking._id}`)}
+                        className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors text-sm shadow-md flex items-center justify-center gap-2"
+                      >
+                        <span className="text-sm">🎟️</span> View QR pass
+                      </button>
                     </div>
                   )}
                 </div>
@@ -269,7 +271,7 @@ const VendorDashboard = () => {
 
       {/* ANALYTICS DASHBOARD SECTION */}
       <div className="mb-12">
-        <h2 className="text-2xl font-black text-primary mb-6">Vendor Performance Analytics</h2>
+        <h2 className="text-2xl font-semibold text-primary mb-6">Vendor Performance Analytics</h2>
         <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 flex flex-col relative overflow-hidden">
            <p className="text-muted-foreground font-medium mb-8">View the real-time status distribution of your active stall requests.</p>
            
@@ -295,7 +297,7 @@ const VendorDashboard = () => {
 
       {/* UPCOMING EVENTS ROW */}
       <div className="flex justify-between items-center mb-6 px-2">
-        <h2 className="text-2xl font-black text-primary">Upcoming Events</h2>
+        <h2 className="text-2xl font-semibold text-primary">Upcoming Events</h2>
         <a href="#view-all" className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors">View All</a>
       </div>
 
@@ -306,7 +308,7 @@ const VendorDashboard = () => {
                <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors duration-500 z-10"></div>
                <img src={evt.image} alt={evt.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 blur-[2px] group-hover:blur-0" />
                <div className="absolute top-4 left-4 z-20">
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg ${
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest shadow-lg ${
                     evt.status === 'upcoming' ? 'bg-amber-400 text-amber-900' :
                     evt.status === 'open' ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-white'
                   }`}>
@@ -314,26 +316,26 @@ const VendorDashboard = () => {
                   </div>
                </div>
                <div className="absolute bottom-4 left-4 right-4 z-20">
-                 <h3 className="text-2xl font-black text-white leading-tight shadow-sm">{evt.name}</h3>
+                 <h3 className="text-2xl font-semibold text-white leading-tight shadow-sm">{evt.name}</h3>
                </div>
             </div>
             <div className="p-6 flex-1 flex flex-col">
-              <div className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">
+              <div className="flex justify-between items-center text-sm font-bold text-slate-500 uppercase tracking-widest mb-6">
                 <span>{evt.date}</span>
                 <span className="truncate ml-2">{evt.location}</span>
               </div>
               <div className="grid grid-cols-3 gap-2 bg-slate-50 rounded-xl p-3 border border-slate-100 mb-6 text-center">
                 <div>
                   <div className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Available</div>
-                  <div className="font-black text-emerald-500">{evt.stats.available}</div>
+                  <div className="font-semibold text-emerald-500">{evt.stats.available}</div>
                 </div>
                 <div className="border-x border-slate-200">
                   <div className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Pending</div>
-                  <div className="font-black text-orange-500">{evt.stats.pending}</div>
+                  <div className="font-semibold text-orange-500">{evt.stats.pending}</div>
                 </div>
                 <div>
                   <div className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Booked</div>
-                  <div className="font-black text-slate-800">{evt.stats.booked}</div>
+                  <div className="font-semibold text-slate-800">{evt.stats.booked}</div>
                 </div>
               </div>
               <button 
@@ -359,7 +361,7 @@ const VendorDashboard = () => {
       <div id="map-section" className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col mb-20">
         <div className="flex flex-col md:flex-row justify-between items-center p-8 lg:px-10 border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
           <div className="mb-4 md:mb-0">
-            <h2 className="text-2xl font-black text-primary mb-1">Stall Booking: <span className="text-accent underline decoration-accent/30 decoration-4 underline-offset-4">Event Venue Map</span></h2>
+            <h2 className="text-2xl font-semibold text-primary mb-1">Stall Booking: <span className="text-accent underline decoration-accent/30 decoration-4 underline-offset-4">Event Venue Map</span></h2>
             <p className="text-slate-500 font-medium">Select a stall from the structural map below to view details and invoke reservation holds.</p>
           </div>
         </div>
