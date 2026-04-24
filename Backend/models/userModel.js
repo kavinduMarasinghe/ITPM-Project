@@ -26,9 +26,15 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'vendor'],
+    enum: ['admin', 'vendor', 'student', 'hod', 'organizer'],
     default: 'vendor'
   },
+  studentId: { type: String, trim: true, sparse: true, index: true },
+  phone: { type: String, trim: true },
+  department: { type: String, trim: true },
+  year: { type: String, trim: true },
+  semester: { type: String, trim: true },
+  address: { type: String, trim: true },
   businessName: {
     type: String,
     trim: true

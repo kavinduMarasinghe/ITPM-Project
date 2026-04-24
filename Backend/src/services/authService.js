@@ -1,23 +1,53 @@
 const { randomUUID } = require("crypto");
+const bcrypt = require("bcryptjs");
 
 const { ROLES, SESSION_TTL_MS, USER_STATUSES } = require("../config/constants");
 const sessionModel = require("../models/SessionModel");
 const userModel = require("../models/UserModel");
+const LegacyUser = require("../../models/userModel");
 const { AppError } = require("../utils/errors");
 const { verifyPassword } = require("../utils/password");
 
+const VENDOR_ID_PREFIX = "vendor:";
+
 function sanitizeUser(user) {
+  const fullName = user.fullName || user.name || null;
   return {
     id: user.id,
     role: user.role,
     status: user.status,
-    fullName: user.fullName,
+    fullName,
+    name: fullName,
     email: user.email,
     studentId: user.studentId || null,
     phone: user.phone || null,
     department: user.department || user.profile?.department || null,
     title: user.profile?.title || user.position || null,
     organizationName: user.organizationName || null,
+    businessName: user.businessName || null,
+  };
+}
+
+function buildVendorUser(legacyUser) {
+  return {
+    id: `${VENDOR_ID_PREFIX}${legacyUser._id.toString()}`,
+    role: ROLES.VENDOR,
+    status: USER_STATUSES.ACTIVE,
+    fullName: legacyUser.name,
+    email: legacyUser.email,
+    phone: legacyUser.contactNumber || null,
+    businessName: legacyUser.businessName || null,
+  };
+}
+
+function buildLegacyAdminUser(legacyUser) {
+  return {
+    id: `${VENDOR_ID_PREFIX}${legacyUser._id.toString()}`,
+    role: ROLES.ADMIN,
+    status: USER_STATUSES.ACTIVE,
+    fullName: legacyUser.name,
+    email: legacyUser.email,
+    phone: legacyUser.contactNumber || null,
   };
 }
 
@@ -47,6 +77,10 @@ class AuthService {
 
     if (!credentials.password) {
       throw new AppError(400, "Password is required.");
+    }
+
+    if (requestedRole === ROLES.VENDOR) {
+      return this.loginVendor(credentials);
     }
 
     let user = null;
@@ -101,6 +135,35 @@ class AuthService {
     return this.createAuthenticatedSession(user);
   }
 
+  async loginVendor(credentials) {
+    if (!credentials.email) {
+      throw new AppError(400, "Email is required.");
+    }
+
+    const normalizedEmail = String(credentials.email).trim().toLowerCase();
+
+    const legacyUser = await LegacyUser.findOne({
+      role: { $in: [ROLES.VENDOR, ROLES.ADMIN] },
+      $or: [{ email: normalizedEmail }, { username: normalizedEmail }],
+    });
+
+    if (!legacyUser || !legacyUser.password) {
+      throw new AppError(401, "Invalid credentials.");
+    }
+
+    const matches = await bcrypt.compare(credentials.password, legacyUser.password);
+    if (!matches) {
+      throw new AppError(401, "Invalid credentials.");
+    }
+
+    const sessionUser =
+      legacyUser.role === ROLES.ADMIN
+        ? buildLegacyAdminUser(legacyUser)
+        : buildVendorUser(legacyUser);
+
+    return this.createAuthenticatedSession(sessionUser);
+  }
+
   async createAuthenticatedSession(user) {
     const createdAt = new Date();
     const session = {
@@ -130,17 +193,36 @@ class AuthService {
       throw new AppError(401, "Session expired or invalid.");
     }
 
-    const user = await userModel.findById(session.userId);
+    let user;
 
-    if (!user) {
-      throw new AppError(401, "User not found.");
+    if (session.userId.startsWith(VENDOR_ID_PREFIX)) {
+      const legacyId = session.userId.slice(VENDOR_ID_PREFIX.length);
+      const legacyUser = await LegacyUser.findById(legacyId);
+
+      if (!legacyUser) {
+        throw new AppError(401, "User not found.");
+      }
+
+      user =
+        legacyUser.role === ROLES.ADMIN
+          ? buildLegacyAdminUser(legacyUser)
+          : buildVendorUser(legacyUser);
+    } else {
+      user = await userModel.findById(session.userId);
+
+      if (!user) {
+        throw new AppError(401, "User not found.");
+      }
     }
 
     if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
       throw new AppError(403, "You do not have permission to access this resource.");
     }
 
-    ensureUserCanLogin(user);
+    if (user.role !== ROLES.VENDOR) {
+      ensureUserCanLogin(user);
+    }
+
     return user;
   }
 

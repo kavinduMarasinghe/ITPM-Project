@@ -98,22 +98,12 @@ exports.scanAttendance = async (req, res) => {
       });
     }
 
-    if (booking.attendanceConfirmed) {
-      return res.status(400).json({
-        message: "Attendance already confirmed for this vendor",
-        booking: {
-          id: booking._id,
-          vendorName: booking.vendorName,
-          stallNumber: booking.stallNumber,
-          stallName: booking.stallName,
-          eventName: booking.eventName,
-          attendanceConfirmedAt: booking.attendanceConfirmedAt,
-        },
-      });
-    }
+    const wasAlreadyConfirmed = booking.attendanceConfirmed === true;
 
-    booking.attendanceConfirmed = true;
-    booking.attendanceConfirmedAt = new Date();
+    if (!wasAlreadyConfirmed) {
+      booking.attendanceConfirmed = true;
+      booking.attendanceConfirmedAt = new Date();
+    }
 
     const scannedAt = new Date();
     const scanBy = scannedBy || "Admin";
@@ -136,7 +126,10 @@ exports.scanAttendance = async (req, res) => {
     await booking.save();
 
     return res.status(200).json({
-      message: "Attendance marked successfully",
+      message: wasAlreadyConfirmed
+        ? "Vendor re-scan logged. Notification email sent."
+        : "Attendance marked successfully",
+      reScan: wasAlreadyConfirmed,
       adminEmailSent: Boolean(emailResult.sent),
       adminEmailNote: emailResult.sent
         ? "Notification sent to admin Gmail."

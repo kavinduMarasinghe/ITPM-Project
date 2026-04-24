@@ -63,15 +63,25 @@ exports.register = async (req, res) => {
 // POST /api/auth/login
 exports.login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, studentId, password, role } = req.body;
+    const identifier = (username || email || studentId || '').toString().trim().toLowerCase();
 
-    // Find by username or email
-    const user = await User.findOne({
-      $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }]
-    });
+    if (!identifier || !password) {
+      return res.status(400).json({ success: false, message: 'Email/username and password are required.' });
+    }
 
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid username or password.' });
+    const query = {
+      $or: [{ username: identifier }, { email: identifier }],
+    };
+    const roleMap = { staff: 'admin', admin: 'admin', vendor: 'vendor' };
+    if (roleMap[role]) {
+      query.role = roleMap[role];
+    }
+
+    const user = await User.findOne(query);
+
+    if (!user || !user.password) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     }
 
     // Compare password

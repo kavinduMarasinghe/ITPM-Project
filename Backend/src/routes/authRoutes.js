@@ -16,13 +16,13 @@ module.exports = [
   {
     method: "GET",
     path: "/api/auth/me",
-    roles: [ROLES.ADMIN, ROLES.HOD, ROLES.ORGANIZER, ROLES.STUDENT],
+    roles: [ROLES.ADMIN, ROLES.HOD, ROLES.ORGANIZER, ROLES.STUDENT, ROLES.VENDOR],
     handler: authController.me,
   },
   {
     method: "POST",
     path: "/api/auth/logout",
-    roles: [ROLES.ADMIN, ROLES.HOD, ROLES.ORGANIZER, ROLES.STUDENT],
+    roles: [ROLES.ADMIN, ROLES.HOD, ROLES.ORGANIZER, ROLES.STUDENT, ROLES.VENDOR],
     handler: authController.logout,
   },
 ];

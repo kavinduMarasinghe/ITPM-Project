@@ -34,7 +34,10 @@ const Sidebar = ({ role }) => {
   };
 
   const currentRole = role || user?.role || 'vendor';
-  const displayName = user?.name || (currentRole === 'admin' ? 'Admin User' : 'Vendor User');
+  const displayName =
+    user?.fullName ||
+    user?.name ||
+    (currentRole === 'admin' ? 'Admin User' : 'Vendor User');
   const initials = displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   const NavItem = ({ to, end, icon, label, badge }) => (

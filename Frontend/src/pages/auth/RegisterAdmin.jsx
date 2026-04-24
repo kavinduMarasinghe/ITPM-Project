@@ -57,7 +57,7 @@ const RegisterAdmin = () => {
     setLoading(true);
     try {
       await register(form);
-      navigate('/admin/stalls');
+      navigate('/admin/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Registration failed.');
     } finally {

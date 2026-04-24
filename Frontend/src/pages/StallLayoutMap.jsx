@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 
-const StallLayoutMap = ({ role = "admin" }) => {
+const StallLayoutMap = ({ role = "admin", hideHeader = false }) => {
   const [stalls, setStalls] = useState([]);
   const [selectedStall, setSelectedStall] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -228,6 +228,18 @@ const StallLayoutMap = ({ role = "admin" }) => {
       return;
     }
 
+    // Public homepage map: visitors aren't vendors yet, so route them to
+    // the vendor registration form instead of the vendor dashboard.
+    if (role === "public") {
+      if (
+        selectedStall.status === "Available" ||
+        selectedStall.status === "Reserved"
+      ) {
+        navigate("/register-vendor");
+      }
+      return;
+    }
+
     // Vendor flow
     if (selectedStall.status === "Available") {
       navigate(`/vendor/stalls/request/${selectedStall._id}`);
@@ -240,18 +252,20 @@ const StallLayoutMap = ({ role = "admin" }) => {
     <div className="w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 pb-12 sm:pb-20">
       <div className="mx-auto max-w-[1440px]">
         <div className="mb-6 sm:mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-          <div>
-            <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-widest mb-2 sm:mb-3 border border-accent/20">
-              Interactive Blueprint
+          {!hideHeader && (
+            <div>
+              <div className="inline-block px-3 py-1 bg-accent/10 text-accent rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-widest mb-2 sm:mb-3 border border-accent/20">
+                Interactive Blueprint
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tighter text-primary leading-none">
+                Event <span className="text-accent">Flow</span> Map
+              </h1>
+              <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg text-muted-foreground font-medium max-w-2xl">
+                Visualize the global stall ecosystem. Select any node to calculate route geometry and operational constraints.
+              </p>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tighter text-primary leading-none">
-              Event <span className="text-accent">Flow</span> Map
-            </h1>
-            <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg text-muted-foreground font-medium max-w-2xl">
-              Visualize the global stall ecosystem. Select any node to calculate route geometry and operational constraints.
-            </p>
-          </div>
-          
+          )}
+
           <div className="flex gap-2 sm:gap-3 flex-wrap">
              <div className="bg-white border-2 border-slate-100 px-3 sm:px-5 py-2 sm:py-3 rounded-full shadow-sm flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>

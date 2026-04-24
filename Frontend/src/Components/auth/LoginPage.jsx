@@ -12,10 +12,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { api } from "../../services/api";
 import { getDashboardRouteForRole, saveSession } from "../../services/session";
+import { useAuth } from "../../context/AuthContext";
 
 function LoginPage({ defaultPortal = "staff" }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setSession } = useAuth();
   const [activePortal, setActivePortal] = useState(
     location.state?.portal || defaultPortal
   );
@@ -73,9 +75,15 @@ function LoginPage({ defaultPortal = "staff" }) {
 
   const finishLogin = (session) => {
     saveSession(session);
-    navigate(getDashboardRouteForRole(session.user.role), {
-      replace: true,
-    });
+    setSession(session);
+    const isLegacyStallAdmin =
+      session.user.role === "admin" &&
+      typeof session.user.id === "string" &&
+      session.user.id.startsWith("vendor:");
+    const target = isLegacyStallAdmin
+      ? "/admin/dashboard"
+      : getDashboardRouteForRole(session.user.role);
+    navigate(target, { replace: true });
   };
 
   const handleStudentSubmit = async (event) => {
@@ -280,7 +288,7 @@ function LoginPage({ defaultPortal = "staff" }) {
             <>
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2" style={{ color: "#0F172A" }}>
-                  Vendor Login
+                  Vendor / Admin Login
                 </h3>
                 <p className="text-sm" style={{ color: "#64748B" }}>
                   Sign in to manage your stalls, reservations, and event participation.
@@ -389,7 +397,7 @@ function LoginPage({ defaultPortal = "staff" }) {
               >
                 <div className="flex flex-wrap justify-center gap-6 text-sm">
                   <Link
-                    to="/vendor/register"
+                    to="/register-vendor"
                     style={{ color: "#F97316" }}
                     className="font-medium hover:opacity-80"
                   >
@@ -534,7 +542,7 @@ function LoginPage({ defaultPortal = "staff" }) {
                     Organization registration
                   </Link>
                   <Link
-                    to="/vendor/register"
+                    to="/register-vendor"
                     style={{ color: "#64748B" }}
                     className="font-medium hover:opacity-80"
                   >
@@ -663,7 +671,7 @@ function LoginPage({ defaultPortal = "staff" }) {
                     Organization registration
                   </Link>
                   <Link
-                    to="/vendor/register"
+                    to="/register-vendor"
                     style={{ color: "#F97316" }}
                     className="font-medium hover:opacity-80"
                   >
@@ -676,7 +684,7 @@ function LoginPage({ defaultPortal = "staff" }) {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0%, 100% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

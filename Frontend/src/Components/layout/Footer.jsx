@@ -70,7 +70,7 @@ function Footer() {
                   Organization Register
                 </Link>
                 <Link
-                  to="/vendor/register"
+                  to="/register-vendor"
                   className="text-gray-500 hover:text-orange-500 transition-colors text-sm"
                 >
                   Vendor Register

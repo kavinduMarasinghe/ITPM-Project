@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import heroBg from "../../assets/hero-bg.png";
+import StallLayoutMap from "../../pages/StallLayoutMap";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -129,6 +130,12 @@ const Homepage = () => {
               className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
             >
               Roles
+            </button>
+            <button
+              onClick={() => scrollToSection("browse-stalls")}
+              className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
+            >
+              Browse Stalls
             </button>
           </div>
 
@@ -296,6 +303,28 @@ const Homepage = () => {
                 </button>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────────────── BROWSE STALLS ───────────────────────── */}
+      <section id="browse-stalls" className="py-20 md:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <span className="inline-block px-3 py-1 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-bold uppercase tracking-[0.2em] rounded-full mb-4">
+              Interactive Blueprint
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              Event <span className="text-orange-500">Flow</span> Map
+            </h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+              Visualize the global stall ecosystem. Select any node to explore
+              availability, zones, and pricing across the venue.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-gray-100 overflow-hidden">
+            <StallLayoutMap role="public" hideHeader />
           </div>
         </div>
       </section>

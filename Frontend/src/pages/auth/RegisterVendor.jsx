@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import api from '../../api';
 
 const RegisterVendor = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,8 +77,17 @@ const RegisterVendor = () => {
     }
     setLoading(true);
     try {
-      const user = await register(form);
-      navigate('/vendor/dashboard');
+      const res = await api.post('/auth/register', form);
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || 'Registration failed.');
+      }
+      navigate('/login', {
+        replace: true,
+        state: {
+          portal: 'vendor',
+          message: 'Registration successful. Please sign in with your new vendor credentials.',
+        },
+      });
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Registration failed.');
     } finally {

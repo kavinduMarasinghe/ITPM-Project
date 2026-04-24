@@ -12,39 +12,46 @@ const VendorDashboard = () => {
   const [stalls, setStalls] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0 });
-  const [selectedEventId, setSelectedEventId] = useState('evt-001'); // Tech Expo by default
+  const [events, setEvents] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState(null);
   const [selectedStall, setSelectedStall] = useState(null);
 
-  // Mocked Event Data for the gallery
-  const events = [
-    {
-      id: 'evt-001',
-      name: 'Annual Tech Innovation Expo',
-      date: 'Oct 15, 2026',
-      location: 'Main Auditorium',
-      status: 'upcoming',
-      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800',
-      stats: { available: 12, pending: 5, booked: 45 }
-    },
-    {
-      id: 'evt-002',
-      name: 'Spring Career Fair 2026',
-      date: 'Nov 02, 2026',
-      location: 'Sports Complex',
-      status: 'open',
-      image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80&w=800',
-      stats: { available: 45, pending: 12, booked: 20 }
-    },
-    {
-      id: 'evt-003',
-      name: 'International Food Festival',
-      date: 'Sep 20, 2026',
-      location: 'Campus Green',
-      status: 'closed',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800',
-      stats: { available: 0, pending: 0, booked: 60 }
-    }
-  ];
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await api.get('/events/published');
+        if (res.data.success) {
+          const today = new Date();
+          const list = Array.isArray(res.data.data)
+            ? res.data.data
+            : res.data.data?.events || [];
+          const mapped = list.map((evt) => {
+            const start = evt.startDate ? new Date(evt.startDate) : null;
+            const end = evt.endDate ? new Date(evt.endDate) : start;
+            let status = 'open';
+            if (end && end < today) status = 'closed';
+            else if (start && start > today) status = 'upcoming';
+            return {
+              id: evt.id,
+              name: evt.eventTitle,
+              date: start
+                ? start.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+                : '',
+              location: evt.venue || evt.venueLocation || '',
+              status,
+              image: evt.imageUrl,
+              stats: { available: 0, pending: 0, booked: 0 },
+            };
+          });
+          setEvents(mapped);
+          if (mapped.length > 0) setSelectedEventId(mapped[0].id);
+        }
+      } catch (err) {
+        console.error('Error fetching events', err);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const fetchRequests = async () => {
     if (!user?.name) return;
@@ -302,6 +309,11 @@ const VendorDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {events.length === 0 && (
+          <div className="col-span-full bg-white border border-slate-100 rounded-3xl p-10 text-center text-slate-500 font-medium">
+            No published events yet. Check back once organizers publish their events.
+          </div>
+        )}
         {events.map((evt) => (
           <div key={evt.id} className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl shadow-slate-200/40 flex flex-col group">
             <div className="relative h-48 bg-slate-200 overflow-hidden">
@@ -324,33 +336,23 @@ const VendorDashboard = () => {
                 <span>{evt.date}</span>
                 <span className="truncate ml-2">{evt.location}</span>
               </div>
-              <div className="grid grid-cols-3 gap-2 bg-slate-50 rounded-xl p-3 border border-slate-100 mb-6 text-center">
-                <div>
-                  <div className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Available</div>
-                  <div className="font-semibold text-emerald-500">{evt.stats.available}</div>
-                </div>
-                <div className="border-x border-slate-200">
-                  <div className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Pending</div>
-                  <div className="font-semibold text-orange-500">{evt.stats.pending}</div>
-                </div>
-                <div>
-                  <div className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Booked</div>
-                  <div className="font-semibold text-slate-800">{evt.stats.booked}</div>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  setSelectedEventId(evt.id);
-                  document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
-                }}
-                className={`mt-auto w-full py-3.5 rounded-xl font-bold transition-all ${
-                  evt.status === 'closed' 
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                  : 'bg-white border-2 border-primary/10 text-primary hover:bg-primary hover:text-white hover:border-primary shadow-sm'
+              <button
+                onClick={() => navigate('/vendor/stalls/layout')}
+                className={`mt-auto w-full py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                  evt.status === 'closed'
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-primary text-white hover:bg-primary/90 shadow-md shadow-primary/20'
                 }`}
                 disabled={evt.status === 'closed'}
               >
-                {evt.status === 'closed' ? 'Booking Closed' : 'View Details'}
+                {evt.status === 'closed' ? 'Booking Closed' : (
+                  <>
+                    Browse Stalls & Book
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </>
+                )}
               </button>
             </div>
           </div>

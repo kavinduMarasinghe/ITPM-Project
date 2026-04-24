@@ -7,6 +7,7 @@ const ROLES = {
   HOD: "hod",
   ORGANIZER: "organizer",
   STUDENT: "student",
+  VENDOR: "vendor",
 };
 
 const USER_STATUSES = {

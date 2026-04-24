@@ -49,8 +49,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('eventaura_user');
   };
 
+  const setSession = ({ token: nextToken, user: nextUser }) => {
+    if (!nextToken || !nextUser) return;
+    setToken(nextToken);
+    setUser(nextUser);
+    localStorage.setItem('eventaura_token', nextToken);
+    localStorage.setItem('eventaura_user', JSON.stringify(nextUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, setSession }}>
       {children}
     </AuthContext.Provider>
   );

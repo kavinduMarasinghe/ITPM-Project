@@ -57,8 +57,8 @@ const BookingRequestForm = () => {
   const [stall, setStall] = useState(null);
   
   const [formData, setFormData] = useState({
-    vendorName: user?.name || '',
-    contactNumber: user?.contactNumber || '',
+    vendorName: user?.fullName || user?.name || '',
+    contactNumber: user?.phone || user?.contactNumber || '',
     businessName: user?.businessName || '',
     itemsToSell: '',
     notes: ''
@@ -66,6 +66,16 @@ const BookingRequestForm = () => {
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+
+  useEffect(() => {
+    if (!user) return;
+    setFormData((prev) => ({
+      ...prev,
+      vendorName: prev.vendorName || user.fullName || user.name || '',
+      contactNumber: prev.contactNumber || user.phone || user.contactNumber || '',
+      businessName: prev.businessName || user.businessName || '',
+    }));
+  }, [user]);
 
   useEffect(() => {
     const fetchStall = async () => {

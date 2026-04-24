@@ -53,7 +53,7 @@ module.exports = [
   {
     method: "GET",
     path: "/api/events/published",
-    roles: [ROLES.STUDENT],
+    roles: [ROLES.STUDENT, ROLES.VENDOR],
     handler: eventController.getPublishedEvents,
   },
   {

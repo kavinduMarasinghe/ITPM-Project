@@ -37,6 +37,8 @@ export function getDashboardRouteForRole(role) {
       return "/admindashboard";
     case "hod":
       return "/hodashboard";
+    case "vendor":
+      return "/vendor/dashboard";
     default:
       return "/login";
   }
