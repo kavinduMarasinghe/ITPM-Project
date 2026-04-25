@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useEvent } from "@/lib/EventContext";
-import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   MessageCircle,
@@ -73,7 +72,15 @@ function getFileKind(file) {
 
 export function EventChat() {
   const { selectedEventId, eventMembers, currentSociety } = useEvent();
-  const { user } = useAuth();
+
+  // Default user — authentication is handled externally.
+  const user = {
+    _id: "1",
+    name: "Sarah Chen",
+    avatar: "#6366f1",
+    role: "Project Lead",
+    email: "sarah@eventaura.com",
+  };
 
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);

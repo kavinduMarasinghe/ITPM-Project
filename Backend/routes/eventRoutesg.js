@@ -12,16 +12,14 @@ const {
   getDashboardSummary,
 } = require("../controllers/eventControllerg");
 
-const { protect } = require("../middleware/authMiddlewareg");
-
-router.get("/", protect, getEvents);
-router.get("/:id/risk-summary", protect, getRiskSummary);
-router.get("/:id/performance", protect, getPerformanceSummary);
-router.get("/:id/report", protect, getEventReport);
-router.get("/:id/live-summary", protect, getLiveSummary);
-router.get("/:id/dashboard", protect, getDashboardSummary);
-router.post("/", protect, createEvent);
-router.put("/:id", protect, updateEvent);
-router.delete("/:id", protect, deleteEvent);
+router.get("/", getEvents);
+router.get("/:id/risk-summary", getRiskSummary);
+router.get("/:id/performance", getPerformanceSummary);
+router.get("/:id/report", getEventReport);
+router.get("/:id/live-summary", getLiveSummary);
+router.get("/:id/dashboard", getDashboardSummary);
+router.post("/", createEvent);
+router.put("/:id", updateEvent);
+router.delete("/:id", deleteEvent);
 
 module.exports = router;

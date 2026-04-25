@@ -7,7 +7,15 @@ import {
   useEffect,
 } from "react";
 import API from "./api";
-import { useAuth } from "./AuthContext";
+
+// Default user — authentication is handled externally.
+const defaultUser = {
+  _id: "1",
+  name: "Sarah Chen",
+  avatar: "#6366f1",
+  role: "Project Lead",
+  email: "sarah@eventaura.com",
+};
 
 const EventContext = createContext(null);
 
@@ -43,7 +51,7 @@ const normalizeSociety = (society) => ({
 });
 
 export function EventProvider({ children }) {
-  const { user } = useAuth();
+  const user = defaultUser;
 
   const [allSocieties, setAllSocieties] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
@@ -52,14 +60,6 @@ export function EventProvider({ children }) {
   const [loadingData, setLoadingData] = useState(true);
 
   const refreshData = useCallback(async () => {
-    if (!user) {
-      setAllSocieties([]);
-      setAllEvents([]);
-      setAllTasks([]);
-      setSelectedEventId("");
-      setLoadingData(false);
-      return;
-    }
 
     try {
       setLoadingData(true);
@@ -94,32 +94,25 @@ export function EventProvider({ children }) {
     } finally {
       setLoadingData(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     refreshData();
   }, [refreshData]);
 
   const userSocieties = useMemo(() => {
-    if (!user) return [];
     return allSocieties.filter((society) =>
       society.members?.some((member) => getId(member) === user._id)
     );
-  }, [allSocieties, user]);
+  }, [allSocieties]);
 
   const userEvents = useMemo(() => {
-    if (!user) return [];
     return allEvents.filter((event) =>
       event.members?.some((member) => getId(member) === user._id)
     );
-  }, [allEvents, user]);
+  }, [allEvents]);
 
   useEffect(() => {
-    if (!user) {
-      setSelectedEventId("");
-      return;
-    }
-
     if (!selectedEventId && userEvents.length > 0) {
       setSelectedEventId(getId(userEvents[0]));
       return;
@@ -131,7 +124,7 @@ export function EventProvider({ children }) {
     ) {
       setSelectedEventId(userEvents.length > 0 ? getId(userEvents[0]) : "");
     }
-  }, [user, userEvents, selectedEventId]);
+  }, [userEvents, selectedEventId]);
 
   const currentEvent = useMemo(
     () => allEvents.find((event) => getId(event) === selectedEventId),
@@ -191,8 +184,6 @@ export function EventProvider({ children }) {
 
   const hasEventAccess = useCallback(
     (eventId) => {
-      if (!user) return false;
-
       const event = allEvents.find((item) => getId(item) === eventId);
       if (!event) return false;
 
@@ -200,13 +191,11 @@ export function EventProvider({ children }) {
         (member) => getId(member) === user._id
       );
     },
-    [allEvents, user]
+    [allEvents]
   );
 
   const getUserEventRole = useCallback(
     (eventId) => {
-      if (!user) return undefined;
-
       const event = allEvents.find((item) => getId(item) === eventId);
       if (!event) return undefined;
 
@@ -220,7 +209,7 @@ export function EventProvider({ children }) {
 
       return matchedRole?.role;
     },
-    [allEvents, user]
+    [allEvents]
   );
 
   const addTask = useCallback(async (taskData) => {

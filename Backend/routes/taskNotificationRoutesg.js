@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-const { protect } = require("../middleware/authMiddlewareg");
 const {
   getTaskNotifications,
   createTaskNotification,
@@ -10,10 +9,10 @@ const {
   deleteTaskNotification,
 } = require("../controllers/taskNotificationControllerg");
 
-router.get("/", protect, getTaskNotifications);
-router.post("/", protect, createTaskNotification);
-router.patch("/read-all", protect, markAllTaskNotificationsRead);
-router.patch("/:id/read", protect, markTaskNotificationRead);
-router.delete("/:id", protect, deleteTaskNotification);
+router.get("/", getTaskNotifications);
+router.post("/", createTaskNotification);
+router.patch("/read-all", markAllTaskNotificationsRead);
+router.patch("/:id/read", markTaskNotificationRead);
+router.delete("/:id", deleteTaskNotification);
 
 module.exports = router;

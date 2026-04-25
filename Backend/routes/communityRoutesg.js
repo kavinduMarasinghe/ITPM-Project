@@ -8,11 +8,9 @@ const {
   deleteCommunity,
 } = require("../controllers/communityControllerg");
 
-const { protect } = require("../middleware/authMiddlewareg");
-
-router.get("/", protect, getCommunities);
-router.post("/", protect, createCommunity);
-router.put("/:id", protect, updateCommunity);
-router.delete("/:id", protect, deleteCommunity);
+router.get("/", getCommunities);
+router.post("/", createCommunity);
+router.put("/:id", updateCommunity);
+router.delete("/:id", deleteCommunity);
 
 module.exports = router;

@@ -6,10 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { Layout } from "@/components/G_Layout";
 import { EventProvider } from "@/lib/EventContext";
-import ProtectedRoute from "@/components/G_ProtectedRoute";
 
-import Login from "@/pages/G_Login";
-import Register from "@/pages/G_Register";
 import Communities from "@/pages/G_Communities";
 import UpdateSociety from "@/pages/G_UpdateSociety";
 import MyEvents from "@/pages/G_MyEvents";
@@ -36,16 +33,7 @@ const App = () => (
       <BrowserRouter>
         <EventProvider>
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-
-            <Route
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
+            <Route element={<Layout />}>
               <Route path="/" element={<Communities />} />
               <Route path="/update-society/:id" element={<UpdateSociety />} />
               <Route path="/events" element={<MyEvents />} />

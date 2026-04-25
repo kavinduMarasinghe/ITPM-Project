@@ -10,11 +10,9 @@ import {
   FolderOpen,
   Award,
   Building2,
-  LogOut,
   Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/G_NavLink";
-import { useAuth } from "@/lib/AuthContext";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -48,7 +46,14 @@ const monitorNav = [
 ];
 
 export function AppSidebar() {
-  const { user, logout } = useAuth();
+  // Default user — authentication is handled externally.
+  const user = {
+    _id: "1",
+    name: "Sarah Chen",
+    avatar: "#6366f1",
+    role: "Project Lead",
+    email: "sarah@eventaura.com",
+  };
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
@@ -136,9 +141,6 @@ export function AppSidebar() {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-medium text-sidebar-foreground/65">
-                  Logged in as
-                </p>
                 <p className="truncate text-sm font-heading font-bold text-sidebar-accent-foreground">
                   {user.name}
                 </p>
@@ -147,23 +149,22 @@ export function AppSidebar() {
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={logout}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/15"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              Logout
-            </button>
           </div>
         ) : collapsed && user ? (
-          <button
-            onClick={logout}
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 text-red-400 transition hover:bg-red-500/15"
-            title="Logout"
+          <div
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-sidebar-border/60 bg-sidebar-accent/70"
+            title={user.name}
           >
-            <LogOut className="h-4 w-4" />
-          </button>
+            <span className="text-xs font-bold text-sidebar-accent-foreground">
+              {user?.name
+                ?.split(" ")
+                .filter(Boolean)
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase() || "U"}
+            </span>
+          </div>
         ) : null}
       </SidebarFooter>
     </Sidebar>
