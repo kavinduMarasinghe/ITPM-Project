@@ -119,6 +119,38 @@ export function CreateSocietyDialog() {
       return;
     }
 
+    if (name.trim().length < 2) {
+      toast({
+        title: "Name Too Short",
+        description: "Society name must be at least 2 characters.",
+      });
+      return;
+    }
+
+    if (name.trim().length > 100) {
+      toast({
+        title: "Name Too Long",
+        description: "Society name must be less than 100 characters.",
+      });
+      return;
+    }
+
+    if (!description.trim()) {
+      toast({
+        title: "Missing Description",
+        description: "Society description is required.",
+      });
+      return;
+    }
+
+    if (description.trim().length > 500) {
+      toast({
+        title: "Description Too Long",
+        description: "Description must be less than 500 characters.",
+      });
+      return;
+    }
+
     try {
       setSubmitting(true);
 
@@ -196,12 +228,13 @@ export function CreateSocietyDialog() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Society name"
                 className="h-12 rounded-2xl"
+                maxLength={100}
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                Description
+                Description *
               </label>
               <Textarea
                 value={description}
@@ -209,6 +242,7 @@ export function CreateSocietyDialog() {
                 placeholder="Brief description..."
                 rows={4}
                 className="rounded-2xl"
+                maxLength={500}
               />
             </div>
 
@@ -356,7 +390,7 @@ export function CreateSocietyDialog() {
 
             <Button
               onClick={handleSubmit}
-              disabled={!name.trim() || submitting}
+              disabled={!name.trim() || !description.trim() || submitting}
               className="w-full h-12 rounded-2xl gradient-primary text-primary-foreground"
             >
               {submitting ? "Creating..." : "Create Society"}

@@ -153,12 +153,37 @@ export default function UpdateSociety() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.name.trim()) {
+      alert("Society name is required");
+      return;
+    }
+
+    if (formData.name.trim().length < 2) {
+      alert("Society name must be at least 2 characters");
+      return;
+    }
+
+    if (formData.name.trim().length > 100) {
+      alert("Society name must be less than 100 characters");
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      alert("Description is required");
+      return;
+    }
+
+    if (formData.description.trim().length > 500) {
+      alert("Description must be less than 500 characters");
+      return;
+    }
+
     try {
       setSaving(true);
 
       await API.put(`/communities/${id}`, {
-        name: formData.name,
-        description: formData.description,
+        name: formData.name.trim(),
+        description: formData.description.trim(),
         category: formData.category,
         icon: formData.icon,
         color: formData.color,
@@ -169,7 +194,7 @@ export default function UpdateSociety() {
       navigate("/");
     } catch (error) {
       console.error("Update error:", error);
-      alert("Failed to update society");
+      alert(error?.response?.data?.message || "Failed to update society");
     } finally {
       setSaving(false);
     }
@@ -237,13 +262,14 @@ export default function UpdateSociety() {
                   }
                   placeholder="Society name"
                   required
+                  maxLength={100}
                   className="h-14 w-full rounded-2xl border border-border bg-background px-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  Description
+                  Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.description}
@@ -255,6 +281,8 @@ export default function UpdateSociety() {
                   }
                   placeholder="Brief description..."
                   rows={4}
+                  required
+                  maxLength={500}
                   className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
@@ -435,7 +463,7 @@ export default function UpdateSociety() {
 
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || !formData.name.trim() || !formData.description.trim()}
                 className="flex h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-base font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {saving ? "Updating Society..." : "Update Society"}

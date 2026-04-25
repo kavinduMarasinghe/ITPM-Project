@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/popover";
 
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const getId = (item) => item?._id || item?.id || "";
@@ -71,9 +71,28 @@ export function UpdateTaskDialog({ task, open, onOpenChange, onTaskUpdated }) {
   const validate = () => {
     const newErrors = {};
 
-    if (!title.trim()) newErrors.title = "Title is required";
-    if (!description.trim()) newErrors.description = "Description is required";
-    if (!deadline) newErrors.deadline = "Deadline is required";
+    if (!title.trim()) {
+      newErrors.title = "Title is required";
+    } else if (title.trim().length < 3) {
+      newErrors.title = "Title must be at least 3 characters";
+    } else if (title.trim().length > 200) {
+      newErrors.title = "Title must be less than 200 characters";
+    }
+
+    if (!description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (description.trim().length < 3) {
+      newErrors.description = "Description must be at least 3 characters";
+    } else if (description.trim().length > 1000) {
+      newErrors.description = "Description must be less than 1000 characters";
+    }
+
+    if (!deadline) {
+      newErrors.deadline = "Deadline is required";
+    } else if (startOfDay(deadline) < startOfDay(new Date())) {
+      newErrors.deadline = "Deadline cannot be in the past";
+    }
+
     if (!assigneeId) newErrors.assignee = "Assignee is required";
 
     setErrors(newErrors);
@@ -128,6 +147,7 @@ export function UpdateTaskDialog({ task, open, onOpenChange, onTaskUpdated }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Task title"
+              maxLength={200}
             />
             {errors.title && (
               <p className="mt-1 text-xs text-red-500">{errors.title}</p>
@@ -139,6 +159,7 @@ export function UpdateTaskDialog({ task, open, onOpenChange, onTaskUpdated }) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Task description"
+              maxLength={1000}
             />
             {errors.description && (
               <p className="mt-1 text-xs text-red-500">{errors.description}</p>
@@ -164,7 +185,11 @@ export function UpdateTaskDialog({ task, open, onOpenChange, onTaskUpdated }) {
                 <Calendar
                   mode="single"
                   selected={deadline}
-                  onSelect={setDeadline}
+                  onSelect={(selectedDate) => {
+                    setDeadline(selectedDate);
+                    setErrors((prev) => ({ ...prev, deadline: undefined }));
+                  }}
+                  disabled={(d) => startOfDay(d) < startOfDay(new Date())}
                 />
               </PopoverContent>
             </Popover>

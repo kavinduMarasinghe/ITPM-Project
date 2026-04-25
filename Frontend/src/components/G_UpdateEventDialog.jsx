@@ -25,7 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarIcon, Edit, X } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 const EVENT_TYPES = [
@@ -153,13 +153,40 @@ export function UpdateEventDialog({
 
   const validateForm = () => {
     const newErrors = {};
+    const trimmedName = name.trim();
+    const today = startOfDay(new Date());
 
-    if (!name.trim()) newErrors.name = "Event name is required.";
+    if (!trimmedName) {
+      newErrors.name = "Event name is required.";
+    } else if (trimmedName.length < 3) {
+      newErrors.name = "Event name must be at least 3 characters.";
+    } else if (trimmedName.length > 100) {
+      newErrors.name = "Event name must be less than 100 characters.";
+    }
+
     if (!societyId) newErrors.societyId = "Please select a society.";
     if (!eventType) newErrors.eventType = "Please select an event type.";
     if (!status) newErrors.status = "Please select a status.";
-    if (!date) newErrors.date = "Please select a date.";
-    if (selectedTeam.length === 0) newErrors.team = "Add at least one member.";
+
+    if (!date) {
+      newErrors.date = "Please select a date.";
+    } else if (startOfDay(date) < today) {
+      newErrors.date = "Event date cannot be in the past.";
+    }
+
+    if (selectedTeam.length === 0) {
+      newErrors.team = "Add at least one member.";
+    } else if (society) {
+      const societyMemberIds = new Set(societyMembers.map((m) => m?._id));
+      const hasInvalidMember = selectedTeam.some(
+        (member) => !societyMemberIds.has(member.memberId)
+      );
+
+      if (hasInvalidMember) {
+        newErrors.team =
+          "Selected team contains members outside the chosen society.";
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -235,6 +262,7 @@ export function UpdateEventDialog({
                 setErrors((prev) => ({ ...prev, name: undefined }));
               }}
               placeholder="Event name"
+              maxLength={100}
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -328,7 +356,15 @@ export function UpdateEventDialog({
                 </Button>
               </PopoverTrigger>
               <PopoverContent>
-                <Calendar mode="single" selected={date} onSelect={setDate} />
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(selectedDate) => {
+                    setDate(selectedDate);
+                    setErrors((prev) => ({ ...prev, date: undefined }));
+                  }}
+                  disabled={(d) => startOfDay(d) < startOfDay(new Date())}
+                />
               </PopoverContent>
             </Popover>
             {errors.date && (

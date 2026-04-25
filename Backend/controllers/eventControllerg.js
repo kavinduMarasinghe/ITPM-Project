@@ -1205,6 +1205,34 @@ const createEvent = async (req, res) => {
       });
     }
 
+    const trimmedName = String(name).trim();
+
+    if (trimmedName.length < 3) {
+      return res.status(400).json({
+        message: "Event name must be at least 3 characters",
+      });
+    }
+
+    if (trimmedName.length > 100) {
+      return res.status(400).json({
+        message: "Event name must be less than 100 characters",
+      });
+    }
+
+    const validEventTypes = ["sports", "seminar", "concert", "social", "community", "exhibition", "workshop"];
+    if (!validEventTypes.includes(eventType)) {
+      return res.status(400).json({
+        message: "Invalid event type. Must be one of: " + validEventTypes.join(", "),
+      });
+    }
+
+    const validStatuses = ["upcoming", "active", "completed"];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status. Must be one of: " + validStatuses.join(", "),
+      });
+    }
+
     if (!isValidDateValue(date)) {
       return res.status(400).json({
         message: "Invalid event date",
@@ -1309,6 +1337,33 @@ const updateEvent = async (req, res) => {
     if (date && !isValidDateValue(date)) {
       return res.status(400).json({
         message: "Invalid event date",
+      });
+    }
+
+    if (name !== undefined && name !== null) {
+      const trimmedName = String(name).trim();
+      if (!trimmedName) {
+        return res.status(400).json({ message: "Event name cannot be empty" });
+      }
+      if (trimmedName.length < 3) {
+        return res.status(400).json({ message: "Event name must be at least 3 characters" });
+      }
+      if (trimmedName.length > 100) {
+        return res.status(400).json({ message: "Event name must be less than 100 characters" });
+      }
+    }
+
+    const validEventTypes = ["sports", "seminar", "concert", "social", "community", "exhibition", "workshop"];
+    if (eventType && !validEventTypes.includes(eventType)) {
+      return res.status(400).json({
+        message: "Invalid event type. Must be one of: " + validEventTypes.join(", "),
+      });
+    }
+
+    const validStatuses = ["upcoming", "active", "completed"];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status. Must be one of: " + validStatuses.join(", "),
       });
     }
 

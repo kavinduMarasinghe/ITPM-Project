@@ -1,5 +1,7 @@
 const Community = require("../models/G_Community");
 
+const VALID_CATEGORIES = ["sports", "technology", "cultural", "community", "music", "academic", "other"];
+
 const formatCommunity = (community) => ({
   _id: community._id,
   id: community._id.toString(),
@@ -38,6 +40,48 @@ const createCommunity = async (req, res) => {
   try {
     const { name, color, icon, description, category, members } = req.body;
 
+    if (!name || !String(name).trim()) {
+      return res.status(400).json({ message: "Society name is required" });
+    }
+
+    const trimmedName = String(name).trim();
+
+    if (trimmedName.length < 2) {
+      return res.status(400).json({ message: "Society name must be at least 2 characters" });
+    }
+
+    if (trimmedName.length > 100) {
+      return res.status(400).json({ message: "Society name must be less than 100 characters" });
+    }
+
+    if (!description || !String(description).trim()) {
+      return res.status(400).json({ message: "Description is required" });
+    }
+
+    if (String(description).trim().length > 500) {
+      return res.status(400).json({ message: "Description must be less than 500 characters" });
+    }
+
+    if (!category || !VALID_CATEGORIES.includes(category)) {
+      return res.status(400).json({ message: "Invalid category. Must be one of: " + VALID_CATEGORIES.join(", ") });
+    }
+
+    if (!icon) {
+      return res.status(400).json({ message: "Icon is required" });
+    }
+
+    if (!color) {
+      return res.status(400).json({ message: "Color is required" });
+    }
+
+    const duplicateName = await Community.findOne({
+      name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+    });
+
+    if (duplicateName) {
+      return res.status(409).json({ message: "A society with this name already exists" });
+    }
+
     const creatorId = req.user._id.toString();
 
     const safeMembers = Array.isArray(members)
@@ -74,6 +118,43 @@ const updateCommunity = async (req, res) => {
 
     if (!existingCommunity) {
       return res.status(404).json({ message: "Community not found" });
+    }
+
+    if (name !== undefined && name !== null) {
+      const trimmedName = String(name).trim();
+      if (!trimmedName) {
+        return res.status(400).json({ message: "Society name cannot be empty" });
+      }
+      if (trimmedName.length < 2) {
+        return res.status(400).json({ message: "Society name must be at least 2 characters" });
+      }
+      if (trimmedName.length > 100) {
+        return res.status(400).json({ message: "Society name must be less than 100 characters" });
+      }
+
+      const duplicateName = await Community.findOne({
+        _id: { $ne: existingCommunity._id },
+        name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+      });
+
+      if (duplicateName) {
+        return res.status(409).json({ message: "A society with this name already exists" });
+      }
+    }
+
+    if (description !== undefined && description !== null) {
+      if (!String(description).trim()) {
+        return res.status(400).json({ message: "Description cannot be empty" });
+      }
+      if (String(description).trim().length > 500) {
+        return res.status(400).json({ message: "Description must be less than 500 characters" });
+      }
+    }
+
+    if (category !== undefined && category !== null) {
+      if (!VALID_CATEGORIES.includes(category)) {
+        return res.status(400).json({ message: "Invalid category. Must be one of: " + VALID_CATEGORIES.join(", ") });
+      }
     }
 
     const creatorId = req.user._id.toString();

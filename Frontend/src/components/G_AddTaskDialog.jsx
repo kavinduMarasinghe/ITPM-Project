@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/popover";
 
 import { CalendarIcon, Plus } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export function AddTaskDialog() {
@@ -57,9 +57,28 @@ export function AddTaskDialog() {
   const validate = () => {
     const errs = {};
 
-    if (!title.trim()) errs.title = "Title is required";
-    if (!description.trim()) errs.description = "Description is required";
-    if (!deadline) errs.deadline = "Deadline is required";
+    if (!title.trim()) {
+      errs.title = "Title is required";
+    } else if (title.trim().length < 3) {
+      errs.title = "Title must be at least 3 characters";
+    } else if (title.trim().length > 200) {
+      errs.title = "Title must be less than 200 characters";
+    }
+
+    if (!description.trim()) {
+      errs.description = "Description is required";
+    } else if (description.trim().length < 3) {
+      errs.description = "Description must be at least 3 characters";
+    } else if (description.trim().length > 1000) {
+      errs.description = "Description must be less than 1000 characters";
+    }
+
+    if (!deadline) {
+      errs.deadline = "Deadline is required";
+    } else if (startOfDay(deadline) < startOfDay(new Date())) {
+      errs.deadline = "Deadline cannot be in the past";
+    }
+
     if (!assigneeId) errs.assignee = "Assignee is required";
     if (!selectedEventId) errs.event = "Select an event first";
 
@@ -141,6 +160,7 @@ export function AddTaskDialog() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Task title"
+            maxLength={200}
           />
           {errors.title && <p className="text-red-500 text-xs">{errors.title}</p>}
 
@@ -149,6 +169,7 @@ export function AddTaskDialog() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Task description"
+            maxLength={1000}
           />
           {errors.description && (
             <p className="text-red-500 text-xs">{errors.description}</p>
@@ -164,9 +185,17 @@ export function AddTaskDialog() {
             </PopoverTrigger>
 
             <PopoverContent>
-              <Calendar mode="single" selected={deadline} onSelect={setDeadline} />
+              <Calendar
+                mode="single"
+                selected={deadline}
+                onSelect={setDeadline}
+                disabled={(d) => startOfDay(d) < startOfDay(new Date())}
+              />
             </PopoverContent>
           </Popover>
+          {errors.deadline && (
+            <p className="text-red-500 text-xs">{errors.deadline}</p>
+          )}
 
           {/* Assignee Search */}
           <Input

@@ -213,16 +213,39 @@ const createTask = async (req, res) => {
       return res.status(400).json({ message: "title is required" });
     }
 
+    if (title.trim().length < 3) {
+      return res.status(400).json({ message: "title must be at least 3 characters" });
+    }
+
+    if (title.trim().length > 200) {
+      return res.status(400).json({ message: "title must be less than 200 characters" });
+    }
+
     if (!description?.trim()) {
       return res.status(400).json({ message: "description is required" });
     }
 
-    if (!priority) {
-      return res.status(400).json({ message: "priority is required" });
+    if (description.trim().length < 3) {
+      return res.status(400).json({ message: "description must be at least 3 characters" });
     }
 
-    if (!impact) {
-      return res.status(400).json({ message: "impact is required" });
+    if (description.trim().length > 1000) {
+      return res.status(400).json({ message: "description must be less than 1000 characters" });
+    }
+
+    const validPriorities = ["high", "medium", "low"];
+    if (!priority || !validPriorities.includes(priority)) {
+      return res.status(400).json({ message: "priority is required and must be one of: " + validPriorities.join(", ") });
+    }
+
+    const validImpacts = ["critical", "important", "supportive"];
+    if (!impact || !validImpacts.includes(impact)) {
+      return res.status(400).json({ message: "impact is required and must be one of: " + validImpacts.join(", ") });
+    }
+
+    const validPhases = ["todo", "in-progress", "review", "completed"];
+    if (finalPhase && !validPhases.includes(finalPhase)) {
+      return res.status(400).json({ message: "phase must be one of: " + validPhases.join(", ") });
     }
 
     if (!deadline || !isValidDateValue(deadline)) {
@@ -328,6 +351,52 @@ const updateTask = async (req, res) => {
         return res.status(400).json({ message: "Invalid deadline" });
       }
       updates.deadline = new Date(updates.deadline);
+    }
+
+    if (updates.title !== undefined) {
+      if (!String(updates.title).trim()) {
+        return res.status(400).json({ message: "title cannot be empty" });
+      }
+      if (String(updates.title).trim().length < 3) {
+        return res.status(400).json({ message: "title must be at least 3 characters" });
+      }
+      if (String(updates.title).trim().length > 200) {
+        return res.status(400).json({ message: "title must be less than 200 characters" });
+      }
+    }
+
+    if (updates.description !== undefined) {
+      if (!String(updates.description).trim()) {
+        return res.status(400).json({ message: "description cannot be empty" });
+      }
+      if (String(updates.description).trim().length < 3) {
+        return res.status(400).json({ message: "description must be at least 3 characters" });
+      }
+      if (String(updates.description).trim().length > 1000) {
+        return res.status(400).json({ message: "description must be less than 1000 characters" });
+      }
+    }
+
+    const validPriorities = ["high", "medium", "low"];
+    if (updates.priority && !validPriorities.includes(updates.priority)) {
+      return res.status(400).json({ message: "priority must be one of: " + validPriorities.join(", ") });
+    }
+
+    const validImpacts = ["critical", "important", "supportive"];
+    if (updates.impact && !validImpacts.includes(updates.impact)) {
+      return res.status(400).json({ message: "impact must be one of: " + validImpacts.join(", ") });
+    }
+
+    const validPhases = ["todo", "in-progress", "review", "completed"];
+    if (updates.phase && !validPhases.includes(updates.phase)) {
+      return res.status(400).json({ message: "phase must be one of: " + validPhases.join(", ") });
+    }
+
+    if (updates.progress !== undefined) {
+      const progressNum = Number(updates.progress);
+      if (Number.isNaN(progressNum) || progressNum < 0 || progressNum > 100) {
+        return res.status(400).json({ message: "progress must be a number between 0 and 100" });
+      }
     }
 
     const existingTask = await Task.findById(req.params.id)
