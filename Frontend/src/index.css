@@ -1,74 +1,213 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-:root {
-	--font-heading-name: 'Poppins';
-	--font-body-name: 'Work Sans';
-	--font-heading: 'Poppins', sans-serif;
-	--font-body: 'Work Sans', sans-serif;
-	--letter-spacing-heading: 0px;
-	--letter-spacing-body: 0px;
-	--space-base: 1rem;
-	--radius-small: 8px;
-	--radius-large: 14px;
-	--border-width: 1px;
-	--shadow-color: 99 102 241;
-	--shadow-offset-x: 0px;
-	--shadow-offset-y: 4px;
-	--shadow-blur: 24px;
-	--shadow-spread: 0px;
-	--shadow-opacity: 0.12;
-	--shadow-custom: 0px 4px 24px rgba(99,102,241,0.10);
-	--shadow-custom-hover: 0px 8px 32px rgba(99,102,241,0.20);
-}
-
-body {
-	font-family: var(--font-body);
-	background-color: #fff;
-	color: #1f2937;
-}
-
-.sidebar-link { transition: all 0.18s; }
-.sidebar-link:hover, .sidebar-link.active { background: linear-gradient(90deg,#4f46e5 0%,#7c3aed 100%); color: #fff; }
-.sidebar-link.active { box-shadow: 0 2px 12px rgba(99,102,241,0.18); }
-.stat-card { transition: box-shadow 0.18s, transform 0.18s; }
-.stat-card:hover { box-shadow: var(--shadow-custom-hover); transform: translateY(-2px); }
-.tab-btn.active { background: #4f46e5; color: #fff; }
-.tab-btn { transition: all 0.15s; }
-.badge-gold { background: linear-gradient(90deg,#f59e0b,#fbbf24); color:#fff; }
-.badge-silver { background: linear-gradient(90deg,#6b7280,#9ca3af); color:#fff; }
-.badge-bronze { background: linear-gradient(90deg,#b45309,#d97706); color:#fff; }
-.progress-bar { transition: width 0.6s cubic-bezier(.4,0,.2,1); }
-.sponsor-card { transition: box-shadow 0.18s, transform 0.18s; }
-.sponsor-card:hover { box-shadow: var(--shadow-custom-hover); transform: translateY(-2px); }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 6px; }
-.mobile-overlay { display: none; }
-@media (max-width: 1023px) {
-	.sidebar-desktop { display: none !important; }
-	.mobile-overlay.open { display: block; }
-}
-@media (min-width: 1024px) {
-	.mobile-menu-btn { display: none !important; }
-}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-:root {
-	--color-primary: #331C22;
-	--color-secondary: #38434E;
-	--color-blue: #2F3775;
-	--color-accent: #F7A910;
-	--color-danger: #B63637;
-	--color-teal: #058694;
-	--color-gray: #616162;
-	--color-bg: #FFFFFF;
-	--color-white: #FFFFFF;
+/* ── Base Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* Keep a single source of truth for app background */
+html {
+  scroll-behavior: smooth;
+  font-size: 16px; /* base — rem calculations anchor here */
+}
+
 body {
-	background: var(--color-bg);
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 1rem;       /* 16px body text */
+  font-weight: 400;
+  line-height: 1.6;
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+code {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* ── Typography Scale ────────────────────────────────────────────────────── */
+/*
+  h1  → 2rem   (32px)  font-semibold  page titles
+  h2  → 1.5rem (24px)  font-bold   section headings
+  h3  → 1.25rem(20px)  font-bold   card headings
+  h4  → 1.125rem(18px) font-semibold sub-headings
+  p   → 1rem   (16px)  font-normal  body text
+  small → 0.875rem(14px) labels, meta
+  xs  → 0.75rem(12px)  badges, captions — NOT smaller than this
+*/
+
+h1 { font-size: 2rem;    font-weight: 900; line-height: 1.15; letter-spacing: -0.03em; }
+h2 { font-size: 1.5rem;  font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
+h3 { font-size: 1.25rem; font-weight: 700; line-height: 1.3;  letter-spacing: -0.01em; }
+h4 { font-size: 1.125rem;font-weight: 600; line-height: 1.4; }
+
+p  { font-size: 1rem; font-weight: 400; line-height: 1.65; }
+
+/* ── Bold override — prevent excessive bolding ───────────────────────────── */
+/*
+  Only use font-semibold (900) for display numbers and main page headings.
+  Everything else should be font-bold (700) or font-semibold (600).
+  Labels and captions: font-medium (500) or font-semibold (600).
+  Body copy: font-normal (400).
+*/
+.font-semibold { font-weight: 900; }
+.font-bold { font-weight: 800; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.font-normal { font-weight: 400; }
+
+/* ── Minimum font size guard ─────────────────────────────────────────────── */
+/* Tailwind's text-sm is 0.75rem (12px) — do not go below this */
+.text-sm   { font-size: 0.75rem;  line-height: 1.5; }
+.text-sm   { font-size: 0.875rem; line-height: 1.55; }
+.text-base { font-size: 1rem;     line-height: 1.6; }
+.text-lg   { font-size: 1.125rem; line-height: 1.5; }
+.text-xl   { font-size: 1.25rem;  line-height: 1.45; }
+.text-2xl  { font-size: 1.5rem;   line-height: 1.4; }
+.text-3xl  { font-size: 1.875rem; line-height: 1.3; }
+.text-4xl  { font-size: 2.25rem;  line-height: 1.2; }
+
+/* ── Form elements — accessible minimum sizes ────────────────────────────── */
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: 0.9375rem; /* 15px — never smaller than 15px for interactive elements */
+}
+
+label {
+  font-size: 0.8125rem; /* 13px — clear labels */
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ── Table text ──────────────────────────────────────────────────────────── */
+th {
+  font-size: 0.75rem;  /* 12px table headers — uppercase so readable */
+  font-weight: 700;
+}
+td {
+  font-size: 0.875rem; /* 14px table cells */
+  font-weight: 400;
+}
+
+/* ── Badge / chip minimum ────────────────────────────────────────────────── */
+.badge, [class*="rounded-full"][class*="px-"][class*="text-sm"] {
+  font-size: 0.75rem; /* 12px min */
+  font-weight: 700;
+}
+
+/* ── Tracking widest override — use sparingly ────────────────────────────── */
+/* tracking-widest on tiny text (< 0.75rem) hurts readability — not used */
+
+/* ── Scrollbar hide utility ──────────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Notification badge pulse ────────────────────────────────────────────── */
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.15); }
+}
+.notification-badge { animation: badgePulse 2s ease-in-out infinite; }
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #F4F6F9;
+    color: #0F172A;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  
+  .btn-accent {
+    background-color: #F97316;
+    color: #FFFFFF;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .btn-accent:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  
+  .btn-secondary {
+    background-color: #E9EEF5;
+    color: #0F172A;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .card {
+    background-color: #FFFFFF;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid #E2E8F0;
+    padding: 1.5rem;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    background-color: white;
+  }
+  
+  .input:focus {
+    outline: none;
+    ring: 2px solid #F97316;
+    border-color: transparent;
+  }
+  
+  .label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0F172A;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #F97316;
+    display: inline-block;
+  }
 }

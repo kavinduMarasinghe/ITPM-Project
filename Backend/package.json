@@ -1,25 +1,25 @@
 {
-  "name": "server",
+  "name": "eventaura-backend",
   "version": "1.0.0",
-  "type": "module",
-  "description": "",
-  "main": "index.mjs",
+  "description": "EventAura backend",
+  "main": "app.js",
   "scripts": {
-    "dev": "nodemon index.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "dev": "nodemon app.js"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.2.1",
-    "nodemailer": "^8.0.5",
-    "pdfkit": "^0.17.2"
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.1",
+    "nodemailer": "^8.0.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.14"
   }
 }

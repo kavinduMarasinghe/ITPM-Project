@@ -1,72 +1,106 @@
-import express from "express";
-import cors from "cors";
-import nodemailer from "nodemailer";
+const express = require("express");
 
-import sponsorshipPackageRoutes from "./routes/sponsorshipPackage.routes.js";
-import sponsorApplicationRoutes from "./routes/sponsorApplication.routes.js";
-import sponsorRequestRoutes from "./routes/sponsorRequest.routes.js";
-import paymentRoutes from "./routes/payment.routes.js";
-import reportRoutes from "./routes/report.routes.js";
-import invoiceRoutes from "./routes/invoice.routes.js";
-import { errorHandler } from "./middleware/errorHandler.js";
+const authService = require("./services/authService");
+const routes = require("./routes");
+const { AppError } = require("./utils/errors");
 
-// TODO: replace with your real auth middleware that sets req.user
-import { auth } from "./middleware/auth.js";
+function getBearerToken(req) {
+  const authorizationHeader = req.headers.authorization || "";
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Backend is running successfully 🚀");
-});
-
-// Test email endpoint
-app.post("/api/test-email", async (req, res) => {
-  const { to, subject, body } = req.body;
-
-  if (!to) {
-    return res.status(400).json({ message: "Email recipient required" });
+  if (!authorizationHeader.startsWith("Bearer ")) {
+    return null;
   }
 
-  try {
-    const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE || "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+  return authorizationHeader.slice("Bearer ".length).trim();
+}
 
-    const result = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: to,
-      subject: subject || "Test Email from EVENTAURA",
-      html: body || `<h1>Test Email</h1><p>This is a test email from EVENTAURA backend. If you received this, email is working correctly!</p>`,
-    });
+function applyRoute(app, route) {
+  app[route.method.toLowerCase()](route.path, async (req, res, next) => {
+    try {
+      let authUser = null;
+      const token = getBearerToken(req);
 
-    res.status(200).json({
-      message: "Test email sent successfully",
-      details: result,
-    });
-  } catch (error) {
-    console.error("Test email error:", error);
-    res.status(500).json({
-      message: "Failed to send test email",
-      error: error.message,
-    });
+      if (route.roles && route.roles.length > 0) {
+        authUser = await authService.getAuthenticatedUser(token, route.roles);
+      }
+
+      const result = await route.handler({
+        authUser,
+        body: req.body || {},
+        params: req.params || {},
+        query: req.query || {},
+        req,
+        res,
+        token,
+      });
+
+      res.status(result.statusCode || 200).json({
+        success: true,
+        ...(result.message ? { message: result.message } : {}),
+        ...(Object.prototype.hasOwnProperty.call(result, "data")
+          ? { data: result.data }
+          : {}),
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+}
+
+function createApp() {
+  const app = express();
+
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    if (req.method === "OPTIONS") {
+      res.sendStatus(204);
+      return;
+    }
+
+    next();
+  });
+
+  app.use(express.json({ limit: "50mb" }));
+
+  for (const route of routes) {
+    applyRoute(app, route);
   }
-});
 
-app.use(auth);
+  app.use((req, res) => {
+    res.status(404).json({
+      success: false,
+      message: "Route not found.",
+    });
+  });
 
-app.use("/api", sponsorshipPackageRoutes);
-app.use("/api", sponsorApplicationRoutes);
-app.use("/api", sponsorRequestRoutes);
-app.use("/api", paymentRoutes);
-app.use("/api", reportRoutes);
-app.use("/api", invoiceRoutes);
+  app.use((error, req, res, next) => {
+    if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid JSON body.",
+      });
+      return;
+    }
 
-app.use(errorHandler);
+    const statusCode = error instanceof AppError ? error.statusCode : 500;
+    const message =
+      error instanceof AppError
+        ? error.message
+        : "Something went wrong while processing the request.";
 
-export default app;
+    res.status(statusCode).json({
+      success: false,
+      message,
+      ...(error instanceof AppError && error.details ? { details: error.details } : {}),
+    });
+  });
+
+  return app;
+}
+
+module.exports = {
+  createApp,
+};
