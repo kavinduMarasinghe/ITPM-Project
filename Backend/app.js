@@ -7,6 +7,13 @@ require("dotenv").config({ override: true });
 const stallRoutes = require("./routes/stallRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
+const communityRoutesG = require("./routes/communityRoutesg");
+const eventRoutesG = require("./routes/eventRoutesg");
+const taskRoutesG = require("./routes/taskRoutesg");
+const taskNotificationRoutesG = require("./routes/taskNotificationRoutesg");
+const chatRoutesG = require("./routes/chatRoutesg");
+const LegacyUser = require("./models/userModel");
+const { authenticate } = require("./middleware/authMiddleware");
 const { register: registerVendor } = require("./controllers/authController");
 
 // Unified EventAura routes (auth, students, organizers, events, health)
@@ -36,6 +43,41 @@ app.get("/", (req, res) => {
 
 // Vendor registration still uses the legacy bcrypt + JWT controller
 app.post("/api/auth/register", registerVendor);
+
+// User directory used by community/event/task member-search dialogs
+app.get("/api/auth/users", authenticate, async (req, res) => {
+  try {
+    const search = (req.query.search || "").toString().trim();
+    const filter = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { username: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const users = await LegacyUser.find(filter)
+      .select("_id name email username role")
+      .sort({ name: 1 })
+      .lean();
+
+    res.json(
+      users.map((u) => ({
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        username: u.username,
+        role: u.role,
+        avatar: "#6366f1",
+      }))
+    );
+  } catch (err) {
+    console.error("List users error:", err.stack || err);
+    res.status(500).json({ success: false, message: "Failed to list users." });
+  }
+});
 
 // Stall-management endpoints (no auth middleware in this layer)
 app.use("/api/stalls", stallRoutes);
@@ -86,6 +128,18 @@ function applyRoute(app, route) {
 for (const route of unifiedRoutes) {
   applyRoute(app, route);
 }
+
+// EventAura community / event / task data used by G_ dialogs.
+// Mounted AFTER the unified routes so the specific unified handlers
+// (e.g. POST /api/events, GET /api/events/my-events) keep priority.
+// `authenticate` populates req.user, which the controllers depend on.
+app.use("/api/communities", authenticate, communityRoutesG);
+// /api/events is owned by the unified event-request flow; expose the G_
+// internal-event CRUD under a distinct prefix to avoid that collision.
+app.use("/api/g-events", authenticate, eventRoutesG);
+app.use("/api/tasks", authenticate, taskRoutesG);
+app.use("/api/task-notifications", authenticate, taskNotificationRoutesG);
+app.use("/api/chat", authenticate, chatRoutesG);
 
 app.use((error, req, res, next) => {
   if (error instanceof SyntaxError && error.status === 400 && "body" in error) {

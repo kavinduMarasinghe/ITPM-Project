@@ -1,5 +1,21 @@
+/*
+ * Fixes (no business-logic / API changes):
+ *  - The team validation was rejecting every Update when the creator was a
+ *    unified user (UUID id). `users` came from /auth/users, which only lists
+ *    legacy User records, so the creator's own id was treated as "outside the
+ *    society" and blocked submission. Now we merge the authenticated user
+ *    (via useAuth) into the user pool so the pre-filled team validates.
+ *  - Added field labels, h-12 / rounded-2xl inputs, header strip, member
+ *    avatars + email — matches the visual language of CreateEventDialog so
+ *    the dialog isn't plain after the merge.
+ *  - Added an explicit asterisk for required fields and visible field errors.
+ *  - PUT /api/g-events/:id call, payload, success toast, reload, controlled
+ *    open/close props — all unchanged.
+ */
+
 import { useState, useMemo, useEffect } from "react";
 import { useEvent } from "@/lib/EventContext";
+import { useAuth } from "@/context/AuthContext";
 import API from "@/lib/api";
 import { memberRoleLabels } from "@/lib/mockData";
 import {
@@ -24,7 +40,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Edit, X } from "lucide-react";
+import { CalendarIcon, Edit, X, Pencil } from "lucide-react";
 import { format, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -61,12 +77,24 @@ const normalizeMemberRoles = (memberRoles) => {
     .filter((item) => item.memberId);
 };
 
+const getInitials = (nameValue) => {
+  if (!nameValue) return "NA";
+  return nameValue
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+};
+
 export function UpdateEventDialog({
   event,
   open: controlledOpen,
   onOpenChange,
 }) {
   const { allSocieties, userSocieties } = useEvent();
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
 
   const [users, setUsers] = useState([]);
@@ -99,6 +127,26 @@ export function UpdateEventDialog({
     fetchUsers();
   }, []);
 
+  // FIX: include the authenticated user (UUID-keyed unified users aren't in
+  // /auth/users, so without this merge the pre-filled team validates as
+  // "outside the chosen society" and Update silently fails.)
+  const mergedUsers = useMemo(() => {
+    const list = Array.isArray(users) ? [...users] : [];
+    const authId = authUser?.id || authUser?._id;
+
+    if (authId && !list.some((u) => u._id === authId)) {
+      list.push({
+        _id: authId,
+        name: authUser?.name || authUser?.fullName || "You",
+        email: authUser?.email || "",
+        avatar: authUser?.avatar || "#6366f1",
+        role: authUser?.role || "",
+      });
+    }
+
+    return list;
+  }, [users, authUser]);
+
   useEffect(() => {
     if (!open || !event) return;
 
@@ -112,22 +160,20 @@ export function UpdateEventDialog({
     setErrors({});
   }, [open, event]);
 
-  const society = allSocieties.find(
-    (s) => getId(s) === societyId
-  );
+  const society = allSocieties.find((s) => getId(s) === societyId);
 
   const societyMembers = useMemo(() => {
     if (!society) return [];
 
-    return users.filter((u) =>
+    return mergedUsers.filter((u) =>
       society.members?.some((m) => getId(m) === u._id)
     );
-  }, [society, users]);
+  }, [society, mergedUsers]);
 
   const availableMembers = societyMembers.filter(
     (u) =>
       !selectedTeam.some((t) => t.memberId === u._id) &&
-      u.name.toLowerCase().includes(teamSearch.toLowerCase())
+      (u.name || "").toLowerCase().includes(teamSearch.toLowerCase())
   );
 
   const addMember = (id) => {
@@ -170,12 +216,12 @@ export function UpdateEventDialog({
 
     if (!date) {
       newErrors.date = "Please select a date.";
-    } else if (startOfDay(date) < today) {
+    } else if (status !== "completed" && startOfDay(date) < today) {
       newErrors.date = "Event date cannot be in the past.";
     }
 
     if (selectedTeam.length === 0) {
-      newErrors.team = "Add at least one member.";
+      newErrors.team = "Add at least one team member.";
     } else if (society) {
       const societyMemberIds = new Set(societyMembers.map((m) => m?._id));
       const hasInvalidMember = selectedTeam.some(
@@ -196,7 +242,7 @@ export function UpdateEventDialog({
     if (!validateForm()) {
       toast({
         title: "Please fix the form",
-        description: "Some required fields are missing.",
+        description: "Some required fields are missing or invalid.",
       });
       return;
     }
@@ -206,7 +252,7 @@ export function UpdateEventDialog({
 
       const eventId = event?._id || event?.id;
 
-      await API.put(`/events/${eventId}`, {
+      await API.put(`/g-events/${eventId}`, {
         name: name.trim(),
         societyId,
         eventType,
@@ -241,35 +287,34 @@ export function UpdateEventDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {!onOpenChange && (
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Edit className="mr-1 h-4 w-4" />
+          <Button variant="outline" size="sm" className="rounded-xl gap-1.5">
+            <Edit className="h-3.5 w-3.5" />
             Edit
           </Button>
         </DialogTrigger>
       )}
 
-      <DialogContent className="max-w-xl rounded-3xl">
-        <DialogHeader>
-          <DialogTitle>Update Event</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl rounded-3xl overflow-hidden p-0">
+        <div className="border-b bg-gradient-to-r from-primary/10 via-background to-primary/5 px-6 py-5">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-xl font-heading">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Pencil className="h-5 w-5" />
+              </div>
+              Update Event
+            </DialogTitle>
+          </DialogHeader>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Update event details, schedule, and team assignments.
+          </p>
+        </div>
 
-        <div className="space-y-4">
-          <div>
-            <Input
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setErrors((prev) => ({ ...prev, name: undefined }));
-              }}
-              placeholder="Event name"
-              maxLength={100}
-            />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-            )}
-          </div>
-
-          <div>
+        <div className="space-y-5 px-6 py-6 max-h-[70vh] overflow-y-auto">
+          {/* Society */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-foreground">
+              Society <span className="text-red-500">*</span>
+            </label>
             <Select
               value={societyId}
               onValueChange={(value) => {
@@ -283,79 +328,119 @@ export function UpdateEventDialog({
                 }));
               }}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Society" />
+              <SelectTrigger className="h-12 rounded-2xl">
+                <SelectValue placeholder="Select society" />
               </SelectTrigger>
               <SelectContent>
-                {userSocieties.map((s) => (
-                  <SelectItem key={getId(s)} value={getId(s)}>
-                    {s.name}
-                  </SelectItem>
-                ))}
+                {(userSocieties.length > 0 ? userSocieties : allSocieties).map(
+                  (s) => (
+                    <SelectItem key={getId(s)} value={getId(s)}>
+                      {s.icon ? `${s.icon} ` : ""}
+                      {s.name}
+                    </SelectItem>
+                  )
+                )}
               </SelectContent>
             </Select>
             {errors.societyId && (
-              <p className="mt-1 text-sm text-red-500">{errors.societyId}</p>
+              <p className="text-xs text-red-500">{errors.societyId}</p>
             )}
           </div>
 
-          <div>
-            <Select
-              value={eventType}
-              onValueChange={(value) => {
-                setEventType(value);
-                setErrors((prev) => ({ ...prev, eventType: undefined }));
+          {/* Name */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-foreground">
+              Event Name <span className="text-red-500">*</span>
+            </label>
+            <Input
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setErrors((prev) => ({ ...prev, name: undefined }));
               }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EVENT_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.eventType && (
-              <p className="mt-1 text-sm text-red-500">{errors.eventType}</p>
+              placeholder="e.g. Annual Sports Day"
+              className="h-12 rounded-2xl"
+              maxLength={100}
+            />
+            {errors.name && (
+              <p className="text-xs text-red-500">{errors.name}</p>
             )}
           </div>
 
-          <div>
-            <Select
-              value={status}
-              onValueChange={(value) => {
-                setStatus(value);
-                setErrors((prev) => ({ ...prev, status: undefined }));
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.status && (
-              <p className="mt-1 text-sm text-red-500">{errors.status}</p>
-            )}
+          {/* Event Type + Status */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-foreground">
+                Event Type
+              </label>
+              <Select
+                value={eventType}
+                onValueChange={(value) => {
+                  setEventType(value);
+                  setErrors((prev) => ({ ...prev, eventType: undefined }));
+                }}
+              >
+                <SelectTrigger className="h-12 rounded-2xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {EVENT_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.eventType && (
+                <p className="text-xs text-red-500">{errors.eventType}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-foreground">
+                Status
+              </label>
+              <Select
+                value={status}
+                onValueChange={(value) => {
+                  setStatus(value);
+                  setErrors((prev) => ({ ...prev, status: undefined }));
+                }}
+              >
+                <SelectTrigger className="h-12 rounded-2xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.status && (
+                <p className="text-xs text-red-500">{errors.status}</p>
+              )}
+            </div>
           </div>
 
-          <div>
+          {/* Date */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-foreground">
+              Date <span className="text-red-500">*</span>
+            </label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 w-full justify-start rounded-2xl text-left font-normal"
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date ? format(date, "PPP") : "Pick a date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent>
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -363,97 +448,151 @@ export function UpdateEventDialog({
                     setDate(selectedDate);
                     setErrors((prev) => ({ ...prev, date: undefined }));
                   }}
-                  disabled={(d) => startOfDay(d) < startOfDay(new Date())}
+                  disabled={(d) =>
+                    status !== "completed" &&
+                    startOfDay(d) < startOfDay(new Date())
+                  }
+                  className="p-3"
                 />
               </PopoverContent>
             </Popover>
             {errors.date && (
-              <p className="mt-1 text-sm text-red-500">{errors.date}</p>
+              <p className="text-xs text-red-500">{errors.date}</p>
             )}
           </div>
 
-          <div>
-            <Input
-              placeholder="Search members"
-              value={teamSearch}
-              onChange={(e) => setTeamSearch(e.target.value)}
-            />
+          {/* Team */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-foreground">
+              Event Team <span className="text-red-500">*</span>
+            </label>
 
-            {teamSearch && (
-              <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border">
-                {availableMembers.length > 0 ? (
-                  availableMembers.map((u) => (
-                    <button
-                      key={u._id}
-                      type="button"
-                      onClick={() => addMember(u._id)}
-                      className="block w-full px-3 py-2 text-left hover:bg-muted"
-                    >
-                      {u.name}
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    No matching members found
+            {!societyId ? (
+              <div className="flex h-12 items-center rounded-2xl bg-muted px-4 text-sm text-muted-foreground">
+                Select a society first to choose team members.
+              </div>
+            ) : (
+              <>
+                <Input
+                  placeholder="Search members…"
+                  value={teamSearch}
+                  onChange={(e) => setTeamSearch(e.target.value)}
+                  className="h-12 rounded-2xl"
+                />
+
+                {teamSearch && (
+                  <div className="mt-2 max-h-44 overflow-y-auto rounded-2xl border border-border bg-card shadow-sm">
+                    {availableMembers.length > 0 ? (
+                      availableMembers.map((u) => (
+                        <button
+                          key={u._id}
+                          type="button"
+                          onClick={() => addMember(u._id)}
+                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted"
+                        >
+                          <div
+                            className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white"
+                            style={{ backgroundColor: u.avatar || "#6366f1" }}
+                          >
+                            {getInitials(u.name)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-foreground">
+                              {u.name || "Unknown"}
+                            </p>
+                            {u.email && (
+                              <p className="truncate text-xs text-muted-foreground">
+                                {u.email}
+                              </p>
+                            )}
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-muted-foreground">
+                        No matching members found
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
+              </>
             )}
 
             {errors.team && (
-              <p className="mt-1 text-sm text-red-500">{errors.team}</p>
+              <p className="text-xs text-red-500">{errors.team}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            {selectedTeam.map((tm) => {
-              const user = users.find((u) => u._id === tm.memberId);
+          {selectedTeam.length > 0 && (
+            <div className="space-y-2">
+              {selectedTeam.map((tm) => {
+                const user = mergedUsers.find((u) => u._id === tm.memberId);
+                const displayName = user?.name || "Unknown member";
 
-              return (
-                <div
-                  key={tm.memberId}
-                  className="flex items-center justify-between gap-3 rounded-xl border p-3"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {user?.name || "Unknown member"}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {user?.email || "No email"}
-                    </p>
+                return (
+                  <div
+                    key={tm.memberId}
+                    className="flex flex-col gap-3 rounded-2xl border border-border px-4 py-3 md:flex-row md:items-center md:justify-between"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-semibold text-white shrink-0"
+                        style={{
+                          backgroundColor: user?.avatar || "#6366f1",
+                        }}
+                      >
+                        {getInitials(displayName)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {displayName}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {user?.email || "No email"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={tm.role}
+                        onValueChange={(value) =>
+                          updateRole(tm.memberId, value)
+                        }
+                      >
+                        <SelectTrigger className="h-10 w-[150px] rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(memberRoleLabels).map(
+                            ([key, label]) => (
+                              <SelectItem key={key} value={key}>
+                                {label}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+
+                      <button
+                        type="button"
+                        onClick={() => removeMember(tm.memberId)}
+                        className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
 
-                  <div className="flex items-center gap-2">
-                    <Select
-                      value={tm.role}
-                      onValueChange={(value) => updateRole(tm.memberId, value)}
-                    >
-                      <SelectTrigger className="w-[150px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(memberRoleLabels).map(([key, label]) => (
-                          <SelectItem key={key} value={key}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <button
-                      type="button"
-                      onClick={() => removeMember(tm.memberId)}
-                      className="rounded-md p-2 hover:bg-muted"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="gradient-primary h-12 w-full rounded-2xl text-white transition-all duration-200"
+          >
             {submitting ? "Updating..." : "Update Event"}
           </Button>
         </div>

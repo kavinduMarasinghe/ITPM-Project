@@ -1,3 +1,9 @@
+/*
+ * UI fix (no logic change):
+ *  - z-50 -> z-[80] on SelectContent so dropdown options render ABOVE the
+ *    dialog content (z-[70]) instead of being clipped behind it.
+ */
+
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
@@ -73,7 +79,7 @@ const SelectContent = React.forwardRef(
         ref={ref}
         position={position}
         className={cn(
-          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-xl",
+          "relative z-[80] max-h-96 min-w-[8rem] overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-xl",
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
           "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const taskCommentSchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    userId: { type: String },
     text: { type: String, required: true },
     timestamp: { type: String, required: true },
   },
@@ -12,8 +12,7 @@ const taskCommentSchema = new mongoose.Schema(
 const taskActivitySchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     action: {
@@ -44,8 +43,7 @@ const taskSchema = new mongoose.Schema(
       required: true,
     },
     assigneeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     deadline: { type: Date, required: true },

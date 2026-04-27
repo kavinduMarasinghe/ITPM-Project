@@ -8,8 +8,7 @@ const chatMessageSchema = new mongoose.Schema(
       default: null,
     },
     senderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     message: {

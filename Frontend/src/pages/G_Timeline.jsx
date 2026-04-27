@@ -1,3 +1,15 @@
+/*
+ * Fixes (no business-logic / API changes):
+ *  - Added a "no event selected / no events" fallback so the page doesn't
+ *    silently render a misleading default milestone column when the user has
+ *    nothing to show.
+ *  - Sorted critical-path tasks chronologically by deadline (earliest first)
+ *    so the bottom card behaves like a real timeline.
+ *  - Added a loading skeleton while EventContext is fetching.
+ *  - currentEvent banner shows which event the timeline is anchored to.
+ *  - All milestone math, readiness score, and Progress UI are unchanged.
+ */
+
 import { useMemo } from "react";
 import { useEvent } from "@/lib/EventContext";
 import { getReadinessScore } from "@/lib/mockData";
@@ -10,6 +22,7 @@ import {
   CheckCircle2,
   Clock3,
   Target,
+  CalendarClock,
 } from "lucide-react";
 
 const defaultMilestones = [
@@ -31,13 +44,26 @@ function getAssigneeName(task) {
 }
 
 export default function Timeline() {
-  const { eventTasks = [] } = useEvent();
+  const {
+    eventTasks = [],
+    currentEvent,
+    selectedEventId,
+    userEvents = [],
+    loadingData,
+  } = useEvent();
 
   const score = getReadinessScore(eventTasks);
 
-  const criticalTasks = eventTasks.filter(
-    (t) => t?.impact === "critical" && t?.phase !== "completed"
-  );
+  const criticalTasks = useMemo(() => {
+    return eventTasks
+      .filter((t) => t?.impact === "critical" && t?.phase !== "completed")
+      .slice()
+      .sort((a, b) => {
+        const aTime = a?.deadline ? new Date(a.deadline).getTime() : Infinity;
+        const bTime = b?.deadline ? new Date(b.deadline).getTime() : Infinity;
+        return aTime - bTime;
+      });
+  }, [eventTasks]);
 
   const completedTasks = eventTasks.filter((t) => t?.phase === "completed").length;
   const totalTasks = eventTasks.length;
@@ -66,6 +92,67 @@ export default function Timeline() {
     ];
   }, [eventTasks, completionRate]);
 
+  // Loading state
+  if (loadingData) {
+    return (
+      <div className="space-y-6 animate-slide-in">
+        <div className="h-8 w-48 rounded bg-muted animate-pulse" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[0, 1, 2].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4 space-y-2">
+                <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+                <div className="h-6 w-1/3 rounded bg-muted animate-pulse" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardContent className="p-6 space-y-3">
+            <div className="h-4 w-1/3 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // No event context — surface a clear empty state instead of showing
+  // a misleading default milestones column.
+  if (!selectedEventId || !currentEvent) {
+    return (
+      <div className="space-y-6 animate-slide-in">
+        <div>
+          <h1 className="text-2xl font-heading font-bold text-foreground">
+            Event Timeline
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Visual overview of milestones and critical path
+          </p>
+        </div>
+
+        <Card className="border-dashed">
+          <CardContent className="p-10 text-center space-y-3">
+            <div className="mx-auto h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+              <CalendarClock className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-semibold text-foreground">
+              {userEvents.length === 0
+                ? "No events yet"
+                : "Select an event to view its timeline"}
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              {userEvents.length === 0
+                ? "Once you're added to an event, its milestones and critical-path tasks will show up here."
+                : "Pick an event from the Dashboard or Task Board, then come back here to see its timeline."}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -74,7 +161,9 @@ export default function Timeline() {
             Event Timeline
           </h1>
           <p className="text-sm text-muted-foreground">
-            Visual overview of milestones and critical path
+            {currentEvent.name
+              ? `Milestones and critical path for ${currentEvent.name}`
+              : "Visual overview of milestones and critical path"}
           </p>
         </div>
 

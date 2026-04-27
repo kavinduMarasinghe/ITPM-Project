@@ -27,7 +27,7 @@ export function DeleteEventDialog({ event }) {
 
       const eventId = event?._id || event?.id;
 
-      await API.delete(`/events/${eventId}`);
+      await API.delete(`/g-events/${eventId}`);
 
       toast({
         title: "Event Deleted",

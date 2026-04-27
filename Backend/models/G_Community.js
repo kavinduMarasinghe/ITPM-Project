@@ -11,7 +11,7 @@ const communitySchema = new mongoose.Schema(
       enum: ["sports", "technology", "cultural", "community", "music", "academic", "other"],
       required: true,
     },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    members: [{ type: String }],
   },
   { timestamps: true }
 );

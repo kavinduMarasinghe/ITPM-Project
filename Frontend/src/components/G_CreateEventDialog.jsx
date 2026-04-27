@@ -214,7 +214,7 @@ export function CreateEventDialog({ preSelectedSocietyId }) {
     try {
       setSubmitting(true);
 
-      await API.post("/events", {
+      await API.post("/g-events", {
         name: name.trim(),
         societyId,
         eventType,

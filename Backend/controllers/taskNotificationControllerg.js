@@ -58,12 +58,10 @@ const formatTaskNotification = (notification) => ({
 
 const getTaskNotifications = async (req, res) => {
   try {
-    const notifications = await TaskNotification.find({
-      userId: req.user._id,
-    })
+    const userId = String(req.user._id);
+    const notifications = await TaskNotification.find({ userId })
       .populate("eventId", "name date status")
       .populate("taskId", "title phase priority")
-      .populate("relatedUserId", "name email avatar role")
       .sort({ createdAt: -1 });
 
     res.json(notifications.map(formatTaskNotification));

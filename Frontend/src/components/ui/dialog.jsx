@@ -1,3 +1,12 @@
+/*
+ * UI fixes (no logic / API changes):
+ *  - Overlay: bg-black/80 -> bg-slate-950/60, backdrop-blur-sm -> backdrop-blur-[2px]
+ *    (resolves "dim / blurry" modals while keeping the SmartCampus dark-blue feel).
+ *  - z-index: overlay z-50 -> z-[60], content z-50 -> z-[70] so popovers/selects
+ *    rendered with z-[80] sit above the modal instead of being clipped behind it.
+ *  - DialogContent: subtle ring-1 + ring-border/40 for crisper edge against overlay.
+ */
+
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
@@ -13,7 +22,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm transition-all duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
+      "fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-[2px] transition-all duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
       className
     )}
     {...props}
@@ -30,8 +39,8 @@ const DialogContent = React.forwardRef(
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%]",
-          "rounded-2xl border border-border bg-card p-6 shadow-2xl",
+          "fixed left-[50%] top-[50%] z-[70] w-full max-w-lg translate-x-[-50%] translate-y-[-50%]",
+          "rounded-2xl border border-border bg-card p-6 shadow-2xl ring-1 ring-border/40",
           "transition-all duration-200",
           "data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=open]:fade-in-0",
           "data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out-0",

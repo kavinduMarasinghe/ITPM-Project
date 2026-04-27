@@ -1,5 +1,6 @@
 const Task = require("../models/G_Task");
 const TaskNotification = require("../models/G_TaskNotification");
+const { loadMemberDirectory, lookupMember } = require("../utils/userDirectoryg");
 
 const isValidDateValue = (value) => {
   const parsed = new Date(value);
@@ -19,62 +20,66 @@ const pushActivity = (task, userId, action) => {
   });
 };
 
-const formatTask = (task) => ({
-  _id: task._id,
-  id: task._id.toString(),
-  title: task.title,
-  description: task.description,
-  phase: task.phase,
-  priority: task.priority,
-  impact: task.impact,
+const collectTaskUserIds = (task) => {
+  const ids = new Set();
+  if (task?.assigneeId) ids.add(String(task.assigneeId));
+  for (const log of task?.activityLog || []) {
+    if (log?.userId) ids.add(String(log.userId));
+  }
+  for (const c of task?.commentList || []) {
+    if (c?.userId) ids.add(String(c.userId));
+  }
+  return [...ids];
+};
 
-  assignee: task.assigneeId
-    ? {
-        _id: task.assigneeId._id,
-    id: task.assigneeId._id.toString(),
-        name: task.assigneeId.name,
-        avatar: task.assigneeId.avatar,
-        role: task.assigneeId.role,
-        taskCount: 0,
-        completedCount: 0,
-      }
-    : null,
+const buildTaskFormatter = (directory) => (task) => {
+  const assigneeIdStr = task?.assigneeId ? String(task.assigneeId) : "";
+  const assigneeMember = assigneeIdStr ? lookupMember(directory, assigneeIdStr) : null;
 
-  assigneeId: task.assigneeId?._id
-    ? task.assigneeId._id.toString()
-    : task.assigneeId?.toString() || "",
+  return {
+    _id: task._id,
+    id: task._id.toString(),
+    title: task.title,
+    description: task.description,
+    phase: task.phase,
+    priority: task.priority,
+    impact: task.impact,
 
-  deadline: task.deadline,
-  progress: task.progress,
-  isOverdue: task.isOverdue,
-  isBlocked: task.isBlocked,
-  blockedBy: task.blockedBy,
-  comments: task.comments,
-  attachments: task.attachments,
-  commentList: task.commentList,
+    assignee: assigneeMember
+      ? { ...assigneeMember, taskCount: 0, completedCount: 0 }
+      : null,
 
-  activityLog: Array.isArray(task.activityLog)
-    ? task.activityLog.map((log) => ({
-        _id: log._id,
-        action: log.action,
-        createdAt: log.createdAt,
-        updatedAt: log.updatedAt,
-        userId: log.userId?._id
-          ? {
-              _id: log.userId._id,
-              id: log.userId._id.toString(),
-              name: log.userId.name,
-              avatar: log.userId.avatar,
-              role: log.userId.role,
-            }
-          : log.userId || null,
-      }))
-    : [],
+    assigneeId: assigneeIdStr,
 
-  eventId: task.eventId?._id
-    ? task.eventId._id.toString()
-    : task.eventId?.toString(),
-});
+    deadline: task.deadline,
+    progress: task.progress,
+    isOverdue: task.isOverdue,
+    isBlocked: task.isBlocked,
+    blockedBy: task.blockedBy,
+    comments: task.comments,
+    attachments: task.attachments,
+    commentList: task.commentList,
+
+    activityLog: Array.isArray(task.activityLog)
+      ? task.activityLog.map((log) => ({
+          _id: log._id,
+          action: log.action,
+          createdAt: log.createdAt,
+          updatedAt: log.updatedAt,
+          userId: log?.userId ? lookupMember(directory, log.userId) : null,
+        }))
+      : [],
+
+    eventId: task.eventId?._id
+      ? task.eventId._id.toString()
+      : task.eventId?.toString(),
+  };
+};
+
+async function formatTaskAsync(task) {
+  const directory = await loadMemberDirectory(collectTaskUserIds(task));
+  return buildTaskFormatter(directory)(task);
+}
 
 const createNotification = async ({
   userId,
@@ -137,17 +142,16 @@ const updateOverdueTasks = async () => {
     phase: { $ne: "completed" },
     isOverdue: { $ne: true },
   })
-    .populate("assigneeId", "name email avatar role")
     .populate("eventId", "name date status")
-    .populate("activityLog.userId", "name email avatar role");
+      ;
 
   for (const task of overdueTasks) {
     task.isOverdue = true;
     await task.save();
 
-    if (task.assigneeId?._id) {
+    if (task.assigneeId) {
       await createNotification({
-        userId: task.assigneeId._id,
+        userId: String(task.assigneeId),
         title: "Task overdue",
         message: `Your task "${task.title}" is overdue.`,
         type: "warning",
@@ -174,10 +178,13 @@ const getTasks = async (req, res) => {
     }
 
     const tasks = await Task.find(filter)
-      .populate("assigneeId", "name email avatar role")
       .populate("eventId", "name date status")
-      .populate("activityLog.userId", "name email avatar role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const allUserIds = [...new Set(tasks.flatMap(collectTaskUserIds))];
+    const directory = await loadMemberDirectory(allUserIds);
+    const formatTask = buildTaskFormatter(directory);
 
     res.json(tasks.map(formatTask));
   } catch (error) {
@@ -294,13 +301,12 @@ const createTask = async (req, res) => {
     const saved = await task.save();
 
     const populated = await Task.findById(saved._id)
-      .populate("assigneeId", "name email avatar role")
-      .populate("eventId", "name date status")
-      .populate("activityLog.userId", "name email avatar role");
+        .populate("eventId", "name date status")
+        ;
 
-    if (populated?.assigneeId?._id) {
+    if (populated?.assigneeId) {
       await createNotification({
-        userId: populated.assigneeId._id,
+        userId: String(populated.assigneeId),
         title: "New task assigned",
         message: `You have been assigned a new task: "${populated.title}".`,
         type: "task",
@@ -314,9 +320,9 @@ const createTask = async (req, res) => {
       });
     }
 
-    if (populated?.isBlocked && populated?.assigneeId?._id) {
+    if (populated?.isBlocked && populated?.assigneeId) {
       await createNotification({
-        userId: populated.assigneeId._id,
+        userId: String(populated.assigneeId),
         title: "Task blocked",
         message: `Your task "${populated.title}" is blocked.`,
         type: "risk",
@@ -330,7 +336,7 @@ const createTask = async (req, res) => {
       });
     }
 
-    res.status(201).json(formatTask(populated));
+    res.status(201).json(await formatTaskAsync(populated));
   } catch (error) {
     console.error("CREATE TASK ERROR:", error);
     res.status(500).json({ message: error.message });
@@ -400,17 +406,16 @@ const updateTask = async (req, res) => {
     }
 
     const existingTask = await Task.findById(req.params.id)
-      .populate("assigneeId", "name email avatar role")
-      .populate("eventId", "name date status")
-      .populate("activityLog.userId", "name email avatar role");
+        .populate("eventId", "name date status")
+        ;
 
     if (!existingTask) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    const previousAssigneeId = existingTask.assigneeId?._id
-      ? existingTask.assigneeId._id.toString()
-      : existingTask.assigneeId?.toString() || "";
+    const previousAssigneeId = existingTask.assigneeId
+      ? String(existingTask.assigneeId)
+      : "";
 
     const previousBlocked = Boolean(existingTask.isBlocked);
     const previousOverdue = Boolean(existingTask.isOverdue);
@@ -421,17 +426,14 @@ const updateTask = async (req, res) => {
     const task = await Task.findByIdAndUpdate(req.params.id, updates, {
       new: true,
     })
-      .populate("assigneeId", "name email avatar role")
-      .populate("eventId", "name date status")
-      .populate("activityLog.userId", "name email avatar role");
+        .populate("eventId", "name date status")
+        ;
 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    const newAssigneeId = task.assigneeId?._id
-      ? task.assigneeId._id.toString()
-      : task.assigneeId?.toString() || "";
+    const newAssigneeId = task.assigneeId ? String(task.assigneeId) : "";
 
     let shouldSaveActivity = false;
 
@@ -496,9 +498,9 @@ const updateTask = async (req, res) => {
       });
     }
 
-    if (!previousBlocked && task.isBlocked && task.assigneeId?._id) {
+    if (!previousBlocked && task.isBlocked && task.assigneeId) {
       await createNotification({
-        userId: task.assigneeId._id,
+        userId: String(task.assigneeId),
         title: "Task blocked",
         message: `Your task "${task.title}" has been marked as blocked.`,
         type: "risk",
@@ -525,9 +527,9 @@ const updateTask = async (req, res) => {
         await task.save();
       }
 
-      if (task.assigneeId?._id) {
+      if (task.assigneeId) {
         await createNotification({
-          userId: task.assigneeId._id,
+          userId: String(task.assigneeId),
           title: "Task overdue",
           message: `Your task "${task.title}" is overdue.`,
           type: "warning",
@@ -542,11 +544,10 @@ const updateTask = async (req, res) => {
     }
 
     const refreshedTask = await Task.findById(task._id)
-      .populate("assigneeId", "name email avatar role")
-      .populate("eventId", "name date status")
-      .populate("activityLog.userId", "name email avatar role");
+        .populate("eventId", "name date status")
+        ;
 
-    res.json(formatTask(refreshedTask));
+    res.json(await formatTaskAsync(refreshedTask));
   } catch (error) {
     console.error("UPDATE TASK ERROR:", error);
     res.status(500).json({ message: error.message });

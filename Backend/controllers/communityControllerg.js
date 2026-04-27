@@ -1,8 +1,9 @@
 const Community = require("../models/G_Community");
+const { loadMemberDirectory, lookupMember } = require("../utils/userDirectoryg");
 
 const VALID_CATEGORIES = ["sports", "technology", "cultural", "community", "music", "academic", "other"];
 
-const formatCommunity = (community) => ({
+const buildFormatter = (directory) => (community) => ({
   _id: community._id,
   id: community._id.toString(),
   name: community.name,
@@ -10,28 +11,27 @@ const formatCommunity = (community) => ({
   icon: community.icon,
   description: community.description,
   category: community.category,
-  members: community.members
-    ? community.members.map((member) => ({
-        _id: member._id,
-        id: member._id.toString(),
-        name: member.name,
-        email: member.email,
-        avatar: member.avatar,
-        role: member.role,
-      }))
-    : [],
+  members: (community.members || []).map((memberId) =>
+    lookupMember(directory, memberId)
+  ),
 });
 
 const getCommunities = async (req, res) => {
   try {
-    const communities = await Community.find({
-      members: req.user._id,
-    })
-      .populate("members", "name email avatar role")
-      .sort({ createdAt: -1 });
+    const userId = String(req.user._id);
+    const communities = await Community.find({ members: userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const allMemberIds = [
+      ...new Set(communities.flatMap((c) => (c.members || []).map(String))),
+    ];
+    const directory = await loadMemberDirectory(allMemberIds);
+    const formatCommunity = buildFormatter(directory);
 
     res.json(communities.map(formatCommunity));
   } catch (error) {
+    console.error("getCommunities error:", error.stack || error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -98,14 +98,14 @@ const createCommunity = async (req, res) => {
     });
 
     const saved = await community.save();
+    const savedPlain = saved.toObject ? saved.toObject() : saved;
 
-    const populated = await Community.findById(saved._id).populate(
-      "members",
-      "name email avatar role"
-    );
+    const directory = await loadMemberDirectory(savedPlain.members || []);
+    const formatCommunity = buildFormatter(directory);
 
-    res.status(201).json(formatCommunity(populated));
+    res.status(201).json(formatCommunity(savedPlain));
   } catch (error) {
+    console.error("createCommunity error:", error.stack || error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -171,14 +171,14 @@ const updateCommunity = async (req, res) => {
     existingCommunity.members = safeMembers;
 
     const updated = await existingCommunity.save();
+    const updatedPlain = updated.toObject ? updated.toObject() : updated;
 
-    const populated = await Community.findById(updated._id).populate(
-      "members",
-      "name email avatar role"
-    );
+    const directory = await loadMemberDirectory(updatedPlain.members || []);
+    const formatCommunity = buildFormatter(directory);
 
-    res.json(formatCommunity(populated));
+    res.json(formatCommunity(updatedPlain));
   } catch (error) {
+    console.error("updateCommunity error:", error.stack || error);
     res.status(500).json({ message: error.message });
   }
 };

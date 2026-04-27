@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const taskNotificationSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     title: {
@@ -42,8 +41,7 @@ const taskNotificationSchema = new mongoose.Schema(
       default: null,
     },
     relatedUserId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       default: null,
     },
     isRead: {

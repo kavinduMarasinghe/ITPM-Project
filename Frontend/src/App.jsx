@@ -45,6 +45,21 @@ import OrganizerRegistration from "./Components/organizers/OrganizersReg";
 import OrganizerStallRequests from "./Components/organizers/OrganizerStallRequests";
 import OrganizerTeamDashboard from "./Components/organizers/OrganizerTeamDashboard";
 
+import Communities from "./pages/G_Communities";
+import GUpdateSociety from "./pages/G_UpdateSociety";
+import GDashboard from "./pages/G_Dashboard";
+import GMyEvents from "./pages/G_MyEvents";
+import GPastEvents from "./pages/G_PastEvents";
+import GTaskWorkspace from "./pages/G_TaskWorkspace";
+import GTimeline from "./pages/G_Timeline";
+import GRiskPanel from "./pages/G_RiskPanel";
+import GWorkload from "./pages/G_Workload";
+import GPerformance from "./pages/G_Performance";
+import GLiveMode from "./pages/G_LiveMode";
+import GReport from "./pages/G_Report";
+import { Layout as GLayout } from "./Components/G_Layout";
+import { EventProvider } from "./lib/EventContext";
+
 import "./App.css";
 
 function ShellLayout({ children }) {
@@ -166,6 +181,26 @@ function App() {
             </FooterLayout>
           }
         />
+        <Route
+          element={
+            <EventProvider>
+              <GLayout />
+            </EventProvider>
+          }
+        >
+          <Route path="/communities" element={<Communities />} />
+          <Route path="/update-society/:id" element={<GUpdateSociety />} />
+          <Route path="/dashboard" element={<GDashboard />} />
+          <Route path="/my-events" element={<GMyEvents />} />
+          <Route path="/past-events" element={<GPastEvents />} />
+          <Route path="/task-board" element={<GTaskWorkspace />} />
+          <Route path="/timeline" element={<GTimeline />} />
+          <Route path="/risks" element={<GRiskPanel />} />
+          <Route path="/workload" element={<GWorkload />} />
+          <Route path="/performance" element={<GPerformance />} />
+          <Route path="/live" element={<GLiveMode />} />
+          <Route path="/reports" element={<GReport />} />
+        </Route>
 
         {/* Stall management admin */}
         <Route

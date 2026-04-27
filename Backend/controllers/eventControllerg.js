@@ -2,8 +2,18 @@ const Event = require("../models/G_Event");
 const Community = require("../models/G_Community");
 const TaskNotification = require("../models/G_TaskNotification");
 const Task = require("../models/G_Task");
+const { loadMemberDirectory, lookupMember } = require("../utils/userDirectoryg");
 
-const formatEvent = (event) => ({
+const collectEventMemberIds = (event) => {
+  const ids = new Set();
+  for (const m of event?.members || []) ids.add(String(m));
+  for (const mr of event?.memberRoles || []) {
+    if (mr?.memberId) ids.add(String(mr.memberId));
+  }
+  return [...ids];
+};
+
+const buildEventFormatter = (directory) => (event) => ({
   _id: event._id,
   id: event._id.toString(),
   name: event.name,
@@ -12,7 +22,7 @@ const formatEvent = (event) => ({
   societyId: event.societyId?._id
     ? event.societyId._id.toString()
     : event.societyId?.toString(),
-  society: event.societyId
+  society: event.societyId && event.societyId._id
     ? {
         _id: event.societyId._id,
         id: event.societyId._id.toString(),
@@ -24,30 +34,12 @@ const formatEvent = (event) => ({
       }
     : null,
   members: Array.isArray(event.members)
-    ? event.members.map((member) => ({
-        _id: member._id,
-        id: member._id.toString(),
-        name: member.name,
-        email: member.email,
-        avatar: member.avatar,
-        role: member.role,
-      }))
+    ? event.members.map((memberId) => lookupMember(directory, memberId))
     : [],
   memberRoles: Array.isArray(event.memberRoles)
     ? event.memberRoles.map((mr) => ({
-        memberId: mr.memberId?._id
-          ? mr.memberId._id.toString()
-          : mr.memberId?.toString(),
-        member: mr.memberId?._id
-          ? {
-              _id: mr.memberId._id,
-              id: mr.memberId._id.toString(),
-              name: mr.memberId.name,
-              email: mr.memberId.email,
-              avatar: mr.memberId.avatar,
-              role: mr.memberId.role,
-            }
-          : null,
+        memberId: mr.memberId ? String(mr.memberId) : null,
+        member: mr.memberId ? lookupMember(directory, mr.memberId) : null,
         role: mr.role,
       }))
     : [],
@@ -58,6 +50,13 @@ const formatEvent = (event) => ({
   createdAt: event.createdAt,
   updatedAt: event.updatedAt,
 });
+
+// Backward-compatible: caller may already have a directory loaded;
+// otherwise this loads on demand for a single event.
+async function formatEventAsync(event) {
+  const directory = await loadMemberDirectory(collectEventMemberIds(event));
+  return buildEventFormatter(directory)(event);
+}
 
 const isValidDateValue = (value) => {
   const parsed = new Date(value);
@@ -177,16 +176,14 @@ const autoCompletePastEventsAndNotify = async () => {
   const eventsToComplete = await Event.find({
     date: { $lt: new Date() },
     status: { $in: ["upcoming", "active"] },
-  })
-    .populate("members", "_id name email avatar role")
-    .populate("societyId", "name");
+  }).populate("societyId", "name");
 
   for (const event of eventsToComplete) {
     event.status = "completed";
     await event.save();
 
     const memberIds = Array.isArray(event.members)
-      ? event.members.map((member) => member._id.toString())
+      ? event.members.map((m) => String(m))
       : [];
 
     await notifyMembers({
@@ -252,7 +249,6 @@ const getRiskSummary = async (req, res) => {
     const eventId = req.params.id;
 
     const event = await Event.findById(eventId)
-      .populate("members", "name email avatar role")
       .populate("societyId", "name color icon description category");
 
     if (!event) {
@@ -260,7 +256,7 @@ const getRiskSummary = async (req, res) => {
     }
 
     const hasAccess = event.members.some(
-      (member) => member._id.toString() === req.user._id.toString()
+      (m) => String(m) === String(req.user._id)
     );
 
     if (!hasAccess) {
@@ -272,8 +268,8 @@ const getRiskSummary = async (req, res) => {
     const now = new Date();
 
     const tasks = await Task.find({ eventId })
-      .populate("assigneeId", "name email avatar role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const normalizedTasks = tasks.map((task) => {
       const deadlineDate = new Date(task.deadline);
@@ -283,10 +279,14 @@ const getRiskSummary = async (req, res) => {
         task.phase !== "completed";
 
       return {
-        ...task.toObject(),
+        ...task,
         isOverdue: task.isOverdue || computedOverdue,
       };
     });
+
+    const memberDirectory = await loadMemberDirectory(
+      (event.members || []).map((m) => String(m))
+    );
 
     const overdueCritical = normalizedTasks.filter(
       (task) => task.isOverdue && task.impact === "critical"
@@ -295,17 +295,17 @@ const getRiskSummary = async (req, res) => {
     const blockedTasks = normalizedTasks.filter((task) => task.isBlocked);
 
     const overloadedMembers = event.members
-      .map((member) => {
+      .map((rawMemberId) => {
+        const memberId = String(rawMemberId);
+        const member = lookupMember(memberDirectory, memberId);
         const memberTasks = normalizedTasks.filter((task) => {
-          const assigneeId = task.assigneeId?._id
-            ? task.assigneeId._id.toString()
-            : task.assigneeId?.toString() || "";
-          return assigneeId === member._id.toString();
+          const assigneeId = task.assigneeId ? String(task.assigneeId) : "";
+          return assigneeId === String(memberId);
         });
 
         return {
           _id: member._id,
-          id: member._id.toString(),
+          id: member.id,
           name: member.name,
           avatar: member.avatar,
           role: member.role,
@@ -418,7 +418,6 @@ const getPerformanceSummary = async (req, res) => {
     const eventId = req.params.id;
 
     const event = await Event.findById(eventId)
-      .populate("members", "name email avatar role")
       .populate("societyId", "name color icon description category");
 
     if (!event) {
@@ -426,7 +425,7 @@ const getPerformanceSummary = async (req, res) => {
     }
 
     const hasAccess = event.members.some(
-      (member) => member._id.toString() === req.user._id.toString()
+      (m) => String(m) === String(req.user._id)
     );
 
     if (!hasAccess) {
@@ -438,8 +437,8 @@ const getPerformanceSummary = async (req, res) => {
     const now = new Date();
 
     const tasks = await Task.find({ eventId })
-      .populate("assigneeId", "name email avatar role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const normalizedTasks = tasks.map((task) => {
       const deadlineDate = new Date(task.deadline);
@@ -449,19 +448,23 @@ const getPerformanceSummary = async (req, res) => {
         task.phase !== "completed";
 
       return {
-        ...task.toObject(),
+        ...task,
         isOverdue: task.isOverdue || computedOverdue,
       };
     });
 
-    const memberStats = event.members
-      .map((member) => {
-        const memberTasks = normalizedTasks.filter((task) => {
-          const assigneeId = task.assigneeId?._id
-            ? task.assigneeId._id.toString()
-            : task.assigneeId?.toString() || "";
+    const memberDirectory = await loadMemberDirectory(
+      (event.members || []).map((m) => String(m))
+    );
 
-          return assigneeId === member._id.toString();
+    const memberStats = event.members
+      .map((rawMemberId) => {
+        const memberId = String(rawMemberId);
+        const member = lookupMember(memberDirectory, memberId);
+        const memberTasks = normalizedTasks.filter((task) => {
+          const assigneeId = task.assigneeId ? String(task.assigneeId) : "";
+
+          return assigneeId === String(memberId);
         });
 
         const completed = memberTasks.filter(
@@ -500,7 +503,7 @@ const getPerformanceSummary = async (req, res) => {
 
         return {
           _id: member._id,
-          id: member._id.toString(),
+          id: member.id,
           name: member.name,
           avatar: member.avatar,
           role: member.role,
@@ -591,7 +594,6 @@ const getEventReport = async (req, res) => {
     const eventId = req.params.id;
 
     const event = await Event.findById(eventId)
-      .populate("members", "name email avatar role")
       .populate("societyId", "name color icon description category");
 
     if (!event) {
@@ -599,7 +601,7 @@ const getEventReport = async (req, res) => {
     }
 
     const hasAccess = event.members.some(
-      (member) => member._id.toString() === req.user._id.toString()
+      (m) => String(m) === String(req.user._id)
     );
 
     if (!hasAccess) {
@@ -611,8 +613,8 @@ const getEventReport = async (req, res) => {
     const now = new Date();
 
     const tasks = await Task.find({ eventId })
-      .populate("assigneeId", "name email avatar role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const normalizedTasks = tasks.map((task) => {
       const deadlineDate = new Date(task.deadline);
@@ -622,10 +624,14 @@ const getEventReport = async (req, res) => {
         task.phase !== "completed";
 
       return {
-        ...task.toObject(),
+        ...task,
         isOverdue: task.isOverdue || computedOverdue,
       };
     });
+
+    const memberDirectory = await loadMemberDirectory(
+      (event.members || []).map((m) => String(m))
+    );
 
     const total = normalizedTasks.length;
     const completed = normalizedTasks.filter((t) => t.phase === "completed").length;
@@ -683,12 +689,12 @@ const getEventReport = async (req, res) => {
     ].filter((item) => item.value > 0);
 
     const memberStats = event.members
-      .map((member) => {
+      .map((rawMemberId) => {
+        const memberId = String(rawMemberId);
+        const member = lookupMember(memberDirectory, memberId);
         const memberTasks = normalizedTasks.filter((task) => {
-          const assigneeId = task.assigneeId?._id
-            ? task.assigneeId._id.toString()
-            : task.assigneeId?.toString() || "";
-          return assigneeId === member._id.toString();
+          const assigneeId = task.assigneeId ? String(task.assigneeId) : "";
+          return assigneeId === String(memberId);
         });
 
         const done = memberTasks.filter((t) => t.phase === "completed").length;
@@ -705,7 +711,7 @@ const getEventReport = async (req, res) => {
 
         return {
           _id: member._id,
-          id: member._id.toString(),
+          id: member.id,
           name: member.name,
           avatar: member.avatar,
           role: member.role,
@@ -808,7 +814,6 @@ const getLiveSummary = async (req, res) => {
     const eventId = req.params.id;
 
     const event = await Event.findById(eventId)
-      .populate("members", "name email avatar role")
       .populate("societyId", "name color icon description category");
 
     if (!event) {
@@ -816,7 +821,7 @@ const getLiveSummary = async (req, res) => {
     }
 
     const hasAccess = event.members.some(
-      (member) => member._id.toString() === req.user._id.toString()
+      (m) => String(m) === String(req.user._id)
     );
 
     if (!hasAccess) {
@@ -909,18 +914,18 @@ const getLiveSummary = async (req, res) => {
         })),
     ].slice(0, 10);
 
-    const memberStatus = event.members.map((member) => {
+    const memberStatus = event.members.map((rawMemberId) => {
+        const memberId = String(rawMemberId);
+        const member = lookupMember(memberDirectory, memberId);
       const memberTasks = normalizedTasks.filter((task) => {
-        const assigneeId = task.assigneeId?._id
-          ? task.assigneeId._id.toString()
-          : task.assigneeId?.toString() || "";
+        const assigneeId = task.assigneeId ? String(task.assigneeId) : "";
 
-        return assigneeId === member._id.toString();
+        return assigneeId === String(memberId);
       });
 
       return {
         _id: member._id,
-        id: member._id.toString(),
+        id: member.id,
         name: member.name,
         avatar: member.avatar,
         role: member.role,
@@ -992,7 +997,6 @@ const getDashboardSummary = async (req, res) => {
     const eventId = req.params.id;
 
     const event = await Event.findById(eventId)
-      .populate("members", "name email avatar role")
       .populate("societyId", "name color icon description category");
 
     if (!event) {
@@ -1000,7 +1004,7 @@ const getDashboardSummary = async (req, res) => {
     }
 
     const hasAccess = event.members.some(
-      (member) => member._id.toString() === req.user._id.toString()
+      (m) => String(m) === String(req.user._id)
     );
 
     if (!hasAccess) {
@@ -1012,8 +1016,8 @@ const getDashboardSummary = async (req, res) => {
     const now = new Date();
 
     const tasks = await Task.find({ eventId })
-      .populate("assigneeId", "name email avatar role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const normalizedTasks = tasks.map((task) => {
       const deadlineDate = new Date(task.deadline);
@@ -1023,10 +1027,14 @@ const getDashboardSummary = async (req, res) => {
         task.phase !== "completed";
 
       return {
-        ...task.toObject(),
+        ...task,
         isOverdue: task.isOverdue || computedOverdue,
       };
     });
+
+    const memberDirectory = await loadMemberDirectory(
+      (event.members || []).map((m) => String(m))
+    );
 
     const totalTasks = normalizedTasks.length;
     const completedTasks = normalizedTasks.filter(
@@ -1070,18 +1078,18 @@ const getDashboardSummary = async (req, res) => {
       { name: "Completed", value: completedTasks },
     ];
 
-    const workloadDistribution = event.members.map((member) => {
+    const workloadDistribution = event.members.map((rawMemberId) => {
+        const memberId = String(rawMemberId);
+        const member = lookupMember(memberDirectory, memberId);
       const memberTasks = normalizedTasks.filter((task) => {
-        const assigneeId = task.assigneeId?._id
-          ? task.assigneeId._id.toString()
-          : task.assigneeId?.toString() || "";
+        const assigneeId = task.assigneeId ? String(task.assigneeId) : "";
 
-        return assigneeId === member._id.toString();
+        return assigneeId === String(memberId);
       });
 
       return {
         _id: member._id,
-        id: member._id.toString(),
+        id: member.id,
         name: member.name,
         avatar: member.avatar,
         role: member.role,
@@ -1176,12 +1184,18 @@ const getEvents = async (req, res) => {
       societyId: { $in: allowedSocietyIds },
     })
       .populate("societyId", "name color icon description category")
-      .populate("members", "name email avatar role")
-      .populate("memberRoles.memberId", "name email avatar role")
-      .sort({ date: 1 });
+      .sort({ date: 1 })
+      .lean();
+
+    const allMemberIds = [
+      ...new Set(events.flatMap(collectEventMemberIds)),
+    ];
+    const directory = await loadMemberDirectory(allMemberIds);
+    const formatEvent = buildEventFormatter(directory);
 
     res.json(events.map(formatEvent));
   } catch (error) {
+    console.error("getEvents error:", error.stack || error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -1274,8 +1288,7 @@ const createEvent = async (req, res) => {
 
     const populated = await Event.findById(saved._id)
       .populate("societyId", "name color icon description category")
-      .populate("members", "name email avatar role")
-      .populate("memberRoles.memberId", "name email avatar role");
+      ;
 
     await notifyMembers({
       memberIds: safeMembers,
@@ -1289,8 +1302,9 @@ const createEvent = async (req, res) => {
       preventDuplicate: true,
     });
 
-    res.status(201).json(formatEvent(populated));
+    res.status(201).json(await formatEventAsync(populated));
   } catch (error) {
+    console.error("createEvent error:", error.stack || error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -1392,8 +1406,7 @@ const updateEvent = async (req, res) => {
 
     const populated = await Event.findById(updated._id)
       .populate("societyId", "name color icon description category")
-      .populate("members", "name email avatar role")
-      .populate("memberRoles.memberId", "name email avatar role");
+      ;
 
     await notifyMembers({
       memberIds: safeMembers,
@@ -1407,8 +1420,9 @@ const updateEvent = async (req, res) => {
       preventDuplicate: false,
     });
 
-    res.json(formatEvent(populated));
+    res.json(await formatEventAsync(populated));
   } catch (error) {
+    console.error("updateEvent error:", error.stack || error);
     res.status(500).json({ message: error.message });
   }
 };

@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const eventMemberInfoSchema = new mongoose.Schema(
   {
     memberId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     role: {
@@ -30,7 +29,7 @@ const eventSchema = new mongoose.Schema(
       ref: "Community",
       required: true,
     },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    members: [{ type: String }],
     memberRoles: [eventMemberInfoSchema],
     eventType: {
       type: String,
