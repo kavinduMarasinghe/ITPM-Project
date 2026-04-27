@@ -6,7 +6,10 @@ export default function AppShell({ children }) {
   const { pathname } = useLocation();
 
   // Allow certain pages to take over the full viewport and provide their own chrome
-  const isFullPage = pathname.startsWith("/organizer/dashboard") || pathname.startsWith("/sponsor/dashboard");
+  const isFullPage =
+    pathname.startsWith("/organizer/dashboard") ||
+    pathname.startsWith("/sponsor/dashboard") ||
+    pathname.startsWith("/login");
 
   if (isFullPage) {
     return <>{children}</>;
