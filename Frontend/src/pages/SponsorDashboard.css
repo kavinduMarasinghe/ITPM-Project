@@ -1,0 +1,642 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+.sponsor-dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f7fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Sidebar */
+.sponsor-sidebar {
+  width: 220px;
+  background: #2c2d3e;
+  color: white;
+  padding: 20px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-circle {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sidebar-logo h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sidebar-logo p {
+  font-size: 12px;
+  color: #a0a0a8;
+  margin: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.nav-section h4 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8a8a94;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: #a0a0a8;
+  text-decoration: none;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  color: white;
+}
+
+/* Main Content */
+.sponsor-main {
+  margin-left: 220px;
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Top Header */
+.sponsor-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-left h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 5px 0;
+}
+
+.header-left p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+}
+
+.live-btn {
+  padding: 8px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.live-btn:hover {
+  background: #059669;
+}
+
+.notify-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.notify-btn:hover {
+  background: #f9fafb;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  border-radius: 12px;
+  padding: 40px;
+  color: white;
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+.banner-content h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+}
+
+.banner-content h3 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.banner-content p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.banner-stats {
+  display: flex;
+  gap: 30px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Sections */
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+.section-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.package-badge {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Details Section */
+.details-section {
+  margin-bottom: 40px;
+}
+
+.details-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  font-size: 28px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+  border-radius: 8px;
+}
+
+.card-content h4 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.card-content p {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* Benefits Section */
+.benefits-section {
+  margin-bottom: 40px;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.benefit-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.benefit-card:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.benefit-icon {
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.benefit-card p {
+  font-size: 13px;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Event Section */
+.event-section {
+  margin-bottom: 40px;
+}
+
+.event-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.event-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.event-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-card h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+}
+
+.event-card p {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Payment Section */
+.payment-section {
+  margin-bottom: 40px;
+}
+
+.payment-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fef08a 100%);
+  border-radius: 12px;
+  padding: 30px;
+  border-left: 4px solid #d97706;
+}
+
+.payment-details {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.payment-row:last-child {
+  border-bottom: none;
+}
+
+.payment-row strong {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.payment-row .amount {
+  font-size: 18px;
+  color: #d97706;
+}
+
+.payment-row .status-pending {
+  background: #fef3c7;
+  color: #d97706;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.payment-steps {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.payment-steps h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+}
+
+.payment-steps ol {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.payment-steps li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.payment-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #d97706, #f97316);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.payment-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+}
+
+/* Contact Section */
+.contact-section {
+  margin-bottom: 40px;
+}
+
+.contact-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #0ea5e9;
+}
+
+.contact-card p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 15px 0;
+}
+
+.contact-details {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.contact-details > div {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.contact-details strong {
+  display: block;
+  color: #1f2937;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.contact-details a {
+  color: #0ea5e9;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.contact-details a:hover {
+  color: #0284c7;
+  text-decoration: underline;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #6b7280;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.error-state h2 {
+  color: #dc2626;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.error-state p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sponsor-sidebar {
+    width: 180px;
+  }
+
+  .sponsor-main {
+    margin-left: 180px;
+  }
+
+  .welcome-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .banner-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+}
+
+@media (max-width: 768px) {
+  .sponsor-sidebar {
+    position: fixed;
+    left: -220px;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .sponsor-sidebar.open {
+    left: 0;
+  }
+
+  .sponsor-main {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .sponsor-top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .header-right {
+    align-self: flex-end;
+  }
+
+  .welcome-banner {
+    padding: 25px;
+  }
+
+  .banner-content h2,
+  .banner-content h3 {
+    font-size: 24px;
+  }
+
+  .banner-stats {
+    gap: 15px;
+  }
+
+  .details-cards-grid,
+  .event-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}
