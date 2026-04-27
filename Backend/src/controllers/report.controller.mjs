@@ -1,7 +1,7 @@
-import Payment from "../models/Payment.js";
-import SponsorApplication from "../models/SponsorApplication.js";
-import SponsorshipPackage from "../models/SponsorshipPackage.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import Payment from "../models/Payment.mjs";
+import SponsorApplication from "../models/SponsorApplication.mjs";
+import SponsorshipPackage from "../models/SponsorshipPackage.mjs";
+import { asyncHandler } from "../utils/asyncHandler.mjs";
 import mongoose from "mongoose";
 
 export const eventRevenueReport = asyncHandler(async (req, res) => {

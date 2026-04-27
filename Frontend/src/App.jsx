@@ -43,7 +43,10 @@ import AdminEventDashboard from "./Components/organizers/AdminEventDashboard";
 import HeadOrganizerDashboard from "./Components/organizers/HeadOrganizerDashboard";
 import OrganizerRegistration from "./Components/organizers/OrganizersReg";
 import OrganizerStallRequests from "./Components/organizers/OrganizerStallRequests";
+import OrganizerSponsorApplications from "./Components/organizers/OrganizerSponsorApplications";
 import OrganizerTeamDashboard from "./Components/organizers/OrganizerTeamDashboard";
+import FinancialDashboard from "./pages/FinancialDashboard";
+import SponsorDashboard from "./pages/SponsorDashboard";
 
 import Communities from "./pages/G_Communities";
 import GUpdateSociety from "./pages/G_UpdateSociety";
@@ -178,6 +181,16 @@ function App() {
           element={
             <FooterLayout>
               <OrganizerStallRequests />
+            </FooterLayout>
+          }
+        />
+        <Route path="/sponsor/dashboard" element={<FinancialDashboard />} />
+        <Route path="/sponsor/dashboard/:requestId" element={<SponsorDashboard />} />
+        <Route
+          path="/sponsorships"
+          element={
+            <FooterLayout>
+              <OrganizerSponsorApplications />
             </FooterLayout>
           }
         />

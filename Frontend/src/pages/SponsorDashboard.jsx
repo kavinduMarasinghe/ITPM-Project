@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import "./SponsorDashboard.css";
 
 export default function SponsorDashboard() {
   const { requestId } = useParams();
   const navigate = useNavigate();
+  const invoiceCardRef = useRef(null);
+  const autoDownloadedRef = useRef(false);
   const [requestData, setRequestData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,8 +43,62 @@ export default function SponsorDashboard() {
   };
 
   // Download invoice as PDF
-  const downloadInvoice = () => {
+  const downloadInvoice = async () => {
     const invoiceNumber = `INV-${Date.now()}`;
+    const card = invoiceCardRef.current;
+    if (card) {
+      try {
+        const canvas = await html2canvas(card, {
+          scale: 2,
+          backgroundColor: "#ffffff",
+          useCORS: true,
+        });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 10;
+        const imgW = pageW - margin * 2;
+        const imgH = (canvas.height * imgW) / canvas.width;
+
+        if (imgH <= pageH - margin * 2) {
+          pdf.addImage(imgData, "PNG", margin, margin, imgW, imgH);
+        } else {
+          // Tall invoice: paginate by slicing the canvas vertically.
+          let remaining = imgH;
+          let position = margin;
+          let sourceY = 0;
+          const pxPerMm = canvas.width / imgW;
+          const pageContentHmm = pageH - margin * 2;
+          const pageContentHpx = pageContentHmm * pxPerMm;
+
+          while (remaining > 0) {
+            const sliceHpx = Math.min(pageContentHpx, canvas.height - sourceY);
+            const sliceCanvas = document.createElement("canvas");
+            sliceCanvas.width = canvas.width;
+            sliceCanvas.height = sliceHpx;
+            sliceCanvas
+              .getContext("2d")
+              .drawImage(canvas, 0, sourceY, canvas.width, sliceHpx, 0, 0, canvas.width, sliceHpx);
+            const sliceData = sliceCanvas.toDataURL("image/png");
+            const sliceHmm = sliceHpx / pxPerMm;
+            pdf.addImage(sliceData, "PNG", margin, position, imgW, sliceHmm);
+            sourceY += sliceHpx;
+            remaining -= sliceHmm;
+            if (remaining > 0) {
+              pdf.addPage();
+              position = margin;
+            }
+          }
+        }
+        pdf.save(`${invoiceNumber}.pdf`);
+        return;
+      } catch (err) {
+        console.error("Invoice capture failed, falling back to HTML route:", err);
+      }
+    }
+
+    // Fallback: build a self-contained HTML invoice and rasterize it.
     const packageDetails = getPackageDetails(selectedPackage || requestData.packageName);
     
     const htmlContent = `
@@ -129,23 +187,50 @@ export default function SponsorDashboard() {
       </html>
     `;
 
-    // Load html2pdf library and generate PDF
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    script.onload = () => {
-      const element = document.createElement('div');
-      element.innerHTML = htmlContent;
-      
+    const runHtml2Pdf = () => {
+      const wrapper = document.createElement('div');
+      // Attach in the viewport but invisible so html2canvas lays out + paints
+      // the full content (off-screen `left: -10000px` makes it skip rendering).
+      wrapper.style.position = 'fixed';
+      wrapper.style.left = '0';
+      wrapper.style.top = '0';
+      wrapper.style.zIndex = '-1';
+      wrapper.style.opacity = '0';
+      wrapper.style.pointerEvents = 'none';
+      wrapper.style.width = '794px'; // A4 width at 96dpi
+      wrapper.style.background = '#ffffff';
+      wrapper.innerHTML = htmlContent;
+      document.body.appendChild(wrapper);
+
       const opt = {
         margin: 10,
         filename: `${invoiceNumber}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
       };
-      
-      html2pdf().set(opt).from(element).save();
+
+      // Give the browser one frame to lay out before rasterizing.
+      requestAnimationFrame(() => {
+        window.html2pdf()
+          .set(opt)
+          .from(wrapper)
+          .save()
+          .finally(() => {
+            if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+          });
+      });
     };
+
+    if (window.html2pdf) {
+      runHtml2Pdf();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = runHtml2Pdf;
     document.head.appendChild(script);
   };
 
@@ -154,9 +239,9 @@ export default function SponsorDashboard() {
     
     const fetchRequestData = async () => {
       try {
-        console.log("Fetching request data from:", `http://127.0.0.1:5001/api/sponsor-requests/${requestId}`);
+        console.log("Fetching request data from:", `http://127.0.0.1:5000/api/sponsor-requests/${requestId}`);
         
-        const response = await fetch(`http://127.0.0.1:5001/api/sponsor-requests/${requestId}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/sponsor-requests/${requestId}`, {
           headers: {
             "x-dev-role": "sponsor",
           },
@@ -183,6 +268,18 @@ export default function SponsorDashboard() {
       fetchRequestData();
     }
   }, [requestId]);
+
+  // Auto-trigger PDF download the first time the invoice view becomes visible
+  // after a successful payment. Must stay above any early returns.
+  useEffect(() => {
+    if (showInvoice && paymentSuccess && !autoDownloadedRef.current) {
+      autoDownloadedRef.current = true;
+      const t = setTimeout(() => {
+        downloadInvoice();
+      }, 350);
+      return () => clearTimeout(t);
+    }
+  }, [showInvoice, paymentSuccess]);
 
   const getPackageDetails = (packageName) => {
     const packages = {
@@ -244,7 +341,7 @@ export default function SponsorDashboard() {
     
     // Update the backend with the selected package and amount
     try {
-      const response = await fetch(`http://127.0.0.1:5001/api/sponsor-requests/${requestId}/update-package`, {
+      const response = await fetch(`http://127.0.0.1:5000/api/sponsor-requests/${requestId}/update-package`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -590,7 +687,7 @@ export default function SponsorDashboard() {
                   <button
                     onClick={async () => {
                       try {
-                        const response = await fetch(`http://127.0.0.1:5001/api/payments/sponsor-request/${requestId}/complete`, {
+                        const response = await fetch(`http://127.0.0.1:5000/api/payments/sponsor-request/${requestId}/complete`, {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
@@ -824,7 +921,9 @@ export default function SponsorDashboard() {
 
           {/* Invoice Section */}
           <section style={{ padding: "40px 20px" }}>
-            <div style={{
+            <div
+              ref={invoiceCardRef}
+              style={{
               background: "#ffffff",
               borderRadius: "16px",
               padding: "40px",
@@ -898,23 +997,6 @@ export default function SponsorDashboard() {
                 <p style={{ margin: "5px 0 0 0", color: "#4b5563", fontSize: "13px" }}>Thank you for your sponsorship payment. Your invoice has been recorded.</p>
               </div>
 
-              {/* Download Button */}
-              <button
-                onClick={downloadInvoice}
-                style={{
-                  width: "100%",
-                  padding: "12px 20px",
-                  background: "#3b82f6",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                  fontSize: "14px"
-                }}
-              >
-                ⬇️ Download Invoice
-              </button>
             </div>
           </section>
         </main>

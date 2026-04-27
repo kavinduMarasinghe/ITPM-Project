@@ -1,5 +1,5 @@
 import express from "express";
-import { requireRole } from "../middleware/requireRole.js";
+import { requireRole } from "../middleware/requireRole.mjs";
 import {
   sendSponsorRequest,
   acceptSponsorRequest,
@@ -7,7 +7,7 @@ import {
   getSponsorRequests,
   getSponsorRequest,
   deleteSponsorRequest,
-} from "../controllers/sponsorRequest.controller.js";
+} from "../controllers/sponsorRequest.controller.mjs";
 
 const router = express.Router();
 

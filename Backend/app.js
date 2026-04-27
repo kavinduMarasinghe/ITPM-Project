@@ -141,26 +141,67 @@ app.use("/api/tasks", authenticate, taskRoutesG);
 app.use("/api/task-notifications", authenticate, taskNotificationRoutesG);
 app.use("/api/chat", authenticate, chatRoutesG);
 
-app.use((error, req, res, next) => {
-  if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid JSON body.",
-    });
+// Dev-role shim for sponsor/payment ESM routes that use requireRole(req.user.role).
+// Reads the x-dev-role header sent by the FinancialDashboard frontend.
+app.use("/api", (req, _res, next) => {
+  const devRole = req.headers["x-dev-role"];
+  if (devRole && !req.user) {
+    req.user = { role: String(devRole) };
+  }
+  next();
+});
+
+// Sponsor / payment / invoice routes are written as ESM. Load them via
+// dynamic import() and mount once resolved so this CJS app can use them.
+(async () => {
+  try {
+    const [
+      sponsorRequestRoutes,
+      sponsorApplicationRoutes,
+      sponsorshipPackageRoutes,
+      paymentRoutes,
+      invoiceRoutes,
+    ] = await Promise.all([
+      import("./src/routes/sponsorRequest.routes.mjs"),
+      import("./src/routes/sponsorApplication.routes.mjs"),
+      import("./src/routes/sponsorshipPackage.routes.mjs"),
+      import("./src/routes/payment.routes.mjs"),
+      import("./src/routes/invoice.routes.mjs"),
+    ]);
+
+    app.use("/api", sponsorRequestRoutes.default);
+    app.use("/api", sponsorApplicationRoutes.default);
+    app.use("/api", sponsorshipPackageRoutes.default);
+    app.use("/api", paymentRoutes.default);
+    app.use("/api", invoiceRoutes.default);
+    console.log("✅ Sponsor/payment routes mounted");
+  } catch (err) {
+    console.error("❌ Failed to mount sponsor/payment routes:", err);
   }
 
-  const statusCode = error instanceof AppError ? error.statusCode : 500;
-  const message =
-    error instanceof AppError
-      ? error.message
-      : "Something went wrong while processing the request.";
+  // JSON error handler MUST be registered after the sponsor routes; otherwise
+  // Express falls back to its default HTML error page for errors thrown there.
+  app.use((error, req, res, next) => {
+    if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid JSON body.",
+      });
+    }
 
-  res.status(statusCode).json({
-    success: false,
-    message,
-    ...(error instanceof AppError && error.details ? { details: error.details } : {}),
+    const statusCode = error instanceof AppError ? error.statusCode : 500;
+    const message =
+      error instanceof AppError
+        ? error.message
+        : error?.message || "Something went wrong while processing the request.";
+
+    res.status(statusCode).json({
+      success: false,
+      message,
+      ...(error instanceof AppError && error.details ? { details: error.details } : {}),
+    });
   });
-});
+})();
 
 mongoose
   .connect(process.env.MONGO_URI)

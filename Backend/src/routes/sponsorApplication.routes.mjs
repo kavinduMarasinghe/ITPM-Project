@@ -1,5 +1,5 @@
 import express from "express";
-import { requireRole } from "../middleware/requireRole.js";
+import { requireRole } from "../middleware/requireRole.mjs";
 import {
   submitApplication,
   listApplicationsByEvent,
@@ -13,7 +13,7 @@ import {
   updateApplicationStatus,
   deleteApplicationMongo,
   updateApplicationPackage,
-} from "../controllers/sponsorApplication.controller.js";
+} from "../controllers/sponsorApplication.controller.mjs";
 
 const router = express.Router();
 

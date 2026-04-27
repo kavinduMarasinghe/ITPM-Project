@@ -21,7 +21,6 @@ const MENU_ITEMS = [
   { id: "tasks", label: "Tasks", icon: FiClipboard, route: "/communities" },
   { id: "stalls", label: "Stalls", icon: FiPackage, route: "/organizer/stalls" },
   { id: "sponsorships", label: "Sponsorships", icon: FiShield, route: "/sponsorships" },
-  { id: "users", label: "Users", icon: FiUsers, route: "/users" },
 ];
 
 function OrganizerSidebarLayout({

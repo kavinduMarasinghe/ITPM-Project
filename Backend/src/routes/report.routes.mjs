@@ -1,6 +1,6 @@
 import express from "express";
-import { requireRole } from "../middleware/requireRole.js";
-import { eventRevenueReport } from "../controllers/report.controller.js";
+import { requireRole } from "../middleware/requireRole.mjs";
+import { eventRevenueReport } from "../controllers/report.controller.mjs";
 
 const router = express.Router();
 

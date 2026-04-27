@@ -1,9 +1,21 @@
-import SponsorApplication from "../models/SponsorApplication.js";
-import SponsorshipPackage from "../models/SponsorshipPackage.js";
-import SponsorRequest from "../models/SponsorRequest.js";
-import Payment from "../models/Payment.js";
-import Counter from "../models/Counter.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import SponsorApplication from "../models/SponsorApplication.mjs";
+import SponsorshipPackage from "../models/SponsorshipPackage.mjs";
+import SponsorRequest from "../models/SponsorRequest.mjs";
+import Payment from "../models/Payment.mjs";
+import Counter from "../models/Counter.mjs";
+import Event from "../models/Event.mjs";
+import { asyncHandler } from "../utils/asyncHandler.mjs";
+
+async function getOrCreateFallbackEventId(eventName) {
+  if (eventName) {
+    const byName = await Event.findOne({ name: eventName });
+    if (byName) return byName._id;
+  }
+  const any = await Event.findOne().sort({ createdAt: 1 });
+  if (any) return any._id;
+  const placeholder = await Event.create({ name: eventName || "EventAura" });
+  return placeholder._id;
+}
 
 const makeTxnRef = () => `TXN-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
 
@@ -174,10 +186,15 @@ export const updateApplicationPackage = asyncHandler(async (req, res) => {
   const payerId = sponsorRequest.createdBy || req.user?._id;
   const payerName = sponsorRequest.companyName || app.companyName || "Sponsor";
 
+  const resolvedEventId =
+    sponsorRequest.eventId ||
+    resolvedPkg?.eventId ||
+    (await getOrCreateFallbackEventId(sponsorRequest.eventName || app.eventName));
+
   const payment = await Payment.findOneAndUpdate(
     { refType: "SponsorApplication", refId: app._id },
     {
-      eventId: sponsorRequest.eventId || resolvedPkg?.eventId,
+      eventId: resolvedEventId,
       payerId,
       payerName,
       purpose: "SPONSORSHIP",

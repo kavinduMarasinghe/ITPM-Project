@@ -119,7 +119,7 @@ export default function OrganizerDashboard() {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5001/api/sponsorship-applications", {
+        const response = await fetch("http://127.0.0.1:5000/api/sponsorship-applications", {
           headers: {
             "x-dev-role": "organizer",
           },
@@ -316,7 +316,7 @@ export default function OrganizerDashboard() {
 
     try {
       // Try to update in MongoDB using package name to find the package
-      const response = await fetch(`http://localhost:5001/api/sponsor-packages/by-name/${editingPackage.name}`, {
+      const response = await fetch(`http://localhost:5000/api/sponsor-packages/by-name/${editingPackage.name}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ price: parseFloat(editPrice) }),
@@ -369,7 +369,7 @@ export default function OrganizerDashboard() {
       // Try to fetch from backend first
       let paymentId = null;
       try {
-        const response = await fetch(`http://localhost:5001/api/invoices?invoiceNo=${invoiceData.number}`);
+        const response = await fetch(`http://localhost:5000/api/invoices?invoiceNo=${invoiceData.number}`);
         if (response.ok) {
           const data = await response.json();
           if (data && data._id) {
@@ -383,7 +383,7 @@ export default function OrganizerDashboard() {
       // If payment ID found, try backend PDF first
       if (paymentId) {
         try {
-          const response = await fetch(`http://localhost:5001/api/invoices/${paymentId}/pdf`);
+          const response = await fetch(`http://localhost:5000/api/invoices/${paymentId}/pdf`);
           if (response.ok) {
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -529,7 +529,7 @@ export default function OrganizerDashboard() {
     if (confirm("Are you sure you want to delete this sponsor request?")) {
       try {
         // Delete from backend
-        const response = await fetch(`http://127.0.0.1:5001/api/sponsor-requests/${requestId}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/sponsor-requests/${requestId}`, {
           method: "DELETE",
           headers: {
             "x-dev-role": "organizer",
@@ -555,7 +555,7 @@ export default function OrganizerDashboard() {
       setApplications(applications.filter(app => app.id !== appId));
 
       // Delete from backend MongoDB
-      fetch(`http://127.0.0.1:5001/api/sponsorship-applications/${appId}`, {
+      fetch(`http://127.0.0.1:5000/api/sponsorship-applications/${appId}`, {
         method: "DELETE",
         headers: {
           "x-dev-role": "organizer",
@@ -586,7 +586,7 @@ export default function OrganizerDashboard() {
     // Fetch sponsor requests from backend
     const fetchSponsorRequests = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5001/api/sponsor-requests", {
+        const response = await fetch("http://127.0.0.1:5000/api/sponsor-requests", {
           headers: {
             "x-dev-role": "organizer",
           },
@@ -1002,7 +1002,7 @@ export default function OrganizerDashboard() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-      const response = await fetch("http://127.0.0.1:5001/api/sponsor-requests", {
+      const response = await fetch("http://127.0.0.1:5000/api/sponsor-requests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1035,7 +1035,7 @@ export default function OrganizerDashboard() {
 
       // Refetch sponsor requests from backend to ensure data is persisted
       try {
-        const fetchResponse = await fetch("http://127.0.0.1:5001/api/sponsor-requests", {
+        const fetchResponse = await fetch("http://127.0.0.1:5000/api/sponsor-requests", {
           headers: {
             "x-dev-role": "organizer",
           },
@@ -1050,7 +1050,7 @@ export default function OrganizerDashboard() {
 
       // Also refetch applications to ensure they show up
       try {
-        const appResponse = await fetch("http://127.0.0.1:5001/api/sponsorship-applications", {
+        const appResponse = await fetch("http://127.0.0.1:5000/api/sponsorship-applications", {
           headers: {
             "x-dev-role": "organizer",
           },

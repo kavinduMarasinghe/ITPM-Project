@@ -1,6 +1,6 @@
-import SponsorRequest from "../models/SponsorRequest.js";
-import SponsorApplication from "../models/SponsorApplication.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import SponsorRequest from "../models/SponsorRequest.mjs";
+import SponsorApplication from "../models/SponsorApplication.mjs";
+import { asyncHandler } from "../utils/asyncHandler.mjs";
 import nodemailer from "nodemailer";
 
 const createTransporter = () => {

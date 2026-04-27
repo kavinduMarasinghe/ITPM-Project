@@ -1,10 +1,10 @@
-import Payment from "../models/Payment.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { buildPaymentPdf } from "../utils/invoicePdf.js";
+import Payment from "../models/Payment.mjs";
+import { asyncHandler } from "../utils/asyncHandler.mjs";
+import { buildPaymentPdf } from "../utils/invoicePdf.mjs";
 
 // TODO: adjust imports to your actual Event/User model paths
-import Event from "../models/Event.js";
-import User from "../models/User.js";
+import Event from "../models/Event.mjs";
+import User from "../models/User.mjs";
 
 export const getInvoicePdf = asyncHandler(async (req, res) => {
   const { paymentId } = req.params;

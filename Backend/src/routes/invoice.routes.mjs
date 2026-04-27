@@ -1,6 +1,6 @@
 import express from "express";
-import { requireRole } from "../middleware/requireRole.js";
-import { getInvoicePdf, getReceiptPdf, getInvoiceByNumber } from "../controllers/invoice.controller.js";
+import { requireRole } from "../middleware/requireRole.mjs";
+import { getInvoicePdf, getReceiptPdf, getInvoiceByNumber } from "../controllers/invoice.controller.mjs";
 
 const router = express.Router();
 

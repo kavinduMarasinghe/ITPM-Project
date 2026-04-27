@@ -1,6 +1,6 @@
 import express from "express";
-import { requireRole } from "../middleware/requireRole.js";
-import { getPaymentById } from "../controllers/payment.controller.js";
+import { requireRole } from "../middleware/requireRole.mjs";
+import { getPaymentById } from "../controllers/payment.controller.mjs";
 import {
   createPayment,
   completePayment,
@@ -10,7 +10,7 @@ import {
   listMyPayments,
   deletePayment,
   hardDeletePayment,
-} from "../controllers/payment.controller.js";
+} from "../controllers/payment.controller.mjs";
 
 
 const router = express.Router();

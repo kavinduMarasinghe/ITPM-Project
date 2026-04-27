@@ -1,5 +1,5 @@
-import SponsorshipPackage from "../models/SponsorshipPackage.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import SponsorshipPackage from "../models/SponsorshipPackage.mjs";
+import { asyncHandler } from "../utils/asyncHandler.mjs";
 
 export const createPackage = asyncHandler(async (req, res) => {
   const { eventId } = req.params;

@@ -1,12 +1,12 @@
 import express from "express";
-import { requireRole } from "../middleware/requireRole.js";
+import { requireRole } from "../middleware/requireRole.mjs";
 import {
   createPackage,
   listPackagesByEvent,
   updatePackage,
   updatePackageByName,
   deletePackage,
-} from "../controllers/sponsorshipPackage.controller.js";
+} from "../controllers/sponsorshipPackage.controller.mjs";
 
 const router = express.Router();
 

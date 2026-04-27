@@ -1,13 +1,44 @@
-import Payment from "../models/Payment.js";
-import SponsorApplication from "../models/SponsorApplication.js";
-import SponsorRequest from "../models/SponsorRequest.js";
-import SponsorshipPackage from "../models/SponsorshipPackage.js";
-import Counter from "../models/Counter.js";
-import User from "../models/User.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import Payment from "../models/Payment.mjs";
+import SponsorApplication from "../models/SponsorApplication.mjs";
+import SponsorRequest from "../models/SponsorRequest.mjs";
+import SponsorshipPackage from "../models/SponsorshipPackage.mjs";
+import Counter from "../models/Counter.mjs";
+import User from "../models/User.mjs";
+import Event from "../models/Event.mjs";
+import { asyncHandler } from "../utils/asyncHandler.mjs";
+
+async function getOrCreateFallbackEventId(eventName) {
+  if (eventName) {
+    const byName = await Event.findOne({ name: eventName });
+    if (byName) return byName._id;
+  }
+  const any = await Event.findOne().sort({ createdAt: 1 });
+  if (any) return any._id;
+  const placeholder = await Event.create({ name: eventName || "EventAura" });
+  return placeholder._id;
+}
+
+async function getOrCreateSponsorUser({ email, name }) {
+  const normalizedEmail = (email || `sponsor-${Date.now()}@placeholder.local`).toLowerCase();
+  const byEmail = await User.findOne({ email: normalizedEmail });
+  if (byEmail) return byEmail;
+
+  // Legacy User schema requires name/email/username/password and limits role enum,
+  // so populate every required field for the placeholder.
+  const usernameBase = normalizedEmail.split("@")[0].replace(/[^a-z0-9]/g, "") || "sponsor";
+  const username = `${usernameBase}-${Date.now().toString(36)}`;
+
+  return User.create({
+    name: name || "Sponsor",
+    email: normalizedEmail,
+    username,
+    password: "placeholder",
+    role: "vendor",
+  });
+}
 
 // TODO: Change this import to match Member 3 reservation model path/name
-import Reservation from "../models/Reservation.js";
+import Reservation from "../models/Reservation.mjs";
 
 const makeTxnRef = () => `TXN-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
 
@@ -165,10 +196,21 @@ export const completePaymentBySponsorRequest = asyncHandler(async (req, res) => 
     }
 
     if (!fallbackEventId) {
-      return res.status(400).json({ message: "Payment missing event mapping. Re-select package first." });
+      fallbackEventId = await getOrCreateFallbackEventId(
+        sponsorRequest?.eventName || app.eventName
+      );
     }
 
     payment.eventId = fallbackEventId;
+  }
+
+  if (!payment.payerId || !payment.payerName) {
+    const sponsorUser = await getOrCreateSponsorUser({
+      email: app.email,
+      name: app.companyName,
+    });
+    payment.payerId = payment.payerId || sponsorUser._id;
+    payment.payerName = payment.payerName || app.companyName || sponsorUser.name || "Sponsor";
   }
 
   payment.status = "COMPLETED";

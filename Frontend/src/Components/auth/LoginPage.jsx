@@ -24,6 +24,7 @@ function LoginPage({ defaultPortal = "staff" }) {
   const [showStudentPassword, setShowStudentPassword] = useState(false);
   const [showStaffPassword, setShowStaffPassword] = useState(false);
   const [showVendorPassword, setShowVendorPassword] = useState(false);
+  const [showSponsorPassword, setShowSponsorPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [studentData, setStudentData] = useState({
@@ -35,6 +36,10 @@ function LoginPage({ defaultPortal = "staff" }) {
     password: "",
   });
   const [vendorData, setVendorData] = useState({
+    email: "",
+    password: "",
+  });
+  const [sponsorData, setSponsorData] = useState({
     email: "",
     password: "",
   });
@@ -67,6 +72,15 @@ function LoginPage({ defaultPortal = "staff" }) {
   const handleVendorChange = (event) => {
     const { name, value } = event.target;
     setVendorData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+    setError("");
+  };
+
+  const handleSponsorChange = (event) => {
+    const { name, value } = event.target;
+    setSponsorData((current) => ({
       ...current,
       [name]: value,
     }));
@@ -162,6 +176,18 @@ function LoginPage({ defaultPortal = "staff" }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSponsorSubmit = (event) => {
+    event.preventDefault();
+
+    if (!sponsorData.email.trim() || !sponsorData.password) {
+      setError("Email and password are required.");
+      return;
+    }
+
+    setError("");
+    navigate("/sponsor/dashboard", { replace: true });
   };
 
   return (
@@ -271,6 +297,17 @@ function LoginPage({ defaultPortal = "staff" }) {
               }}
             >
               Vendor
+            </button>
+            <button
+              type="button"
+              onClick={() => switchPortal("sponsor")}
+              className="px-4 py-3 rounded-xl font-semibold transition-all"
+              style={{
+                backgroundColor: activePortal === "sponsor" ? "#F97316" : "transparent",
+                color: activePortal === "sponsor" ? "#FFFFFF" : "#64748B",
+              }}
+            >
+              Sponsor
             </button>
           </div>
           {routeMessage && (
@@ -547,6 +584,135 @@ function LoginPage({ defaultPortal = "staff" }) {
                     className="font-medium hover:opacity-80"
                   >
                     Vendor registration
+                  </Link>
+                </div>
+              </div>
+            </>
+          ) : activePortal === "sponsor" ? (
+            <>
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold mb-2" style={{ color: "#0F172A" }}>
+                  Sponsor Login
+                </h3>
+                <p className="text-sm" style={{ color: "#64748B" }}>
+                  Sign in to manage your sponsorship packages, applications, and payments.
+                </p>
+              </div>
+
+              <form onSubmit={handleSponsorSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: "#0F172A" }}>
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <FiMail
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      style={{ color: "#F97316" }}
+                      size={18}
+                    />
+                    <input
+                      type="email"
+                      name="email"
+                      value={sponsorData.email}
+                      onChange={handleSponsorChange}
+                      placeholder="sponsor@example.com"
+                      className="w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all"
+                      style={{
+                        borderColor: error ? "#EF4444" : "#E2E8F0",
+                        backgroundColor: "#FFFFFF",
+                        color: "#0F172A",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: "#0F172A" }}>
+                    Password
+                  </label>
+                  <div className="relative">
+                    <FiLock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      style={{ color: "#F97316" }}
+                      size={18}
+                    />
+                    <input
+                      type={showSponsorPassword ? "text" : "password"}
+                      name="password"
+                      value={sponsorData.password}
+                      onChange={handleSponsorChange}
+                      placeholder="Enter your password"
+                      className="w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all"
+                      style={{
+                        borderColor: error ? "#EF4444" : "#E2E8F0",
+                        backgroundColor: "#FFFFFF",
+                        color: "#0F172A",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSponsorPassword((current) => !current)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:opacity-70"
+                      style={{ color: "#64748B" }}
+                    >
+                      {showSponsorPassword ? (
+                        <FiEyeOff size={18} />
+                      ) : (
+                        <FiEye size={18} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div
+                    className="rounded-xl p-3 animate-shake"
+                    style={{ backgroundColor: "#FEE2E2", border: "1px solid #EF4444" }}
+                  >
+                    <p className="text-sm text-center" style={{ color: "#EF4444" }}>
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  style={{ backgroundColor: "#F97316" }}
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      Continue to Sponsor Portal
+                      <FiArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div
+                className="mt-6 pt-5 border-t"
+                style={{ borderColor: "#E2E8F0" }}
+              >
+                <div className="flex flex-wrap justify-center gap-6 text-sm">
+                  <Link
+                    to="/register/sponsor"
+                    style={{ color: "#F97316" }}
+                    className="font-medium hover:opacity-80"
+                  >
+                    Sponsor registration
+                  </Link>
+                  <Link
+                    to="/register/organization"
+                    style={{ color: "#64748B" }}
+                    className="font-medium hover:opacity-80"
+                  >
+                    Organization registration
                   </Link>
                 </div>
               </div>
