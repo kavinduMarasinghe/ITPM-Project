@@ -1,0 +1,15 @@
+# Vite
+node_modules
+dist
+dist-ssr
+*.local
+
+# Env
+.env
+.env.local
+.env.production
+
+# Editor
+.vscode
+.idea
+.env.example
